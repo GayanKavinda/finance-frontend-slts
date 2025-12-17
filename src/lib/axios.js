@@ -3,9 +3,13 @@
 import Axios from "axios";
 
 const axios = Axios.create({
-  baseURL: '/', // Uses proxy in dev, same domain in prod
-  withCredentials: true, // Crucial: Sends/receives cookies
-  withXSRFToken: true,   // Auto-adds X-XSRF-TOKEN header from cookie
+  baseURL: '', // Proxied via Next.js
+  withCredentials: true,
+  xsrfCookieName: 'XSRF-TOKEN',
+  xsrfHeaderName: 'X-XSRF-TOKEN',
+  headers: {
+    'Accept': 'application/json',
+  },
 });
 
 export default axios;

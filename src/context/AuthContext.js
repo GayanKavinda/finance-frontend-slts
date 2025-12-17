@@ -4,9 +4,7 @@
 
 import { createContext, useContext, useEffect, useState } from 'react';
 import axios from '@/lib/axios';
-import { fetchCsrf } from '@/lib/auth';
-
-const LARAVEL_URL = 'http://127.0.0.1:8000';
+// import { fetchCsrf } from '@/lib/auth';
 
 const AuthContext = createContext();
 
@@ -15,26 +13,34 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   const fetchUser = async () => {
-    try {
-      await fetchCsrf(); // Ensure CSRF cookie is set
-      const response = await axios.get(`${LARAVEL_URL}/api/user`);
-      setUser(response.data);
-    } catch (error) {
-      setUser(null);
-    } finally {
-      setLoading(false);
+  try {
+    const response = await axios.get('/api/user');
+    setUser(response.data);
+  } catch (error) {
+    if (error.response?.status !== 401) {
+      console.error('fetchUser failed:', error.response?.status);
     }
-  };
+    setUser(null);
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
-    fetchUser();
+    // Optional: Avoid 401s on public pages by only fetching if not on login/signup
+    // Check window.location because router might be not ready or different context
+    if (window.location.pathname !== '/signin' && window.location.pathname !== '/signup') {
+        fetchUser();
+    } else {
+        setLoading(false);
+    }
   }, []);
 
   const logout = async () => {
     try {
-      await axios.post(`${LARAVEL_URL}/api/logout`);
+      await axios.post('/api/logout');
     } catch (e) {
-      // Ignore
+      console.error('Logout failed');
     }
     setUser(null);
   };

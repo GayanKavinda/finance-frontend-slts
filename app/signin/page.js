@@ -3,11 +3,12 @@
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
-import axios from '@/lib/axios';  // ← Custom axios
+import axios from '@/lib/axios';
 import { useSnackbar } from 'notistack';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { fetchCsrf } from '@/lib/auth';
+import { useAuth } from '@/context/AuthContext';  // <-- Import
 
 const schema = yup.object({
   email: yup.string().required('Email is required').email('Invalid email'),
@@ -17,6 +18,7 @@ const schema = yup.object({
 export default function Signin() {
   const { enqueueSnackbar } = useSnackbar();
   const router = useRouter();
+  const { refetch } = useAuth();  // <-- Add this
 
   const {
     register,
@@ -27,32 +29,30 @@ export default function Signin() {
   });
 
   const onSubmit = async (data) => {
-  try {
-    const LARAVEL_URL = 'http://127.0.0.1:8000';
+    try {
+      await fetchCsrf();
 
-    console.log('Step 1: Fetching CSRF cookie...');
-    await fetchCsrf(); // This MUST succeed
+      const response = await axios.post('/api/login', data);
+      console.log('Login response:', response.data);
 
-    console.log('Step 2: Attempting login...');
-    const response = await axios.post(`${LARAVEL_URL}/api/login`, data);
-    console.log('Login response:', response.data);
+      enqueueSnackbar('Welcome back! Login successful.', { variant: 'success' });
 
-    enqueueSnackbar('Welcome back! Login successful.', { variant: 'success' });
-    router.push('/dashboard');
-  } catch (error) {
-    console.error('Login error:', error);
-    console.error('Response data:', error.response?.data);
-    console.error('Status:', error.response?.status);
+      await refetch();  // <-- This will now succeed
+      router.push('/dashboard');
+    } catch (error) {
+      console.error('Login error:', error);
+      console.error('Response data:', error.response?.data);
+      console.error('Status:', error.response?.status);
 
-    if (error.response?.status === 401) {
-      enqueueSnackbar('Invalid email or password.', { variant: 'error' });
-    } else if (error.response?.status === 422) {
-      enqueueSnackbar('Validation error. Check your input.', { variant: 'error' });
-    } else {
-      enqueueSnackbar('Login failed. Check console for details.', { variant: 'error' });
+      if (error.response?.status === 401) {
+        enqueueSnackbar('Invalid email or password.', { variant: 'error' });
+      } else if (error.response?.status === 422) {
+        enqueueSnackbar('Validation error. Check your input.', { variant: 'error' });
+      } else {
+        enqueueSnackbar('Login failed. Check console for details.', { variant: 'error' });
+      }
     }
-  }
-};
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">

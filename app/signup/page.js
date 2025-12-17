@@ -8,6 +8,7 @@ import { useSnackbar } from 'notistack';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { fetchCsrf } from '@/lib/auth';
+import { useAuth } from '@/context/AuthContext';
 
 const schema = yup.object({
   name: yup.string().required('Name is required').max(255),
@@ -38,21 +39,19 @@ export default function Signup() {
     resolver: yupResolver(schema),
   });
 
+  const { refetch } = useAuth(); 
+
   const onSubmit = async (data) => {
-    try {
-      const LARAVEL_URL = 'http://127.0.0.1:8000';
+  try {
+    await fetchCsrf();
 
-      // 1. Get CSRF cookie first
-      await fetchCsrf();
+    await axios.post('/api/register', data);
 
-      // 2. Register — session cookie set automatically
-      await axios.post(`${LARAVEL_URL}/api/register`, data);
+enqueueSnackbar('Account created successfully! You are now logged in.', { variant: 'success' });
 
-      enqueueSnackbar('Account created successfully! You are now logged in.', {
-        variant: 'success',
-      });
-      router.push('/dashboard');
-    } catch (error) {
+await refetch();  // <-- Add this
+router.push('/dashboard');
+  } catch (error) {
       if (error.response?.data?.errors) {
         Object.values(error.response.data.errors).flat().forEach((msg) => {
           enqueueSnackbar(msg, { variant: 'error' });
