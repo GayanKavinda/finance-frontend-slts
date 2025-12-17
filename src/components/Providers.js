@@ -1,3 +1,5 @@
+// src/components/Providers.js
+
 'use client';
 
 import { AuthProvider } from '@/context/AuthContext';

@@ -1,3 +1,5 @@
+// app/dashboard/page.js
+
 'use client'
 
 import { useAuth } from '@/context/AuthContext';

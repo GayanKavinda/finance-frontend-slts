@@ -28,11 +28,13 @@ export default function Signin() {
 
   const onSubmit = async (data) => {
   try {
+    const LARAVEL_URL = 'http://127.0.0.1:8000';
+
     console.log('Step 1: Fetching CSRF cookie...');
     await fetchCsrf(); // This MUST succeed
 
     console.log('Step 2: Attempting login...');
-    const response = await axios.post('/api/login', data);
+    const response = await axios.post(`${LARAVEL_URL}/api/login`, data);
     console.log('Login response:', response.data);
 
     enqueueSnackbar('Welcome back! Login successful.', { variant: 'success' });

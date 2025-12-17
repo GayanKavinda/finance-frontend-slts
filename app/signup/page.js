@@ -40,11 +40,13 @@ export default function Signup() {
 
   const onSubmit = async (data) => {
     try {
+      const LARAVEL_URL = 'http://127.0.0.1:8000';
+
       // 1. Get CSRF cookie first
       await fetchCsrf();
 
       // 2. Register — session cookie set automatically
-      await axios.post('/api/register', data);
+      await axios.post(`${LARAVEL_URL}/api/register`, data);
 
       enqueueSnackbar('Account created successfully! You are now logged in.', {
         variant: 'success',

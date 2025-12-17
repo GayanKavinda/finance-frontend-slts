@@ -1,8 +1,12 @@
+// src/context/AuthContext.js
+
 'use client';
 
 import { createContext, useContext, useEffect, useState } from 'react';
 import axios from '@/lib/axios';
 import { fetchCsrf } from '@/lib/auth';
+
+const LARAVEL_URL = 'http://127.0.0.1:8000';
 
 const AuthContext = createContext();
 
@@ -12,9 +16,8 @@ export function AuthProvider({ children }) {
 
   const fetchUser = async () => {
     try {
-      // Ensure CSRF cookie is present
-      await fetchCsrf();
-      const response = await axios.get('/api/user');
+      await fetchCsrf(); // Ensure CSRF cookie is set
+      const response = await axios.get(`${LARAVEL_URL}/api/user`);
       setUser(response.data);
     } catch (error) {
       setUser(null);
@@ -29,9 +32,9 @@ export function AuthProvider({ children }) {
 
   const logout = async () => {
     try {
-      await axios.post('/api/logout');
+      await axios.post(`${LARAVEL_URL}/api/logout`);
     } catch (e) {
-      // Ignore errors
+      // Ignore
     }
     setUser(null);
   };
