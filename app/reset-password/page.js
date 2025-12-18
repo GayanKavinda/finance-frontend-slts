@@ -1,20 +1,17 @@
-// app/signup/page.js
+// app/reset-password/page.js
 
 'use client';
 
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
-import axios from '@/lib/axios';  // ← IMPORTANT: Your custom axios
+import axios from '@/lib/axios';
 import { useSnackbar } from 'notistack';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { fetchCsrf } from '@/lib/auth';
-import { useAuth } from '@/context/AuthContext';
 
 const schema = yup.object({
-  name: yup.string().required('Name is required').max(255),
-  email: yup.string().required('Email is required').email('Invalid email format'),
   password: yup
     .string()
     .required('Password is required')
@@ -29,9 +26,12 @@ const schema = yup.object({
     .required('Confirm password required'),
 });
 
-export default function Signup() {
+export default function ResetPassword() {
   const { enqueueSnackbar } = useSnackbar();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const token = searchParams.get('token');
+  const email = searchParams.get('email');
 
   const {
     register,
@@ -41,28 +41,19 @@ export default function Signup() {
     resolver: yupResolver(schema),
   });
 
-  const { refetch } = useAuth(); 
-
   const onSubmit = async (data) => {
-  try {
-    await fetchCsrf();
+    if (!token || !email) {
+      enqueueSnackbar('Invalid reset link.', { variant: 'error' });
+      return;
+    }
 
-    await axios.post('/api/register', data);
-
-enqueueSnackbar('Account created successfully! You are now logged in.', { variant: 'success' });
-
-await refetch();  // <-- Add this
-router.push('/dashboard');
-  } catch (error) {
-      if (error.response?.data?.errors) {
-        Object.values(error.response.data.errors).flat().forEach((msg) => {
-          enqueueSnackbar(msg, { variant: 'error' });
-        });
-      } else if (error.response?.data?.message) {
-        enqueueSnackbar(error.response.data.message, { variant: 'error' });
-      } else {
-        enqueueSnackbar('Registration failed. Please try again.', { variant: 'error' });
-      }
+    try {
+      await fetchCsrf();
+      await axios.post('/api/reset-password', { ...data, token, email });
+      enqueueSnackbar('Password reset successfully! Please sign in.', { variant: 'success' });
+      router.push('/signin');
+    } catch (error) {
+      enqueueSnackbar(error.response?.data?.email || 'Failed to reset password.', { variant: 'error' });
     }
   };
 
@@ -70,38 +61,18 @@ router.push('/dashboard');
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">
-          Create your account
+          Set a new password
         </h2>
-        <p className="mt-2 text-center text-sm text-gray-600">
-          Join our secure finance platform
-        </p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
           <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Full Name</label>
-              <input
-                {...register('name')}
-                type="text"
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-600 focus:border-indigo-600"
-              />
-              {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>}
-            </div>
+            <input type="hidden" value={email || ''} {...register('email')} />
+            <input type="hidden" value={token || ''} {...register('token')} />
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">Email Address</label>
-              <input
-                {...register('email')}
-                type="email"
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-600 focus:border-indigo-600"
-              />
-              {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Password</label>
+              <label className="block text-sm font-medium text-gray-700">New Password</label>
               <input
                 {...register('password')}
                 type="password"
@@ -111,7 +82,7 @@ router.push('/dashboard');
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">Confirm Password</label>
+              <label className="block text-sm font-medium text-gray-700">Confirm New Password</label>
               <input
                 {...register('password_confirmation')}
                 type="password"
@@ -125,15 +96,15 @@ router.push('/dashboard');
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+              className="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50"
             >
-              {isSubmitting ? 'Creating Account...' : 'Sign Up'}
+              {isSubmitting ? 'Resetting...' : 'Reset Password'}
             </button>
           </form>
 
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">
-              Already have an account?{' '}
+              Remember your password?{' '}
               <Link href="/signin" className="font-medium text-indigo-600 hover:text-indigo-500">
                 Sign in here
               </Link>

@@ -1,11 +1,15 @@
 # File Tree: finance-frontend
 
-**Generated:** 12/17/2025, 11:36:58 AM
+**Generated:** 12/18/2025, 12:11:07 PM
 **Root Path:** `c:\xampp\htdocs\finance-app\finance-frontend`
 
 ```
 ├── 📁 app
 │   ├── 📁 dashboard
+│   │   └── 📄 page.js
+│   ├── 📁 forgot-password
+│   │   └── 📄 page.js
+│   ├── 📁 reset-password
 │   │   └── 📄 page.js
 │   ├── 📁 signin
 │   │   └── 📄 page.js
@@ -31,6 +35,7 @@
 │       └── 📄 axios.js
 ├── ⚙️ .gitignore
 ├── 📝 README.md
+├── 📝 Structure.md
 ├── 📄 eslint.config.mjs
 ├── ⚙️ jsconfig.json
 ├── 📄 next.config.mjs
