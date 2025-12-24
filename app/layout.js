@@ -1,16 +1,11 @@
 import "./globals.css";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Outfit } from "next/font/google";
 import Providers from '@/components/Providers';  // Client wrapper
 import Navbar from '@/components/Navbar';
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const outfit = Outfit({
   subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  variable: "--font-outfit",
 });
 
 export const metadata = {
@@ -21,7 +16,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" className="dark">
-      <body className="min-h-screen flex flex-col antialiased">
+      <body className={`${outfit.variable} font-sans min-h-screen flex flex-col antialiased`}>
         <Providers>
           <Navbar />
           <main className="flex-1">

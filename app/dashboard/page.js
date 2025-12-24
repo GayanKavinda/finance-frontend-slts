@@ -275,270 +275,298 @@ export default function Dashboard() {
         </div>
 
         {/* Charts Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Income vs Expenses Area Chart */}
-          <ChartCard
-            title="Financial Performance"
-            subtitle="Income & expenses over time"
-            delay={0.5}
-            action
-          >
-            <div className="h-72 mt-6">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={monthlyExpenses}>
-                  <defs>
-                    <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#14b8a6" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="#14b8a6" stopOpacity={0}/>
-                    </linearGradient>
-                    <linearGradient id="colorExpenses" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#f43f5e" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="#f43f5e" stopOpacity={0}/>
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.08)" vertical={false} />
-                  <XAxis 
-                    dataKey="month" 
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fill: '#94a3b8', fontSize: 12, fontWeight: 500 }}
-                  />
-                  <YAxis 
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fill: '#94a3b8', fontSize: 12, fontWeight: 500 }}
-                    tickFormatter={(value) => `$${value / 1000}k`}
-                  />
-                  <Tooltip content={<CustomTooltip />} />
-                  <Area 
-                    type="monotone" 
-                    dataKey="income" 
-                    stroke="#14b8a6" 
-                    fillOpacity={1} 
-                    fill="url(#colorIncome)"
-                    strokeWidth={4}
-                    animationDuration={2000}
-                  />
-                  <Area 
-                    type="monotone" 
-                    dataKey="expenses" 
-                    stroke="#f43f5e" 
-                    fillOpacity={1} 
-                    fill="url(#colorExpenses)"
-                    strokeWidth={4}
-                    animationDuration={2000}
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-          </ChartCard>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Income vs Expenses Area Chart - WIDER */}
+          <div className="lg:col-span-8">
+            <ChartCard
+              title="Financial Performance"
+              subtitle="Cash flow analytics"
+              delay={0.5}
+              action
+            >
+              <div className="h-80 mt-6">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={monthlyExpenses}>
+                    <defs>
+                      <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#14b8a6" stopOpacity={0.4}/>
+                        <stop offset="95%" stopColor="#14b8a6" stopOpacity={0}/>
+                      </linearGradient>
+                      <linearGradient id="colorExpenses" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#f43f5e" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="#f43f5e" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+                    <XAxis 
+                      dataKey="month" 
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fill: '#64748b', fontSize: 10, fontWeight: 800 }}
+                      dy={10}
+                    />
+                    <YAxis 
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fill: '#64748b', fontSize: 10, fontWeight: 800 }}
+                      tickFormatter={(value) => `$${value}`}
+                    />
+                    <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'rgba(20,184,166,0.2)', strokeWidth: 2 }} />
+                    <Area 
+                      type="monotone" 
+                      dataKey="income" 
+                      stroke="#14b8a6" 
+                      fillOpacity={1} 
+                      fill="url(#colorIncome)"
+                      strokeWidth={4}
+                      animationDuration={2500}
+                    />
+                    <Area 
+                      type="monotone" 
+                      dataKey="expenses" 
+                      stroke="#f43f5e" 
+                      fillOpacity={1} 
+                      fill="url(#colorExpenses)"
+                      strokeWidth={4}
+                      animationDuration={2500}
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </ChartCard>
+          </div>
 
-          {/* Spending by Category Pie Chart */}
-          <ChartCard
-            title="Spending Breakdown"
-            subtitle="Distribution by category"
-            delay={0.6}
-            action
-          >
-            <div className="h-72 mt-6">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={categoryData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={75}
-                    outerRadius={105}
-                    paddingAngle={8}
-                    dataKey="value"
-                    stroke="none"
-                  >
-                    {categoryData.map((entry, index) => (
-                      <Cell 
-                        key={`cell-${index}`} 
-                        fill={entry.color} 
-                        style={{ filter: `drop-shadow(0 0 8px ${entry.color}40)` }}
-                      />
-                    ))}
-                  </Pie>
-                  <Tooltip content={<CustomTooltip />} />
-                  <Legend 
-                    layout="vertical"
-                    verticalAlign="middle"
-                    align="right"
-                    iconType="circle"
-                    wrapperStyle={{ paddingLeft: '30px', fontSize: '13px', color: '#f8fafc', fontWeight: 600 }}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-          </ChartCard>
+          {/* Spending by Category Pie Chart - NARROWER */}
+          <div className="lg:col-span-4">
+            <ChartCard
+              title="Capital Distribution"
+              subtitle="Spending categories"
+              delay={0.6}
+              action
+            >
+              <div className="h-80 mt-6">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={categoryData}
+                      cx="50%"
+                      cy="45%"
+                      innerRadius={80}
+                      outerRadius={105}
+                      paddingAngle={10}
+                      dataKey="value"
+                      stroke="none"
+                    >
+                      {categoryData.map((entry, index) => (
+                        <Cell 
+                          key={`cell-${index}`} 
+                          fill={entry.color} 
+                          style={{ filter: `drop-shadow(0 10px 15px ${entry.color}30)` }}
+                        />
+                      ))}
+                    </Pie>
+                    <Tooltip content={<CustomTooltip />} />
+                    <Legend 
+                      iconType="circle"
+                      wrapperStyle={{ bottom: 0, fontSize: '11px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em' }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            </ChartCard>
+          </div>
 
           {/* Weekly Spending Bar Chart */}
-          <ChartCard
-            title="Weekly Activity"
-            subtitle="Daily spending habits"
-            delay={0.7}
-            action
-          >
-            <div className="h-72 mt-6">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={dailySpending}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.08)" vertical={false} />
-                  <XAxis 
-                    dataKey="day" 
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fill: '#94a3b8', fontSize: 12, fontWeight: 500 }}
-                  />
-                  <YAxis 
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fill: '#94a3b8', fontSize: 12, fontWeight: 500 }}
-                  />
-                  <Tooltip content={<CustomTooltip />} />
-                  <Bar 
-                    dataKey="amount" 
-                    fill="url(#barGradient)" 
-                    radius={[8, 8, 0, 0]}
-                    maxBarSize={50}
-                    animationDuration={1500}
-                  >
+          <div className="lg:col-span-7">
+            <ChartCard
+              title="Daily Volume"
+              subtitle="Weekly spending habits"
+              delay={0.7}
+              action
+            >
+              <div className="h-72 mt-6">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={dailySpending}>
                     <defs>
                       <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="0%" stopColor="#14b8a6" stopOpacity={1} />
-                        <stop offset="100%" stopColor="#0d9488" stopOpacity={0.8} />
+                        <stop offset="100%" stopColor="#0d9488" stopOpacity={0.6} />
                       </linearGradient>
                     </defs>
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </ChartCard>
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+                    <XAxis 
+                      dataKey="day" 
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fill: '#64748b', fontSize: 10, fontWeight: 800 }}
+                      dy={10}
+                    />
+                    <YAxis 
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fill: '#64748b', fontSize: 10, fontWeight: 800 }}
+                    />
+                    <Tooltip 
+                      content={<CustomTooltip />} 
+                      cursor={{ fill: 'rgba(255,255,255,0.03)', radius: 12 }} 
+                    />
+                    <Bar 
+                      dataKey="amount" 
+                      fill="url(#barGradient)" 
+                      radius={[10, 10, 0, 0]}
+                      maxBarSize={45}
+                      animationDuration={1500}
+                      background={{ fill: 'rgba(255,255,255,0.02)', radius: 10 }}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </ChartCard>
+          </div>
 
           {/* Savings Progress */}
-          <ChartCard
-            title="Financial Targets"
-            subtitle="Track your progress"
-            delay={0.8}
-            action
-          >
-            <div className="space-y-7 py-4">
-              <ProgressBar
-                label="Emergency Fund"
-                percentage={75}
-                current={6000}
-                target={8000}
-                color="#14b8a6"
-                delay={0.1}
-              />
-              <ProgressBar
-                label="Vacation 2026"
-                percentage={45}
-                current={2250}
-                target={5000}
-                color="#f43f5e"
-                delay={0.3}
-              />
-              <ProgressBar
-                label="Retirement"
-                percentage={30}
-                current={6000}
-                target={20000}
-                color="#6366f1"
-                delay={0.5}
-              />
-            </div>
-          </ChartCard>
+          <div className="lg:col-span-5">
+            <ChartCard
+              title="Growth Targets"
+              subtitle="Long term wealth goals"
+              delay={0.8}
+              action
+            >
+              <div className="space-y-8 py-4">
+                <ProgressBar
+                  label="Strategic Reserve"
+                  percentage={75}
+                  current={6000}
+                  target={8000}
+                  color="#14b8a6"
+                  delay={0.1}
+                />
+                <ProgressBar
+                  label="Global Venture"
+                  percentage={45}
+                  current={2250}
+                  target={5000}
+                  color="#f43f5e"
+                  delay={0.3}
+                />
+                <ProgressBar
+                  label="Infinite Horizon"
+                  percentage={30}
+                  current={6000}
+                  target={20000}
+                  color="#6366f1"
+                  delay={0.5}
+                />
+              </div>
+            </ChartCard>
+          </div>
         </div>
 
         {/* Bottom Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* Quick Actions */}
-          <div className="lg:col-span-4">
-            <div className="glass-card p-6 h-full">
-              <h2 className="text-sm font-bold uppercase tracking-widest text-primary mb-6">Quick Actions</h2>
-              <div className="grid grid-cols-1 gap-4">
-                <ActionCard
-                  icon={<Plus className="w-5 h-5" />}
-                  label="New Transaction"
-                  description="Add a manual entry"
-                  delay={0.1}
-                />
-                <ActionCard
-                  icon={<BarChart3 className="w-5 h-5" />}
-                  label="Reports"
-                  description="Analyze your spending"
-                  delay={0.2}
-                />
-                <ActionCard
-                  icon={<Goal className="w-5 h-5" />}
-                  label="Set Goals"
-                  description="Plan your future"
-                  delay={0.3}
-                />
-                <ActionCard
-                  icon={<Calculator className="w-5 h-5" />}
-                  label="Budgeting"
-                  description="Plan your month"
-                  delay={0.4}
-                />
-              </div>
-            </div>
-          </div>
-
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 relative">
           {/* Recent Transactions */}
-          <div className="lg:col-span-8">
-            <div className="glass-card p-6">
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <h2 className="text-sm font-bold uppercase tracking-widest text-primary">Recent Activity</h2>
+          <div className="lg:col-span-8 order-2 lg:order-1">
+            <div className="glass-card p-8 border border-white/5 bg-linear-to-b from-white/5 to-transparent">
+              <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center gap-3">
+                  <div className="w-1.5 h-6 bg-primary rounded-full shadow-[0_0_15px_#14b8a6]" />
+                  <h2 className="text-sm font-black uppercase tracking-[0.2em] text-foreground">Live Transaction Logs</h2>
                 </div>
-                <button className="flex items-center gap-1 text-xs font-bold text-primary hover:opacity-80 transition-opacity">
-                  View All <ChevronRight className="w-3.5 h-3.5" />
+                <button className="px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-[10px] font-black uppercase tracking-widest text-primary hover:bg-primary/10 hover:border-primary/20 transition-all flex items-center gap-2 group">
+                  Global Ledger <ChevronRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
                 </button>
               </div>
               
-              <div className="space-y-2">
+              <div className="space-y-1">
                 {[
-                  { name: 'Grocery Store', amount: -85.42, date: 'Today', time: '2:30 PM', icon: <Receipt size={18} />, category: 'Food' },
-                  { name: 'Salary Deposit', amount: 4500.0, date: 'Yesterday', time: '9:00 AM', icon: <DollarSign size={18} />, category: 'Income' },
-                  { name: 'Netflix', amount: -15.99, date: 'Dec 15', time: '6:45 PM', icon: <CreditCard size={18} />, category: 'Entertainment' },
-                  { name: 'Electric Bill', amount: -120.0, date: 'Dec 14', time: '11:30 AM', icon: <Receipt size={18} />, category: 'Utilities' },
+                  { name: 'Apple Store Digital', amount: -185.42, date: 'Today', time: '2:30 PM', icon: <Receipt size={18} />, category: 'Tech' },
+                  { name: 'Institutional Deposit', amount: 4500.0, date: 'Yesterday', time: '9:30 AM', icon: <DollarSign size={18} />, category: 'Income' },
+                  { name: 'Netflix Global', amount: -65.99, date: 'Dec 15', time: '6:45 PM', icon: <CreditCard size={18} />, category: 'Sub' },
+                  { name: 'Infrastructure Bill', amount: -320.0, date: 'Dec 14', time: '11:30 AM', icon: <Receipt size={18} />, category: 'Core' },
                 ].map((transaction, idx) => (
                   <motion.div
                     key={idx}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.1 + idx * 0.05 }}
-                    className="flex items-center justify-between p-4 rounded-xl hover:bg-white/5 transition-colors group"
+                    initial={{ opacity: 0, scale: 0.98 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.5 + idx * 0.1 }}
+                    className="flex items-center justify-between p-5 rounded-3xl hover:bg-white/5 transition-all group cursor-pointer border border-transparent hover:border-white/5"
                   >
-                    <div className="flex items-center gap-4">
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center shadow-lg ${
-                        transaction.amount > 0 ? 'bg-emerald-500/10 text-emerald-500 shadow-emerald-500/10' : 'bg-red-500/10 text-red-500 shadow-red-500/10'
+                    <div className="flex items-center gap-5">
+                      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-2xl transition-transform group-hover:scale-110 ${
+                        transaction.amount > 0 
+                          ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' 
+                          : 'bg-white/5 text-foreground/50 border border-white/5'
                       }`}>
                         {transaction.icon}
                       </div>
                       <div>
-                        <p className="text-sm font-semibold">{transaction.name}</p>
-                        <div className="flex items-center gap-2 mt-0.5">
-                          <span className="text-[12px] text-muted-foreground">{transaction.date} • {transaction.time}</span>
-                          <span className="text-[10px] px-2 py-0.5 rounded-lg bg-white/5 text-muted-foreground uppercase font-bold tracking-tight">
+                        <p className="text-sm font-black tracking-tight group-hover:text-primary transition-colors">{transaction.name}</p>
+                        <div className="flex items-center gap-3 mt-1">
+                          <span className="text-[11px] font-bold text-muted-foreground/50">{transaction.date} • {transaction.time}</span>
+                          <span className="text-[9px] px-2.5 py-1 rounded-lg bg-white/5 text-muted-foreground uppercase font-black tracking-widest border border-white/5">
                             {transaction.category}
                           </span>
                         </div>
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className={`text-base font-bold ${transaction.amount > 0 ? 'text-emerald-500' : ''}`}>
-                        {transaction.amount > 0 ? '+' : ''}${Math.abs(transaction.amount).toFixed(2)}
+                      <p className={`text-lg font-black tracking-tighter ${transaction.amount > 0 ? 'text-emerald-400' : 'text-foreground'}`}>
+                        {transaction.amount > 0 ? '+' : ''}${Math.abs(transaction.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                       </p>
-                      <p className="text-[10px] text-muted-foreground uppercase font-medium tracking-widest mt-0.5">
-                        {transaction.amount > 0 ? 'Credit' : 'Debit'}
-                      </p>
+                      <div className="flex items-center justify-end gap-1.5 mt-0.5 opacity-40">
+                        <div className={`w-1 h-1 rounded-full ${transaction.amount > 0 ? 'bg-emerald-500' : 'bg-red-500'}`} />
+                        <p className="text-[9px] font-black uppercase tracking-widest">
+                          Settled
+                        </p>
+                      </div>
                     </div>
                   </motion.div>
                 ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Quick Actions - SIDEBAR */}
+          <div className="lg:col-span-4 order-1 lg:order-2">
+            <div className="premium-card p-8 h-full bg-linear-to-br from-primary/10 via-transparent to-transparent">
+              <div className="flex items-center gap-3 mb-8">
+                <Sparkles className="w-5 h-5 text-primary animate-pulse" />
+                <h2 className="text-sm font-black uppercase tracking-[0.2em] text-primary">Priority Ops</h2>
+              </div>
+              <div className="grid grid-cols-1 gap-5">
+                {[
+                  { icon: <Plus />, label: 'New Transfer', desc: 'Secure fund deployment', color: 'primary' },
+                  { icon: <BarChart3 />, label: 'Core Intel', desc: 'Deep liquidity analysis', color: 'accent' },
+                  { icon: <Goal />, label: 'Objective XP', desc: 'Define growth markers', color: 'primary' },
+                  { icon: <Target />, label: 'Budget Policy', desc: 'Risk mitigation protocol', color: 'accent' },
+                ].map((action, i) => (
+                  <motion.div
+                    key={i}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <ActionCard
+                      icon={action.icon}
+                      label={action.label}
+                      description={action.desc}
+                      delay={i * 0.1}
+                    />
+                  </motion.div>
+                ))}
+              </div>
+
+              {/* Promo Card in Sidebar */}
+              <div className="mt-8 p-6 rounded-[2rem] bg-linear-to-br from-primary to-accent relative overflow-hidden group">
+                <div className="relative z-10 text-white">
+                  <p className="text-[10px] font-black uppercase tracking-widest opacity-80">Pro Exclusive</p>
+                  <h3 className="text-lg font-black mt-1 leading-tight">Generate AI Wealth Report</h3>
+                  <button className="mt-4 px-5 py-2.5 bg-white text-primary text-[10px] font-black uppercase tracking-widest rounded-xl shadow-xl hover:scale-105 active:scale-95 transition-all">
+                    Initialize AI
+                  </button>
+                </div>
+                <div className="absolute top-0 right-0 p-8 opacity-20 transition-transform group-hover:scale-125 group-hover:rotate-12">
+                  <Calculator size={80} />
+                </div>
               </div>
             </div>
           </div>

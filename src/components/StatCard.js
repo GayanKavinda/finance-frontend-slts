@@ -25,29 +25,39 @@ export default function StatCard({ title, value, change, changeLabel, icon, dela
     return () => clearInterval(timer);
   }, [value]);
 
-  const getChangeColor = () => change > 0 ? 'text-emerald-500' : change < 0 ? 'text-rose-500' : 'text-muted-foreground';
-  const getIconBg = () => variant === 'destructive' ? 'bg-destructive/10 text-destructive' : 'bg-primary/10 text-primary';
+  const getChangeColor = () => change > 0 ? 'text-emerald-400' : change < 0 ? 'text-rose-400' : 'text-primary/40';
+  const getIconContainer = () => variant === 'destructive' 
+    ? 'bg-rose-500/20 text-rose-500 border-rose-500/20' 
+    : 'bg-primary/20 text-primary border-primary/20';
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay }}
-      className="stat-card group relative"
+      className="premium-card p-6 group relative overflow-hidden active:scale-95 transition-all cursor-default"
     >
-      <div className="flex items-start justify-between">
-        <div>
-          <div className={`w-9 h-9 rounded-lg ${getIconBg()} flex items-center justify-center mb-3 transition-transform group-hover:scale-110`}>
+      {/* Glossy Reflection */}
+      <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 blur-3xl -mr-16 -mt-16 group-hover:bg-primary/10 transition-colors" />
+      
+      <div className="flex items-start justify-between relative z-10">
+        <div className="flex-1">
+          <div className={`w-11 h-11 rounded-2xl border ${getIconContainer()} flex items-center justify-center mb-5 transition-all duration-500 group-hover:rotate-12 group-hover:scale-110 shadow-lg`}>
             {icon}
           </div>
-          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">{title}</p>
-          <p className="text-2xl font-bold tracking-tight">
-            ${displayValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-          </p>
+          <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.25em] mb-2">{title}</p>
+          <div className="flex items-baseline gap-1">
+            <p className="text-2xl font-black tracking-tighter text-foreground">
+              ${displayValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </p>
+          </div>
+          
           {change !== undefined && (
-            <div className={`flex items-center gap-1 text-[11px] font-semibold mt-2 ${getChangeColor()} px-2 py-0.5 rounded-full bg-white/5 inline-flex`}>
-              {change > 0 ? <TrendingUp className="w-3 h-3" /> : change < 0 ? <TrendingDown className="w-3 h-3" /> : <Minus className="w-3 h-3" />}
-              <span>{Math.abs(change)}% {changeLabel}</span>
+            <div className={`flex items-center gap-2 text-[10px] font-black mt-4 uppercase tracking-widest ${getChangeColor()} transition-colors`}>
+              <div className={`p-1 rounded-lg bg-white/5 border border-white/5`}>
+                {change > 0 ? <TrendingUp className="w-3 h-3" /> : change < 0 ? <TrendingDown className="w-3 h-3" /> : <Minus className="w-3 h-3" />}
+              </div>
+              <span className="opacity-80">{Math.abs(change)}% {changeLabel}</span>
             </div>
           )}
         </div>

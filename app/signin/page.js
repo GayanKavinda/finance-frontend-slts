@@ -5,6 +5,8 @@
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
+import { motion } from 'framer-motion';
+import { Wallet } from 'lucide-react';
 import axios from '@/lib/axios';
 import { useSnackbar } from 'notistack';
 import Link from 'next/link';
@@ -57,56 +59,80 @@ export default function Signin() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <h2 className="mt-6 text-center text-3xl font-bold text-gray-900">
-          Sign in to your account
+    <div className="min-h-screen flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+      {/* Decorative background orbs */}
+      <div className="absolute top-0 -left-20 w-96 h-96 bg-primary/20 rounded-full blur-[120px] -z-10 animate-pulse" />
+      <div className="absolute bottom-0 -right-20 w-96 h-96 bg-accent/20 rounded-full blur-[120px] -z-10 animate-pulse" />
+
+      <div className="sm:mx-auto sm:w-full sm:max-w-md relative">
+        <div className="flex justify-center mb-6">
+          <div className="p-3 rounded-2xl brand-gradient shadow-2xl shadow-primary/20">
+            <Wallet className="w-8 h-8 text-white" />
+          </div>
+        </div>
+        <h2 className="text-center text-4xl font-black text-foreground tracking-tight">
+          Welcome <span className="gradient-text">Back</span>
         </h2>
+        <p className="mt-3 text-center text-sm text-muted-foreground font-medium tracking-wide">
+          Enter your credentials to access your portal
+        </p>
       </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+      <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-md relative group">
+        <div className="absolute -inset-1 bg-linear-to-r from-primary/50 to-accent/50 rounded-[2.5rem] blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-200" />
+        <div className="glass-card relative py-10 px-8 sm:px-12">
           <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Email</label>
-              <input
-                {...register('email')}
-                type="email"
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-600 focus:border-indigo-600"
-              />
-              {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>}
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest ml-1">Email Address</label>
+              <div className="relative">
+                <input
+                  {...register('email')}
+                  type="email"
+                  placeholder="name@company.com"
+                  className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-foreground placeholder:text-muted-foreground/30 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all"
+                />
+              </div>
+              {errors.email && (
+                <motion.p initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="text-xs font-bold text-rose-500 ml-1">
+                  {errors.email.message}
+                </motion.p>
+              )}
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Password</label>
+            <div className="space-y-2">
+              <div className="flex justify-between items-center ml-1">
+                <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Password</label>
+                <Link href="/forgot-password" size="sm" className="text-[10px] font-bold text-primary hover:text-primary/80 uppercase tracking-tighter">
+                  Forgot?
+                </Link>
+              </div>
               <input
                 {...register('password')}
                 type="password"
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-600 focus:border-indigo-600"
+                placeholder="••••••••"
+                className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-foreground placeholder:text-muted-foreground/30 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all font-mono"
               />
-              {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>}
+              {errors.password && (
+                <motion.p initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="text-xs font-bold text-rose-500 ml-1">
+                  {errors.password.message}
+                </motion.p>
+              )}
             </div>
 
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50"
+              className="w-full py-4 brand-gradient rounded-2xl text-white font-bold text-sm uppercase tracking-widest hover:shadow-[0_0_30px_rgba(20,184,166,0.3)] transition-all active:scale-[0.98] disabled:opacity-50 mt-4 shadow-2xl"
             >
-              {isSubmitting ? 'Signing in...' : 'Sign In'}
+              {isSubmitting ? 'Verifying...' : 'Sign In Now'}
             </button>
           </form>
 
-          <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600">
-              <Link href="/forgot-password" className="font-medium text-indigo-600 hover:text-indigo-500">
-                Forgot password?
-              </Link>
-            </p>
-            <br />
-            <p className="text-sm text-gray-600">
-              Don&apos;t have an account?{' '}
-              <Link href="/signup" className="font-medium text-indigo-600 hover:text-indigo-500">
-                Sign up here
+          <div className="mt-10 pt-8 border-t border-white/5 text-center">
+            <p className="text-xs text-muted-foreground font-medium">
+              New to the platform?{' '}
+              <Link href="/signup" className="text-primary font-bold hover:underline decoration-2 underline-offset-4">
+                Create an account
               </Link>
             </p>
           </div>
