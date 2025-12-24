@@ -1,6 +1,6 @@
 # File Tree: finance-frontend
 
-**Generated:** 12/18/2025, 12:11:07 PM
+**Generated:** 12/23/2025, 2:25:25 PM
 **Root Path:** `c:\xampp\htdocs\finance-app\finance-frontend`
 
 ```
@@ -27,15 +27,25 @@
 │   └── 🖼️ window.svg
 ├── 📁 src
 │   ├── 📁 components
-│   │   └── 📄 Providers.js
+│   │   ├── 📁 ui
+│   │   │   ├── 📄 card.jsx
+│   │   │   ├── 📄 chart.jsx
+│   │   │   └── 📄 label.jsx
+│   │   ├── 📄 ActionCard.js
+│   │   ├── 📄 Layout.js
+│   │   ├── 📄 Navbar.js
+│   │   ├── 📄 Providers.js
+│   │   └── 📄 StatCard.js
 │   ├── 📁 context
 │   │   └── 📄 AuthContext.js
 │   └── 📁 lib
 │       ├── 📄 auth.js
-│       └── 📄 axios.js
+│       ├── 📄 axios.js
+│       └── 📄 utils.js
 ├── ⚙️ .gitignore
 ├── 📝 README.md
 ├── 📝 Structure.md
+├── ⚙️ components.json
 ├── 📄 eslint.config.mjs
 ├── ⚙️ jsconfig.json
 ├── 📄 next.config.mjs
