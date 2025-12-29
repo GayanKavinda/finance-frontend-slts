@@ -4,6 +4,7 @@
 
 import { AuthProvider } from '@/context/AuthContext';
 import { SnackbarProvider } from 'notistack';
+import { ThemeProvider } from 'next-themes';
 import CustomToast from './Notifications';
 
 export default function Providers({ children }) {
@@ -23,9 +24,11 @@ export default function Providers({ children }) {
       }}
       autoHideDuration={4000}
     >
-      <AuthProvider>
-        {children}
-      </AuthProvider>
+      <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+        <AuthProvider>
+          {children}
+        </AuthProvider>
+      </ThemeProvider>
     </SnackbarProvider>
   );
 }

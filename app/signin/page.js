@@ -12,7 +12,7 @@ import { useSnackbar } from 'notistack';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { fetchCsrf } from '@/lib/auth';
-import { useAuth } from '@/context/AuthContext';  // <-- Import
+import { useAuth } from '@/context/AuthContext';
 
 const schema = yup.object({
   email: yup.string().required('Email is required').email('Invalid email'),
