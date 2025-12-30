@@ -1,11 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mail, ArrowRight, Loader2, Lock, CheckCircle2, ChevronLeft, ShieldCheck } from 'lucide-react';
+import { Mail, ArrowRight, Loader2, Lock, CheckCircle2, ChevronLeft, ShieldCheck, RefreshCw } from 'lucide-react';
 import axios from '@/lib/axios';
 import { useSnackbar } from 'notistack';
 import Link from 'next/link';
@@ -51,8 +51,21 @@ export default function ForgotPassword() {
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [email, setEmail] = useState('');
-  const [otp, setOtp] = useState('');
+  const [otpValues, setOtpValues] = useState(['', '', '', '', '', '']);
   const [isLoading, setIsLoading] = useState(false);
+  const [resendTimer, setResendTimer] = useState(0);
+  const otpInputs = useRef([]);
+
+  // Timer logic for Resend Code
+  useEffect(() => {
+    let interval;
+    if (resendTimer > 0) {
+      interval = setInterval(() => {
+        setResendTimer((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [resendTimer]);
 
   const { register: registerEmail, handleSubmit: handleSubmitEmail, formState: { errors: errorsEmail } } = useForm({
     resolver: yupResolver(emailSchema)
@@ -64,6 +77,7 @@ export default function ForgotPassword() {
       await axios.post('/api/forgot-password-otp', { email: data.email });
       setEmail(data.email);
       setStep(2);
+      setResendTimer(60); // Start 60s countdown
       enqueueSnackbar('Verification code sent!', { variant: 'success' });
     } catch (error) {
       enqueueSnackbar(error.response?.data?.message || 'Failed to send code', { variant: 'error' });
@@ -72,15 +86,64 @@ export default function ForgotPassword() {
     }
   };
 
-  const { register: registerOtp, handleSubmit: handleSubmitOtp, formState: { errors: errorsOtp } } = useForm({
+  const handleResendCode = async () => {
+    if (resendTimer > 0) return;
+    try {
+      setIsLoading(true);
+      await axios.post('/api/forgot-password-otp', { email });
+      setResendTimer(60);
+      enqueueSnackbar('New code sent successfully!', { variant: 'success' });
+    } catch (error) {
+      enqueueSnackbar('Failed to resend code', { variant: 'error' });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const { setValue: setOtpValue, handleSubmit: handleSubmitOtp, formState: { errors: errorsOtp } } = useForm({
     resolver: yupResolver(otpSchema)
   });
+
+  // Sync otpValues to react-hook-form
+  useEffect(() => {
+    setOtpValue('otp', otpValues.join(''), { shouldValidate: true });
+  }, [otpValues, setOtpValue]);
+
+  const handleOtpChange = (value, index) => {
+    if (!/^\d*$/.test(value)) return;
+    const newValues = [...otpValues];
+    newValues[index] = value.slice(-1);
+    setOtpValues(newValues);
+
+    if (value && index < 5) {
+      otpInputs.current[index + 1].focus();
+    }
+  };
+
+  const handleKeyDown = (e, index) => {
+    if (e.key === 'Backspace' && !otpValues[index] && index > 0) {
+      otpInputs.current[index - 1].focus();
+    }
+  };
+
+  const handlePaste = (e) => {
+    e.preventDefault();
+    const pastedData = e.clipboardData.getData('text').slice(0, 6);
+    if (!/^\d+$/.test(pastedData)) return;
+    
+    const newValues = [...otpValues];
+    pastedData.split('').forEach((char, i) => {
+      if (i < 6) newValues[i] = char;
+    });
+    setOtpValues(newValues);
+    if (pastedData.length === 6) otpInputs.current[5].focus();
+  };
 
   const onSubmitOtp = async (data) => {
     try {
       setIsLoading(true);
       await axios.post('/api/verify-otp', { email, otp: data.otp });
-      setOtp(data.otp);
+      // otp is stored in 'data.otp' from react-hook-form
       setStep(3);
       enqueueSnackbar('Code verified!', { variant: 'success' });
     } catch (error) {
@@ -97,7 +160,12 @@ export default function ForgotPassword() {
   const onSubmitPassword = async (data) => {
     try {
       setIsLoading(true);
-      await axios.post('/api/reset-password-otp', { email, otp, password: data.password, password_confirmation: data.password_confirmation });
+      await axios.post('/api/reset-password-otp', { 
+        email, 
+        otp: otpValues.join(''), 
+        password: data.password, 
+        password_confirmation: data.password_confirmation 
+      });
       enqueueSnackbar('Password reset successfully!', { variant: 'success' });
       router.push('/signin');
     } catch (error) {
@@ -169,20 +237,59 @@ export default function ForgotPassword() {
                     )}
 
                     {step === 2 && (
-                      <motion.form key="s2" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} onSubmit={handleSubmitOtp(onSubmitOtp)} className="space-y-6">
-                        <div className="space-y-2">
-                           <input 
-                            {...registerOtp('otp')}
-                            type="text" 
-                            maxLength={6}
-                            placeholder="000000"
-                            className="w-full text-center text-4xl font-mono font-bold tracking-[0.4em] py-5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:border-[#00B4EB] text-slate-900 dark:text-white outline-none transition-all placeholder:text-slate-200 dark:placeholder:text-slate-800" 
-                          />
-                          {errorsOtp.otp && <p className="text-xs text-red-500 text-left font-medium ml-1">{errorsOtp.otp.message}</p>}
+                      <motion.form key="s2" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} onSubmit={handleSubmitOtp(onSubmitOtp)} className="space-y-8">
+                        {/* Cyberpunk OTP Input */}
+                        <div className="flex justify-between gap-2 sm:gap-3" onPaste={handlePaste}>
+                          {otpValues.map((digit, index) => (
+                            <div key={index} className="relative group flex-1">
+                                {/* Cyberpunk Underglow */}
+                                <div className={`absolute -inset-0.5 bg-gradient-to-t from-[#00B4EB] to-transparent rounded-xl opacity-0 transition-opacity duration-300 group-focus-within:opacity-20 blur-[4px]`} />
+                                
+                                <input
+                                  ref={(el) => (otpInputs.current[index] = el)}
+                                  type="text"
+                                  maxLength={1}
+                                  value={digit}
+                                  onChange={(e) => handleOtpChange(e.target.value, index)}
+                                  onKeyDown={(e) => handleKeyDown(e, index)}
+                                  className={`w-full aspect-square text-center text-2xl font-mono font-bold bg-white dark:bg-slate-950 border-2 rounded-xl focus:outline-none transition-all duration-300 ${
+                                    digit 
+                                      ? 'border-[#00B4EB] text-[#00B4EB] shadow-[0_0_15px_rgba(0,180,235,0.2)]' 
+                                      : 'border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white focus:border-[#00B4EB]'
+                                  }`}
+                                />
+                                {/* Bottom Accent Line */}
+                                <div className={`absolute bottom-0 left-1/4 right-1/4 h-[2px] bg-[#00B4EB] opacity-0 transition-opacity duration-300 group-focus-within:opacity-100 rounded-full`} />
+                            </div>
+                          ))}
                         </div>
-                        <button type="submit" disabled={isLoading} className="w-full py-3.5 bg-[#008001] text-white font-bold rounded-xl shadow-lg active:scale-[0.99] transition-all flex items-center justify-center gap-2 text-sm uppercase tracking-wider">
-                           {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Verify Now'}
-                        </button>
+
+                        {errorsOtp.otp && <p className="text-[11px] text-red-500 text-center font-bold tracking-wide uppercase">{errorsOtp.otp.message}</p>}
+
+                        <div className="space-y-4">
+                            <button type="submit" disabled={isLoading || otpValues.includes('')} className="w-full py-4 bg-[#008001] hover:bg-[#006e01] text-white font-bold rounded-xl shadow-[0_0_20px_rgba(0,128,1,0.2)] active:scale-[0.99] transition-all flex items-center justify-center gap-2 text-sm uppercase tracking-widest disabled:opacity-50 disabled:cursor-not-allowed">
+                                {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Authorize Access'}
+                            </button>
+
+                            <div className="flex flex-col items-center gap-3">
+                                <button 
+                                    type="button" 
+                                    onClick={handleResendCode}
+                                    disabled={isLoading || resendTimer > 0}
+                                    className={`flex items-center gap-2 text-[11px] font-bold transition-all uppercase tracking-widest ${
+                                        resendTimer > 0 
+                                            ? 'text-slate-400 cursor-not-allowed' 
+                                            : 'text-[#00B4EB] hover:text-[#009bc9]'
+                                    }`}
+                                >
+                                    {isLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className={`w-3 h-3 ${resendTimer > 0 ? '' : 'animate-pulse'}`} />}
+                                    {resendTimer > 0 ? `Resend Code in ${resendTimer}s` : 'Resend Verification Code'}
+                                </button>
+                                <p className="text-[10px] text-slate-400 text-center">
+                                    Didn't receive the email? Check your spam folder or request a new one.
+                                </p>
+                            </div>
+                        </div>
                       </motion.form>
                     )}
 
