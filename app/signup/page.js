@@ -177,7 +177,7 @@ export default function Signup() {
   ];
 
   return (
-    <div className="flex flex-col lg:flex-row min-h-screen w-full bg-white dark:bg-[#020617] overflow-hidden transition-colors duration-500">
+    <div className="flex flex-col lg:flex-row min-h-screen w-full bg-white dark:bg-[#020617] overflow-y-auto transition-colors duration-500">
         {/* Navigation Logo */}
         <div className="absolute top-0 left-0 right-0 z-50 pointer-events-none pl-4 pr-6">
             <div className="max-w-7xl mx-auto h-16 flex items-center">
@@ -225,7 +225,7 @@ export default function Signup() {
         </div>
 
         {/* Right Side: Centered Form */}
-        <div className="w-full lg:w-1/2 min-h-screen flex items-center justify-center p-6 lg:p-12 relative overflow-y-auto">
+        <div className="w-full lg:w-1/2 min-h-screen flex items-center justify-center p-6 lg:p-12 relative pt-24 pb-12 lg:py-0 overflow-y-auto">
              <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#00B4EB]/5 rounded-full blur-[100px] pointer-events-none" />
              <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-[#008001]/5 rounded-full blur-[100px] pointer-events-none" />
 
@@ -233,7 +233,7 @@ export default function Signup() {
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.6, ease: "easeOut" }}
-                className="w-full max-w-[480px] relative z-20 py-12 lg:py-0"
+                className="w-full max-w-[420px] relative z-20 pt-24 pb-12 lg:py-0"
              >
                 <div className="mb-8 text-left">
                     <h1 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight mb-2">Create Account</h1>
