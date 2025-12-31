@@ -55,16 +55,35 @@ export default function Navbar() {
     router.push('/signin');
   };
 
-  if (loading) return null;
-
   // Hide Navbar on auth pages
-  if (['/signup', '/signin', '/forgot-password'].includes(pathname)) return null;
+  if (['/signup', '/signin', '/forgot-password', '/reset-password'].includes(pathname)) return null;
+
+  // Render minimal navbar during loading to avoid layout jump
+  if (loading) {
+    return (
+      <div className="fixed top-0 left-0 right-0 z-50 flex justify-center">
+        <nav className="w-full border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-[#0F172A]/80 backdrop-blur-md transition-colors duration-300 pl-4 pr-6">
+          <div className="max-w-7xl mx-auto h-16 flex items-center justify-between">
+            <div className="relative w-[140px] h-[45px]">
+                <Image 
+                    src="/icons/slt_digital_icon.png" 
+                    alt="SLT Digital Logo" 
+                    fill
+                    className="object-contain dark:brightness-0 dark:invert"
+                    priority
+                />
+            </div>
+          </div>
+        </nav>
+      </div>
+    );
+  }
 
   return (
     <>
       <div className="fixed top-0 left-0 right-0 z-50 flex justify-center">
-        <nav className="w-full border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-[#0F172A]/80 backdrop-blur-md transition-colors duration-300">
-          <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+        <nav className="w-full border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-[#0F172A]/80 backdrop-blur-md transition-colors duration-300 pl-4 pr-6">
+          <div className="max-w-7xl mx-auto h-16 flex items-center justify-between">
             {/* Logo */}
             <Link href={user ? '/dashboard' : '/'} className="relative w-[140px] h-[45px]">
                 <Image 

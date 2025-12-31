@@ -71,17 +71,21 @@ export default function Signin() {
   return (
     <div className="flex flex-col lg:flex-row h-screen w-full bg-white dark:bg-[#020617] overflow-hidden transition-colors duration-500">
         {/* Navigation Logo */}
-        <Link href="/" className="absolute top-6 left-6 lg:top-8 lg:left-8 z-50 group flex items-center gap-2 transition-transform hover:scale-105 active:scale-95">
-             <div className="relative w-[120px] h-[40px] lg:w-[140px] lg:h-[45px]">
-                <Image 
-                    src="/icons/slt_digital_icon.png" 
-                    alt="SLT Digital Logo" 
-                    fill
-                    className="object-contain dark:brightness-0 dark:invert transition-all duration-300" 
-                    priority
-                />
+        <div className="absolute top-0 left-0 right-0 z-50 pointer-events-none pl-4 pr-6">
+            <div className="max-w-7xl mx-auto h-16 flex items-center">
+                <Link href="/" className="pointer-events-auto group flex items-center gap-2 transition-transform hover:scale-105 active:scale-95">
+                    <div className="relative w-[120px] h-[40px] lg:w-[140px] lg:h-[45px]">
+                        <Image 
+                            src="/icons/slt_digital_icon.png" 
+                            alt="SLT Digital Logo" 
+                            fill
+                            className="object-contain dark:brightness-0 dark:invert transition-all duration-300" 
+                            priority
+                        />
+                    </div>
+                </Link>
             </div>
-        </Link>
+        </div>
 
         {/* Left Side: Centered Form */}
         <div className="w-full lg:w-1/2 h-full flex items-center justify-center p-6 lg:p-12 relative">
