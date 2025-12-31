@@ -85,7 +85,7 @@ export default function Navbar() {
         <nav className="w-full border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-[#0F172A]/80 backdrop-blur-md transition-colors duration-300 pl-4 pr-6">
           <div className="max-w-7xl mx-auto h-16 flex items-center justify-between">
             {/* Logo */}
-            <Link href={user ? '/dashboard' : '/'} className="relative w-[140px] h-[45px]">
+            <Link href="/" className="relative w-[140px] h-[45px]">
                 <Image 
                     src="/icons/slt_digital_icon.png" 
                     alt="SLT Digital Logo" 
@@ -97,7 +97,7 @@ export default function Navbar() {
 
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center gap-6">
-                {user && (
+                {user && pathname !== '/' && (
                   <div className="flex items-center gap-1 mr-4">
                     {navLinks.map(link => {
                       const isActive = pathname === link.href;
@@ -168,16 +168,26 @@ export default function Navbar() {
 
                 {/* User Actions */}
                 {user ? (
-                   <div className="relative">
-                     <button 
-                       onClick={() => setProfileMenuOpen(!profileMenuOpen)}
-                       className="flex items-center gap-3 pl-2 pr-1 py-1.5 rounded-full hover:bg-slate-50 dark:hover:bg-slate-800 transition-all border border-transparent"
-                     >
-                       <div className="w-8 h-8 rounded-full bg-[#00B4EB]/10 flex items-center justify-center text-[#00B4EB] text-sm font-bold uppercase">
-                         {user.name.charAt(0)}
-                       </div>
-                       <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${profileMenuOpen ? 'rotate-180' : ''}`} />
-                     </button>
+                   <div className="flex items-center gap-4">
+                     {pathname === '/' && (
+                        <Link 
+                          href="/dashboard" 
+                          className="px-5 py-2.5 text-sm font-bold text-white bg-[#00B4EB] rounded-lg hover:bg-[#009bc9] transition-all shadow-[0_0_15px_rgba(0,180,235,0.3)] flex items-center gap-2"
+                        >
+                          <LayoutDashboard className="w-4 h-4" />
+                          <span>Dashboard</span>
+                        </Link>
+                     )}
+                     <div className="relative">
+                       <button 
+                         onClick={() => setProfileMenuOpen(!profileMenuOpen)}
+                         className="flex items-center gap-3 pl-2 pr-1 py-1.5 rounded-full hover:bg-slate-50 dark:hover:bg-slate-800 transition-all border border-transparent"
+                       >
+                         <div className="w-8 h-8 rounded-full bg-[#00B4EB]/10 flex items-center justify-center text-[#00B4EB] text-sm font-bold uppercase">
+                           {user.name.charAt(0)}
+                         </div>
+                         <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${profileMenuOpen ? 'rotate-180' : ''}`} />
+                       </button>
 
                      <AnimatePresence>
                        {profileMenuOpen && (
@@ -220,6 +230,7 @@ export default function Navbar() {
                          </motion.div>
                        )}
                      </AnimatePresence>
+                   </div>
                    </div>
                 ) : (
                   <div className="flex items-center gap-4">
@@ -264,7 +275,9 @@ export default function Navbar() {
                 className="fixed inset-0 z-[60] bg-white dark:bg-slate-950 flex flex-col p-6"
              >
                 <div className="flex items-center justify-between mb-8">
-                     <Image src="/icons/slt_digital_icon.png" alt="Logo" width={120} height={40} className="object-contain dark:brightness-0 dark:invert" />
+                     <Link href="/" onClick={() => setMobileMenuOpen(false)}>
+                        <Image src="/icons/slt_digital_icon.png" alt="Logo" width={120} height={40} className="object-contain dark:brightness-0 dark:invert" />
+                     </Link>
                      <button onClick={() => setMobileMenuOpen(false)}><X className="w-6 h-6 text-slate-500" /></button>
                 </div>
                 
