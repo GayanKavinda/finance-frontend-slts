@@ -6,7 +6,7 @@ import {
   Menu, X, LogOut, ChevronDown, 
   LayoutDashboard, ReceiptText, Target, PieChart,
   User as UserIcon, CreditCard, HelpCircle,
-  Sun, Moon, Laptop
+  Sun, Moon, Laptop, Leaf, ArrowRight, Sparkles
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
@@ -274,11 +274,34 @@ export default function Navbar() {
                 exit={{ opacity: 0 }}
                 className="fixed inset-0 z-[60] bg-white dark:bg-slate-950 flex flex-col p-6"
              >
-                <div className="flex items-center justify-between mb-8">
-                     <Link href="/" onClick={() => setMobileMenuOpen(false)}>
-                        <Image src="/icons/slt_digital_icon.png" alt="Logo" width={120} height={40} className="object-contain dark:brightness-0 dark:invert" />
-                     </Link>
-                     <button onClick={() => setMobileMenuOpen(false)}><X className="w-6 h-6 text-slate-500" /></button>
+                <div className="flex items-center justify-between mb-10">
+                     <motion.div 
+                        initial={{ opacity: 0, scale: 0.9, x: -10 }}
+                        animate={{ opacity: 1, scale: 1, x: 0 }}
+                        className="flex items-center gap-3"
+                     >
+                        <Link href="/" onClick={() => setMobileMenuOpen(false)} className="relative group">
+                            <div className="absolute -inset-2 bg-gradient-to-r from-[#00B4EB]/20 to-transparent rounded-xl blur-lg opacity-0 group-active:opacity-100 transition-opacity" />
+                            <Image 
+                                src="/icons/slt_digital_icon.png" 
+                                alt="Logo" 
+                                width={100} 
+                                height={32} 
+                                className="object-contain dark:brightness-0 dark:invert relative z-10" 
+                            />
+                        </Link>
+                        <div className="h-4 w-px bg-slate-200 dark:bg-slate-800" />
+                        <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] leading-none">
+                            Digital <br /> Finance
+                        </span>
+                     </motion.div>
+                     <motion.button 
+                        whileTap={{ scale: 0.9 }}
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="p-2 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-slate-500 hover:text-red-500 transition-colors"
+                     >
+                        <X className="w-6 h-6" />
+                     </motion.button>
                 </div>
                 
                 <div className="space-y-6 flex-1">
@@ -290,6 +313,34 @@ export default function Navbar() {
                         <>
                              <Link href="/signin" onClick={() => setMobileMenuOpen(false)} className="block text-lg font-bold text-slate-700 dark:text-slate-300">Sign In</Link>
                              <Link href="/signup" onClick={() => setMobileMenuOpen(false)} className="block text-lg font-bold text-[#00B4EB]">Get Started</Link>
+                             
+                             <div className="pt-8 mt-4 border-t border-slate-100 dark:border-slate-800">
+                                <motion.div 
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.2 }}
+                                    className="bg-emerald-500/5 dark:bg-emerald-500/10 rounded-2xl p-6 border border-emerald-500/10 relative overflow-hidden group"
+                                >
+                                    <div className="relative z-10">
+                                        <div className="flex items-center gap-2 mb-3">
+                                             <div className="p-2 rounded-xl bg-emerald-500/20 text-emerald-600 dark:text-emerald-400">
+                                                <Leaf size={16} />
+                                             </div>
+                                             <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">Global Sustainability</span>
+                                        </div>
+                                        <h4 className="text-base font-bold text-slate-900 dark:text-white mb-2 leading-tight">Empower Growth, <br />Support the Planet</h4>
+                                        <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-5">Join the future of eco-conscious corporate finance with SLT Digital.</p>
+                                        <button className="px-4 py-2 bg-emerald-500 text-white text-[10px] font-bold uppercase tracking-widest rounded-lg flex items-center gap-2 hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-500/20">
+                                            Learn More <ArrowRight size={12} />
+                                        </button>
+                                    </div>
+                                    {/* Abstract Visual Elements */}
+                                    <div className="absolute -top-10 -right-10 w-40 h-40 bg-emerald-500/10 rounded-full blur-3xl animate-pulse" />
+                                    <div className="absolute top-4 right-4 text-emerald-500/10 rotate-12">
+                                        <Sparkles size={40} />
+                                    </div>
+                                </motion.div>
+                             </div>
                         </>
                     )}
                 </div>
