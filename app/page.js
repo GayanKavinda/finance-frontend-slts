@@ -98,18 +98,34 @@ export default function Home() {
       </section>
 
       {/* Trust Section */}
-      <section className="py-10 border-y border-slate-200 dark:border-slate-800/50 bg-white dark:bg-[#0F172A]/30">
-        <div className="max-w-7xl mx-auto px-6 text-center">
-             <p className="text-xs font-bold text-slate-500 uppercase tracking-[0.2em] mb-6">Trusted by Industry Leaders</p>
-             <div className="flex justify-center opacity-50 grayscale hover:grayscale-0 transition-all duration-500">
-                <div className="relative w-[180px] h-[50px]">
-                     <Image 
-                        src="/icons/slt_digital_icon.png" 
-                        alt="SLT Digital Logo" 
+      <section className="py-12 border-y border-slate-200 dark:border-slate-800/50 bg-white dark:bg-[#0F172A]/30 group">
+        <div className="max-w-7xl mx-auto px-6">
+             <p className="text-center text-xs font-bold text-slate-500 uppercase tracking-[0.2em] mb-10 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300 transition-colors">Trusted by Industry Leaders</p>
+             <div className="flex flex-wrap justify-center items-center gap-8 md:gap-12 lg:gap-16 opacity-60 grayscale group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-700">
+                {[
+                  { src: '/icons/Daraz-logo.png', alt: 'Daraz Logo' },
+                  { src: '/icons/PickMe-Logo_Two-tone_Transparent-400x172.png', alt: 'PickMe Logo' },
+                  { src: '/icons/boc.png', alt: 'BOC Logo' },
+                  { src: '/icons/cida_logo.png', alt: 'CIDA Logo' },
+                  { src: '/icons/hnb.png', alt: 'HNB Logo' },
+                  { src: '/icons/lassana.svg', alt: 'Lassana Logo' },
+                  { src: '/icons/lgc Transparent.png', alt: 'LGC Logo' },
+                  { src: '/icons/mbsl logo.png', alt: 'MBSL Logo' },
+                  { src: '/icons/p&slogo.svg', alt: 'P&S Logo' },
+                  { src: '/icons/pickme.png', alt: 'PickMe Alt Logo' },
+                  { src: '/icons/sanasa logo.png', alt: 'Sanasa Logo' },
+                  { src: '/icons/sliit-campus-seeklogo.png', alt: 'SLIIT Logo' },
+                  { src: '/icons/slt_digital_icon.png', alt: 'SLT Digital Logo' }
+                ].map((icon, index) => (
+                  <div key={index} className="relative w-24 h-10 md:w-32 md:h-12 group/icon transition-transform duration-300 hover:scale-110">
+                      <Image 
+                        src={icon.src} 
+                        alt={icon.alt} 
                         fill
-                        className="object-contain dark:brightness-0 dark:invert" 
-                    />
-                </div>
+                        className="object-contain" 
+                      />
+                  </div>
+                ))}
              </div>
         </div>
       </section>
