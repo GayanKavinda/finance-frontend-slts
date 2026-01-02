@@ -169,7 +169,7 @@ export default function ForgotPassword() {
       enqueueSnackbar('Password reset successfully!', { variant: 'success' });
       router.push('/signin');
     } catch (error) {
-      enqueueSnackbar('Failed to reset password', { variant: 'error' });
+      enqueueSnackbar(error.response?.data?.message || 'Failed to reset password', { variant: 'error' });
     } finally {
       setIsLoading(false);
     }
@@ -290,7 +290,7 @@ export default function ForgotPassword() {
                                     {resendTimer > 0 ? `Resend Code in ${resendTimer}s` : 'Resend Verification Code'}
                                 </button>
                                 <p className="text-[10px] text-slate-400 text-center">
-                                    Didn't receive the email? Check your spam folder or request a new one.
+                                    Didn&apos;t receive the email? Check your spam folder or request a new one.
                                 </p>
                             </div>
                         </div>

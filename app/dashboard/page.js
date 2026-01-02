@@ -493,18 +493,6 @@ export default function Dashboard() {
                   </motion.div>
                 ))}
               </div>
-
-              {/* Promo Card */}
-              <div className="mt-6 p-5 rounded-2xl bg-linear-to-br from-primary to-accent relative overflow-hidden group">
-                <div className="relative z-10 text-primary-foreground">
-                  <p className="text-[10px] font-black uppercase tracking-widest opacity-80">Pro Feature</p>
-                  <h3 className="text-sm font-heavy mt-1 leading-tight mb-3">AI Financial Insights</h3>
-                  <button className="px-4 py-2 bg-background/20 backdrop-blur-md rounded-lg text-xs font-bold uppercase tracking-wider hover:bg-background/30 transition-all text-white">
-                    Unlock Now
-                  </button>
-                </div>
-                <div className="absolute -bottom-4 -right-4 bg-white/20 rounded-full w-24 h-24 blur-2xl"></div>
-              </div>
             </div>
           </div>
         </div>

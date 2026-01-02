@@ -76,7 +76,7 @@ function ResetPasswordForm() {
       enqueueSnackbar('Password reset successfully! Please sign in.', { variant: 'success' });
       router.push('/signin');
     } catch (error) {
-      enqueueSnackbar(error.response?.data?.email || 'Failed to reset password.', { variant: 'error' });
+      enqueueSnackbar(error.response?.data?.message || 'Failed to reset password.', { variant: 'error' });
     }
   };
 
@@ -179,7 +179,7 @@ export default function ResetPassword() {
                         <span className="text-[#00B4EB]">Security Update</span>
                     </h2>
                     <p className="text-slate-300 text-lg max-w-md leading-relaxed">
-                        You're one step away from reclaiming your account. Please set a strong new password to continue.
+                        You&apos;re one step away from reclaiming your account. Please set a strong new password to continue.
                     </p>
                 </motion.div>
             </div>

@@ -241,7 +241,7 @@ export default function Signup() {
                 </div>
 
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                    <InputField label="Full Name" icon={User} placeholder="John Doe" {...register('name')} error={errors.name?.message} />
+                    <InputField label="Full Name" icon={User} placeholder="Your Name" {...register('name')} error={errors.name?.message} />
 
                     <InputField 
                         label="Work Email" 
