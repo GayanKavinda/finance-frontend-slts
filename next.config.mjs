@@ -11,6 +11,10 @@ const nextConfig = {
         source: '/sanctum/csrf-cookie',
         destination: 'http://localhost:8000/sanctum/csrf-cookie',
       },
+      {
+        source: '/storage/:path*',
+        destination: 'http://localhost:8000/storage/:path*',
+      },
     ];
   },
 };

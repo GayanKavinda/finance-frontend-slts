@@ -4,7 +4,7 @@
 
 import { createContext, useContext, useEffect, useState } from 'react';
 import axios from '@/lib/axios';
-// import { fetchCsrf } from '@/lib/auth';
+import { fetchCsrf } from '@/lib/auth';
 
 const AuthContext = createContext();
 
@@ -30,7 +30,7 @@ export function AuthProvider({ children }) {
     // Optional: Avoid 401s on public pages by only fetching if not on login/signup
     // Check window.location because router might be not ready or different context
     if (window.location.pathname !== '/signin' && window.location.pathname !== '/signup') {
-        fetchUser();
+        (async () => { try { await fetchCsrf(); } catch {} finally { await fetchUser(); } })();
     } else {
         setLoading(false);
     }

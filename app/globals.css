@@ -38,22 +38,22 @@
     --card-foreground: 222 47% 11%;
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
-    --primary: 194 100% 46%; /* Brand Blue #00B4EB */
+    --primary: 206 100% 33%; /* SLT Blue #005FA9 */
     --primary-foreground: 210 40% 98%;
-    --secondary: 121 100% 25%; /* Brand Green #008001 */
+    --secondary: 36 100% 48%; /* SLT Orange #F39200 */
     --secondary-foreground: 210 40% 98%;
     --muted: 210 40% 96%;
     --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 194 100% 46%;
+    --accent: 36 100% 48%; /* SLT Orange */
     --accent-foreground: 222 47% 11%;
     --destructive: 0 84% 60%;
     --border: 214 32% 91%;
     --input: 214 32% 91%;
-    --ring: 194 100% 46%;
+    --ring: 206 100% 33%;
     --radius: 1.25rem;
     --success: 160 84% 39%;
-    --dark-pink: #be185d;
-    --dark-pink-hover: #9d174d;
+    --brand-blue: #005FA9;
+    --brand-blue-hover: #004c87;
   }
 
   .dark {
@@ -83,7 +83,7 @@
 
   html {
     font-family: "Outfit", sans-serif;
-    scrollbar-color: var(--dark-pink) transparent;
+    scrollbar-color: var(--brand-blue) transparent;
     scrollbar-width: thin;
   }
 
@@ -243,12 +243,12 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--dark-pink) !important;
+  background: var(--brand-blue) !important;
   border-radius: 20px;
   border: 2px solid transparent;
   background-clip: content-box;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--dark-pink-hover) !important;
+  background: var(--brand-blue-hover) !important;
 }

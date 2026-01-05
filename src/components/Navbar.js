@@ -108,11 +108,11 @@ export default function Navbar() {
                           href={link.href} 
                           className={`px-3 py-2 text-sm font-medium transition-all flex items-center gap-2 rounded-md
                             ${isActive 
-                              ? 'text-[#00B4EB] bg-[#00B4EB]/5' 
-                              : 'text-slate-600 dark:text-slate-400 hover:text-[#00B4EB] dark:hover:text-[#00B4EB] hover:bg-slate-50 dark:hover:bg-slate-800'
+                              ? 'text-primary bg-primary/5' 
+                              : 'text-slate-600 dark:text-slate-400 hover:text-primary dark:hover:text-primary hover:bg-slate-50 dark:hover:bg-slate-800'
                             }`}
                         >
-                           <Icon className={`w-4 h-4 ${isActive ? 'text-[#00B4EB]' : 'text-slate-400'}`} />
+                           <Icon className={`w-4 h-4 ${isActive ? 'text-primary' : 'text-slate-400'}`} />
                           <span>{link.label}</span>
                         </Link>
                       );
@@ -172,7 +172,7 @@ export default function Navbar() {
                      {pathname === '/' && (
                         <Link 
                           href="/dashboard" 
-                          className="px-5 py-2.5 text-sm font-bold text-white bg-[#00B4EB] rounded-lg hover:bg-[#009bc9] transition-all shadow-[0_0_15px_rgba(0,180,235,0.3)] flex items-center gap-2"
+                          className="px-5 py-2.5 text-sm font-bold text-white bg-primary rounded-lg hover:bg-primary/90 transition-all shadow-[0_0_15px_rgba(0,95,169,0.3)] flex items-center gap-2"
                         >
                           <LayoutDashboard className="w-4 h-4" />
                           <span>Dashboard</span>
@@ -183,9 +183,20 @@ export default function Navbar() {
                          onClick={() => setProfileMenuOpen(!profileMenuOpen)}
                          className="flex items-center gap-3 pl-2 pr-1 py-1.5 rounded-full hover:bg-slate-50 dark:hover:bg-slate-800 transition-all border border-transparent"
                        >
-                         <div className="w-8 h-8 rounded-full bg-[#00B4EB]/10 flex items-center justify-center text-[#00B4EB] text-sm font-bold uppercase">
-                           {user.name.charAt(0)}
-                         </div>
+                         {user.avatar_url ? (
+                            <div className="w-8 h-8 rounded-full overflow-hidden border border-slate-200 dark:border-slate-700 relative">
+                                <Image 
+                                    src={user.avatar_url} 
+                                    alt={user.name} 
+                                    fill 
+                                    className="object-cover"
+                                />
+                            </div>
+                         ) : (
+                            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary text-sm font-bold uppercase">
+                                {user.name.charAt(0)}
+                            </div>
+                         )}
                          <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${profileMenuOpen ? 'rotate-180' : ''}`} />
                        </button>
 
@@ -197,9 +208,25 @@ export default function Navbar() {
                            exit={{ opacity: 0, scale: 0.95, y: 10 }}
                            className="absolute right-0 top-full mt-4 w-60 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-2xl p-2 z-60"
                          >
-                           <div className="px-4 py-3 mb-2 border-b border-slate-100 dark:border-slate-800">
-                             <p className="text-sm font-bold text-slate-900 dark:text-white truncate">{user.name}</p>
-                             <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{user.email}</p>
+                           <div className="px-4 py-3 mb-2 border-b border-slate-100 dark:border-slate-800 flex items-center gap-3">
+                             {user.avatar_url ? (
+                                <div className="w-10 h-10 rounded-full overflow-hidden border border-slate-200 dark:border-slate-700 relative flex-shrink-0">
+                                    <Image 
+                                        src={user.avatar_url} 
+                                        alt={user.name} 
+                                        fill 
+                                        className="object-cover"
+                                    />
+                                </div>
+                             ) : (
+                                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary text-sm font-bold uppercase flex-shrink-0">
+                                    {user.name.charAt(0)}
+                                </div>
+                             )}
+                             <div className="min-w-0">
+                               <p className="text-sm font-bold text-slate-900 dark:text-white truncate">{user.name}</p>
+                               <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{user.email}</p>
+                             </div>
                            </div>
                            
                            {[
@@ -211,7 +238,7 @@ export default function Navbar() {
                                key={i}
                                href={item.href} 
                                onClick={() => setProfileMenuOpen(false)} 
-                               className="flex items-center gap-3 w-full px-4 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400 hover:text-[#00B4EB] dark:hover:text-[#00B4EB] hover:bg-[#00B4EB]/5 transition-all"
+                               className="flex items-center gap-3 w-full px-4 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary hover:bg-primary/5 transition-all"
                              >
                                <item.icon className="w-4 h-4" />
                                {item.label}
@@ -234,10 +261,10 @@ export default function Navbar() {
                    </div>
                 ) : (
                   <div className="flex items-center gap-4">
-                    <Link href="/signin" className="text-sm font-bold text-slate-600 dark:text-slate-300 hover:text-[#00B4EB] transition-colors">
+                    <Link href="/signin" className="text-sm font-bold text-slate-600 dark:text-slate-300 hover:text-primary transition-colors">
                       Sign In
                     </Link>
-                    <Link href="/signup" className="px-5 py-2.5 text-sm font-bold text-white bg-[#00B4EB] rounded-lg hover:bg-[#009bc9] transition-all shadow-[0_0_15px_rgba(0,180,235,0.3)]">
+                    <Link href="/signup" className="px-5 py-2.5 text-sm font-bold text-white bg-primary rounded-lg hover:bg-primary/90 transition-all shadow-[0_0_15px_rgba(0,95,169,0.3)]">
                       Get Started
                     </Link>
                   </div>
@@ -312,32 +339,27 @@ export default function Navbar() {
                     )) : (
                         <>
                              <Link href="/signin" onClick={() => setMobileMenuOpen(false)} className="block text-lg font-bold text-slate-700 dark:text-slate-300">Sign In</Link>
-                             <Link href="/signup" onClick={() => setMobileMenuOpen(false)} className="block text-lg font-bold text-[#00B4EB]">Get Started</Link>
+                             <Link href="/signup" onClick={() => setMobileMenuOpen(false)} className="block text-lg font-bold text-primary">Get Started</Link>
                              
                              <div className="pt-8 mt-4 border-t border-slate-100 dark:border-slate-800">
                                 <motion.div 
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: 0.2 }}
-                                    className="bg-emerald-500/5 dark:bg-emerald-500/10 rounded-2xl p-6 border border-emerald-500/10 relative overflow-hidden group"
+                                    className="bg-primary/5 dark:bg-primary/10 rounded-2xl p-6 border border-primary/10 relative overflow-hidden group"
                                 >
                                     <div className="relative z-10">
                                         <div className="flex items-center gap-2 mb-3">
-                                             <div className="p-2 rounded-xl bg-emerald-500/20 text-emerald-600 dark:text-emerald-400">
-                                                <Leaf size={16} />
+                                             <div className="p-2 rounded-xl bg-primary/20 text-primary">
+                                                <Sparkles size={16} />
                                              </div>
-                                             <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">Global Sustainability</span>
+                                             <span className="text-[11px] font-bold text-primary uppercase tracking-widest">Premium Finance</span>
                                         </div>
-                                        <h4 className="text-base font-bold text-slate-900 dark:text-white mb-2 leading-tight">Empower Growth, <br />Support the Planet</h4>
-                                        <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-5">Join the future of eco-conscious corporate finance with SLT Digital.</p>
-                                        <button className="px-4 py-2 bg-emerald-500 text-white text-[10px] font-bold uppercase tracking-widest rounded-lg flex items-center gap-2 hover:bg-emerald-600 transition-all shadow-lg shadow-emerald-500/20">
+                                        <h4 className="text-base font-bold text-slate-900 dark:text-white mb-2 leading-tight">Empower Growth, <br />Digital SLT</h4>
+                                        <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-5">Join the future of corporate finance with SLT Digital.</p>
+                                        <button className="px-4 py-2 bg-primary text-white text-[10px] font-bold uppercase tracking-widest rounded-lg flex items-center gap-2 hover:bg-primary/90 transition-all shadow-lg shadow-primary/20">
                                             Learn More <ArrowRight size={12} />
                                         </button>
-                                    </div>
-                                    {/* Abstract Visual Elements */}
-                                    <div className="absolute -top-10 -right-10 w-40 h-40 bg-emerald-500/10 rounded-full blur-3xl animate-pulse" />
-                                    <div className="absolute top-4 right-4 text-emerald-500/10 rotate-12">
-                                        <Sparkles size={40} />
                                     </div>
                                 </motion.div>
                              </div>
@@ -351,7 +373,7 @@ export default function Navbar() {
                              <button 
                                 key={mode}
                                 onClick={() => setTheme(mode)}
-                                className={`p-3 rounded-lg flex flex-col items-center justify-center gap-2 text-xs font-bold uppercase ${theme === mode ? 'bg-[#00B4EB]/10 text-[#00B4EB]' : 'bg-slate-50 dark:bg-slate-900 text-slate-500'}`}
+                                className={`p-3 rounded-lg flex flex-col items-center justify-center gap-2 text-xs font-bold uppercase ${theme === mode ? 'bg-primary/10 text-primary' : 'bg-slate-50 dark:bg-slate-900 text-slate-500'}`}
                              >
                                  {mode === 'light' ? <Sun size={16} /> : mode === 'dark' ? <Moon size={16} /> : <Laptop size={16} />}
                                  {mode}
