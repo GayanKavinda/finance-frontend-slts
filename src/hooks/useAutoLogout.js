@@ -1,17 +1,12 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import axios from '@/lib/axios';
 
 const useAutoLogout = (timeout = 30 * 60 * 1000) => { // Default 30 minutes
   const timerRef = useRef(null);
 
-  const resetTimer = () => {
-    if (timerRef.current) clearTimeout(timerRef.current);
-    timerRef.current = setTimeout(logoutUser, timeout);
-  };
-
-  const logoutUser = async () => {
+  const logoutUser = useCallback(async () => {
     try {
       await axios.post('/api/logout');
       window.location.href = '/signin?reason=inactivity';
@@ -19,7 +14,12 @@ const useAutoLogout = (timeout = 30 * 60 * 1000) => { // Default 30 minutes
       console.error('Auto logout failed', err);
       window.location.href = '/signin';
     }
-  };
+  }, []);
+
+  const resetTimer = useCallback(() => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(logoutUser, timeout);
+  }, [logoutUser, timeout]);
 
   useEffect(() => {
     const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'];
@@ -38,7 +38,7 @@ const useAutoLogout = (timeout = 30 * 60 * 1000) => { // Default 30 minutes
       });
       if (timerRef.current) clearTimeout(timerRef.current);
     };
-  }, [timeout]);
+  }, [timeout, resetTimer]);
 };
 
 export default useAutoLogout;

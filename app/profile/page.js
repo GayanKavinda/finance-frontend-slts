@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useLayoutEffect } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -10,6 +10,7 @@ import { fetchCsrf } from '@/lib/auth';
 import { useSnackbar } from 'notistack';
 import { Loader2, User, Mail, Lock, ShieldCheck, Trash2, Save, Camera } from 'lucide-react';
 import Image from 'next/image';
+import PasswordStrength from './PasswordStrength';
 
 // Validation Schemas
 const profileSchema = yup.object({
@@ -82,7 +83,7 @@ export default function ProfilePage() {
     mode: 'onTouched',
   });
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (user) {
       profileForm.reset({ name: user.name || '' });
       setAvatarPreview(user?.avatar_url || null);
@@ -430,20 +431,7 @@ export default function ProfilePage() {
                             <Lock size={18} />
                           </div>
                         </div>
-                        {passwordForm.watch('password') && (
-                          <div className="space-y-1.5">
-                            <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-wider">
-                              <span className="text-slate-500">Strength</span>
-                              <span className={passwordStrength.color.replace('bg-', 'text-')}>{passwordStrength.label}</span>
-                            </div>
-                            <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                              <div 
-                                className={`h-full ${passwordStrength.color} transition-all duration-500`} 
-                                style={{ width: `${(passwordStrength.score / 4) * 100}%` }}
-                              />
-                            </div>
-                          </div>
-                        )}
+                        <PasswordStrength control={passwordForm.control} />
                         {passwordForm.formState.errors.password && (
                           <p className="text-xs text-red-500 mt-1">{passwordForm.formState.errors.password.message}</p>
                         )}

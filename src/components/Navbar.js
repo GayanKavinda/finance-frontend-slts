@@ -8,7 +8,7 @@ import {
   User as UserIcon, CreditCard, HelpCircle,
   Sun, Moon, Laptop, Leaf, ArrowRight, Sparkles
 } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useLayoutEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter, usePathname } from 'next/navigation';
@@ -36,11 +36,11 @@ export default function Navbar() {
   const [themeMenuOpen, setThemeMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     setMounted(true);
   }, []);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     setMobileMenuOpen(false);
     setProfileMenuOpen(false);
     setThemeMenuOpen(false);
