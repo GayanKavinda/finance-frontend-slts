@@ -56,6 +56,10 @@ export default function ProfilePage() {
   // Avatar upload state
   const [avatarFile, setAvatarFile] = useState(null);
   const [avatarPreview, setAvatarPreview] = useState(null);
+  const [loginHistory, setLoginHistory] = useState([]);
+  const [activeSessions, setActiveSessions] = useState([]);
+  const [passwordStrength, setPasswordStrength] = useState({ score: 0, label: '', color: '' });
+
   const fileInputRef = useRef(null);
 
   // Tabs
@@ -179,6 +183,50 @@ export default function ProfilePage() {
     }
   };
 
+  const calculatePasswordStrength = (pwd) => {
+    if (!pwd) return { score: 0, label: '', color: '' };
+    let score = 0;
+    if (pwd.length >= 8) score++;
+    if (/[A-Z]/.test(pwd)) score++;
+    if (/[0-9]/.test(pwd)) score++;
+    if (/[^A-Za-z0-9]/.test(pwd)) score++;
+    
+    const labels = ['Weak', 'Fair', 'Good', 'Strong'];
+    const colors = ['bg-red-500', 'bg-orange-500', 'bg-yellow-500', 'bg-emerald-500'];
+    
+    return { score, label: labels[score-1] || 'Weak', color: colors[score-1] || 'bg-red-500' };
+  };
+
+  const fetchSecurityData = async () => {
+    try {
+      const [historyRes, sessionsRes] = await Promise.all([
+        axios.get('/api/login-history'),
+        axios.get('/api/active-sessions')
+      ]);
+      setLoginHistory(historyRes.data);
+      setActiveSessions(sessionsRes.data);
+    } catch (err) {
+      console.error('Failed to fetch security data', err);
+    }
+  };
+
+  const onRevokeSession = async (id) => {
+    try {
+      await axios.delete(`/api/revoke-session/${id}`);
+      enqueueSnackbar('Session revoked successfully', { variant: 'success' });
+      fetchSecurityData();
+    } catch (err) {
+      enqueueSnackbar('Failed to revoke session', { variant: 'error' });
+    }
+  };
+
+  useEffect(() => {
+    if (tab === 'security') {
+      fetchSecurityData();
+    }
+  }, [tab]);
+
+
   // No functional changes here, just preparing for movement
 
 
@@ -215,7 +263,7 @@ export default function ProfilePage() {
             <button
               key={t.key}
               onClick={() => setTab(t.key)}
-              className={`px-4 py-3 text-sm font-semibold -mb-[1px] border-b-2 ${tab === t.key ? 'border-primary text-primary' : 'border-transparent text-slate-500'} whitespace-nowrap`}
+              className={`px-4 py-3 text-sm font-semibold -mb-px border-b-2 ${tab === t.key ? 'border-primary text-primary' : 'border-transparent text-slate-500'} whitespace-nowrap`}
             >
               {t.label}
             </button>
@@ -230,7 +278,7 @@ export default function ProfilePage() {
               <div className="rounded-2xl border border-slate-200 dark:border-slate-800 p-5 bg-white/60 dark:bg-slate-950/40">
                 <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-4">Profile Photo</h3>
                 <div className="flex items-center gap-4">
-                  <div className="relative w-20 h-20 flex-shrink-0">
+                  <div className="relative w-20 h-20 shrink-0">
                     <Image
                       src={avatarPreview || '/images/Signup.png'}
                       alt="avatar"
@@ -345,40 +393,178 @@ export default function ProfilePage() {
         )}
 
         {tab === 'security' && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2">
-              <div className="rounded-2xl border border-slate-200 dark:border-slate-800 p-5 bg-white/60 dark:bg-slate-950/40">
-                <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-4">Change Password</h3>
-                <form onSubmit={passwordForm.handleSubmit(onUpdatePassword)} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Field label="Current password" icon={Lock} error={passwordForm.formState.errors.current_password?.message}>
-                    <input type="password" {...passwordForm.register('current_password')} className="w-full px-3 py-2 rounded-md border border-slate-200 dark:border-slate-800 bg-transparent text-sm" placeholder="••••••••" />
-                  </Field>
-                  <Field label="New password" icon={Lock} error={passwordForm.formState.errors.password?.message}>
-                    <input type="password" {...passwordForm.register('password')} className="w-full px-3 py-2 rounded-md border border-slate-200 dark:border-slate-800 bg-transparent text-sm" placeholder="At least 8 characters" />
-                  </Field>
-                  <Field label="Confirm new password" icon={ShieldCheck} error={passwordForm.formState.errors.password_confirmation?.message}>
-                    <input type="password" {...passwordForm.register('password_confirmation')} className="w-full px-3 py-2 rounded-md border border-slate-200 dark:border-slate-800 bg-transparent text-sm" placeholder="Repeat password" />
-                  </Field>
-                  <div className="md:col-span-2 flex justify-end">
-                    <button type="submit" disabled={passwordForm.formState.isSubmitting} className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-semibold disabled:opacity-40">
-                      {passwordForm.formState.isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save size={14} />} Update password
-                    </button>
-                  </div>
-                </form>
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <div className="rounded-2xl border border-slate-200 dark:border-slate-800 p-6 bg-white/60 dark:bg-slate-950/40">
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-6">Security Settings</h3>
+                  <form onSubmit={passwordForm.handleSubmit(onUpdatePassword)}>
+                    <div className="space-y-5">
+                      <div className="space-y-2">
+                        <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Current Password</label>
+                        <input
+                          type="password"
+                          {...passwordForm.register('current_password')}
+                          className="w-full h-11 px-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all pr-12"
+                          placeholder="••••••••"
+                        />
+                        {passwordForm.formState.errors.current_password && (
+                          <p className="text-xs text-red-500 mt-1">{passwordForm.formState.errors.current_password.message}</p>
+                        )}
+                      </div>
+
+                      <div className="space-y-3">
+                        <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">New Password</label>
+                        <div className="relative">
+                          <input
+                            type="password"
+                            {...passwordForm.register('password')}
+                            onChange={(e) => {
+                              passwordForm.setValue('password', e.target.value);
+                              setPasswordStrength(calculatePasswordStrength(e.target.value));
+                            }}
+                            className="w-full h-11 px-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all pr-12"
+                            placeholder="Min. 8 characters"
+                          />
+                          <div className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400">
+                            <Lock size={18} />
+                          </div>
+                        </div>
+                        {passwordForm.watch('password') && (
+                          <div className="space-y-1.5">
+                            <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-wider">
+                              <span className="text-slate-500">Strength</span>
+                              <span className={passwordStrength.color.replace('bg-', 'text-')}>{passwordStrength.label}</span>
+                            </div>
+                            <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                              <div 
+                                className={`h-full ${passwordStrength.color} transition-all duration-500`} 
+                                style={{ width: `${(passwordStrength.score / 4) * 100}%` }}
+                              />
+                            </div>
+                          </div>
+                        )}
+                        {passwordForm.formState.errors.password && (
+                          <p className="text-xs text-red-500 mt-1">{passwordForm.formState.errors.password.message}</p>
+                        )}
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Confirm New Password</label>
+                        <input
+                          type="password"
+                          {...passwordForm.register('password_confirmation')}
+                          className="w-full h-11 px-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                          placeholder="Repeat new password"
+                        />
+                        {passwordForm.formState.errors.password_confirmation && (
+                          <p className="text-xs text-red-500 mt-1">{passwordForm.formState.errors.password_confirmation.message}</p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="mt-8">
+                      <button
+                        type="submit"
+                        disabled={passwordForm.formState.isSubmitting}
+                        className="flex items-center gap-2 px-6 py-2.5 bg-primary text-white rounded-xl font-bold text-sm shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
+                      >
+                        {passwordForm.formState.isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save size={16} />}
+                        Update Password
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+
+              <div className="lg:col-span-1">
+                <div className="rounded-2xl border border-slate-200 dark:border-slate-800 p-6 bg-white/60 dark:bg-slate-950/40">
+                  <h3 className="text-lg font-bold text-red-600 dark:text-red-400 mb-2">Danger Zone</h3>
+                  <p className="text-sm text-slate-500 mb-6">Once you deactivate your account, you will have 30 days to request restoration.</p>
+                  <button
+                    onClick={onDeactivate}
+                    className="w-full flex items-center justify-center gap-2 px-6 py-3 border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400 rounded-xl font-bold text-sm hover:bg-red-50 dark:hover:bg-red-950/30 transition-all"
+                  >
+                    <Trash2 size={16} /> Deactivate Account
+                  </button>
+                </div>
               </div>
             </div>
 
-            <div className="lg:col-span-1">
-              <div className="rounded-2xl border border-slate-200 dark:border-slate-800 p-5 bg-white/60 dark:bg-slate-950/40">
-                <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-3">Danger Zone</h3>
-                <p className="text-xs text-slate-500 mb-4">Deactivate your account. Your data will be preserved for 30 days and can be restored by support.</p>
-                <button onClick={onDeactivate} className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 rounded-md bg-red-600 text-white text-xs font-semibold">
-                  <Trash2 size={14} /> Deactivate account
-                </button>
+            <div className="rounded-2xl border border-slate-200 dark:border-slate-800 p-6 bg-white/60 dark:bg-slate-950/40">
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-6">Active Sessions</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {activeSessions.length > 0 ? (
+                  activeSessions.map((session) => (
+                    <div key={session.id} className="flex items-center justify-between p-4 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/20">
+                      <div className="flex items-center gap-4">
+                        <div className="p-2.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm">
+                          <ShieldCheck size={20} className="text-primary" />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2 text-sm font-bold text-slate-900 dark:text-white">
+                            <span className="truncate max-w-[120px] font-mono text-[11px]">{session.ip_address}</span>
+                            {session.is_current && (
+                              <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px]">Active Now</span>
+                            )}
+                          </div>
+                          <div className="text-[10px] text-slate-400 mt-1">
+                            Last active: {new Date(session.last_active).toLocaleString()}
+                          </div>
+                        </div>
+                      </div>
+                      {!session.is_current && (
+                        <button
+                          onClick={() => onRevokeSession(session.id)}
+                          className="px-3 py-1.5 text-[10px] font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors border border-red-200 dark:border-red-500/20"
+                        >
+                          Revoke
+                        </button>
+                      )}
+                    </div>
+                  ))
+                ) : (
+                  <div className="col-span-2 text-center py-6 text-slate-500 text-sm">No active sessions found</div>
+                )}
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-slate-200 dark:border-slate-800 p-6 bg-white/60 dark:bg-slate-950/40">
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-6">Login History</h3>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-sm">
+                  <thead>
+                    <tr className="text-slate-500 dark:text-slate-400 font-bold border-b border-slate-100 dark:border-slate-800">
+                      <th className="pb-4 pr-4 uppercase text-[10px] tracking-wider">Device / OS</th>
+                      <th className="pb-4 pr-4 uppercase text-[10px] tracking-wider">IP Address</th>
+                      <th className="pb-4 pr-4 uppercase text-[10px] tracking-wider">Date & Time</th>
+                      <th className="pb-4 uppercase text-[10px] tracking-wider">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-50 dark:divide-slate-800/50">
+                    {loginHistory.map((login) => (
+                      <tr key={login.id} className="group">
+                        <td className="py-4 pr-4">
+                          <div className="flex items-center gap-3">
+                            <span className="text-slate-700 dark:text-slate-300 font-medium">{login.platform} ({login.browser})</span>
+                          </div>
+                        </td>
+                        <td className="py-4 pr-4 text-slate-500 font-mono text-xs">{login.ip_address}</td>
+                        <td className="py-4 pr-4 text-slate-500">{new Date(login.created_at).toLocaleString()}</td>
+                        <td className="py-4">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold">
+                            Success
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>
         )}
+
 
         {/* Footer meta */}
         <div className="py-10 text-center text-[11px] text-slate-400">SLT DIGITAL</div>
@@ -386,3 +572,5 @@ export default function ProfilePage() {
     </div>
   );
 }
+
+

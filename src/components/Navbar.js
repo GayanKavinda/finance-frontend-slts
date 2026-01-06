@@ -13,6 +13,7 @@ import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter, usePathname } from 'next/navigation';
 import Image from 'next/image';
+import useAutoLogout from '@/hooks/useAutoLogout';
 
 const navLinks = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -23,6 +24,10 @@ const navLinks = [
 
 export default function Navbar() {
   const { user, loading, logout } = useAuth();
+  
+  // Auto-logout after 30 mins
+  useAutoLogout(30 * 60 * 1000);
+
   const router = useRouter();
   const pathname = usePathname();
   const { theme, setTheme } = useTheme();
