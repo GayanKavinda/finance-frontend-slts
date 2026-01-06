@@ -18,9 +18,13 @@ export default function Footer() {
           </div>
 
           {/* Center: Copyright */}
-          <div className="text-[10px] md:text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest text-center">
+          {/* <div className="text-[10px] md:text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest text-center">
               &copy; 2025 Finance Pro
-          </div>
+          </div> */}
+          <div className="text-[10px] text-center text-[11px] text-slate-400 uppercase tracking-wider">
+              © {new Date().getFullYear()} Sri Lanka Telecom Services. All Rights
+          Reserved.
+          </div>{" "}
 
           {/* Right: SLT Logo */}
           <div className="relative w-[120px] h-[30px] md:w-[140px] md:h-[40px]">
