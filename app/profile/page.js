@@ -52,12 +52,12 @@ const emailChangeSchema = yup.object({
 
 function Field({ label, error, icon: Icon, children }) {
   return (
-    <div className="flex flex-col gap-1">
-      <label className="text-xs font-medium text-slate-600 dark:text-slate-300 flex items-center gap-2">
+    <div className="flex flex-col gap-2">
+      <label className="text-xs font-bold text-slate-600 dark:text-slate-300 flex items-center gap-2 uppercase tracking-wider">
         {Icon && <Icon size={14} className="text-slate-400" />} {label}
       </label>
       {children}
-      {error && <p className="text-[11px] text-red-500">{error}</p>}
+      {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
     </div>
   );
 }
@@ -456,7 +456,7 @@ export default function ProfilePage() {
                           type="button"
                           disabled={!avatarFile}
                           onClick={onUploadAvatar}
-                          className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-primary text-white shadow-sm disabled:opacity-40 hover:bg-primary/90 transition-all"
+                          className="px-4 py-2 text-xs font-bold rounded-lg bg-primary text-white shadow-lg disabled:opacity-40 hover:bg-primary/90 hover:shadow-xl transition-all active:scale-95"
                         >
                           Upload
                         </button>
@@ -467,7 +467,7 @@ export default function ProfilePage() {
                               setAvatarFile(null);
                               setAvatarPreview(user?.avatar_url || null);
                             }}
-                            className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors border border-slate-200 dark:border-slate-700"
+                            className="px-4 py-2 text-xs font-bold rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all border-2 border-slate-200 dark:border-slate-700 active:scale-95"
                           >
                             Cancel
                           </button>
@@ -507,7 +507,7 @@ export default function ProfilePage() {
                     >
                       <input
                         {...profileForm.register("name")}
-                        className="w-full px-3 py-2 rounded-md border border-slate-200 dark:border-slate-700 bg-transparent text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                        className="w-full px-4 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                         placeholder="Your name"
                       />
                     </Field>
@@ -515,21 +515,21 @@ export default function ProfilePage() {
                       <input
                         value={user?.email || ""}
                         disabled
-                        className="w-full px-3 py-2 rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 text-sm cursor-not-allowed"
+                        className="w-full px-4 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 text-sm cursor-not-allowed"
                       />
                     </Field>
                     <div className="sm:col-span-2 flex justify-end">
                       <button
                         type="submit"
                         disabled={profileForm.formState.isSubmitting}
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-white text-xs font-semibold shadow-sm hover:bg-primary/90 transition-all disabled:opacity-40 w-full sm:w-auto justify-center"
+                        className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-primary text-white text-sm font-bold shadow-lg hover:bg-primary/90 hover:shadow-xl transition-all disabled:opacity-40 active:scale-95 w-full sm:w-auto justify-center"
                       >
                         {profileForm.formState.isSubmitting ? (
-                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          <Loader2 className="w-4 h-4 animate-spin" />
                         ) : (
-                          <Save size={13} />
+                          <Save size={16} />
                         )}
-                        Save changes
+                        Save Changes
                       </button>
                     </div>
                   </form>
@@ -554,7 +554,7 @@ export default function ProfilePage() {
                       <input
                         {...emailForm.register("new_email")}
                         placeholder="name@example.com"
-                        className="w-full px-3 py-2 rounded-md border border-slate-200 dark:border-slate-700 bg-transparent text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                        className="w-full px-4 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                       />
                     </Field>
                     <Field
@@ -568,14 +568,14 @@ export default function ProfilePage() {
                         type="password"
                         {...emailForm.register("current_password")}
                         placeholder="Your password"
-                        className="w-full px-3 py-2 rounded-md border border-slate-200 dark:border-slate-700 bg-transparent text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                        className="w-full px-4 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                       />
                     </Field>
                     <div className="flex items-end">
                       <button
                         type="button"
                         onClick={onRequestEmailOtp}
-                        className="px-3 py-2 rounded-md border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-semibold w-full hover:bg-slate-100 dark:hover:bg-slate-700 hover:border-slate-400 dark:hover:border-slate-500 transition-all"
+                        className="px-4 py-2.5 rounded-lg border-2 border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-sm font-bold w-full hover:bg-slate-100 dark:hover:bg-slate-700 hover:border-slate-400 dark:hover:border-slate-500 transition-all active:scale-95"
                       >
                         Send Code
                       </button>
@@ -588,19 +588,19 @@ export default function ProfilePage() {
                       <input
                         {...emailForm.register("otp")}
                         placeholder="6-digit code"
-                        className="w-full px-3 py-2 rounded-md border border-slate-200 dark:border-slate-700 bg-transparent text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                        className="w-full px-4 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                       />
                     </Field>
                     <div className="sm:col-span-2 lg:col-span-3 flex justify-end">
                       <button
                         type="submit"
                         disabled={emailForm.formState.isSubmitting}
-                        className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-secondary dark:bg-secondary/90 text-white text-xs font-semibold shadow-sm hover:bg-secondary/90 dark:hover:bg-secondary transition-all disabled:opacity-40 w-full sm:w-auto justify-center"
+                        className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-secondary dark:bg-secondary/90 text-white text-sm font-bold shadow-lg hover:bg-secondary/90 dark:hover:bg-secondary hover:shadow-xl transition-all disabled:opacity-40 active:scale-95 w-full sm:w-auto justify-center"
                       >
                         {emailForm.formState.isSubmitting ? (
-                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          <Loader2 className="w-4 h-4 animate-spin" />
                         ) : (
-                          <ShieldCheck size={13} />
+                          <ShieldCheck size={16} />
                         )}
                         Confirm Change
                       </button>
@@ -627,13 +627,13 @@ export default function ProfilePage() {
                     >
                       <div className="space-y-4">
                         <div className="space-y-2">
-                          <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                          <label className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                             Current Password
                           </label>
                           <input
                             type="password"
                             {...passwordForm.register("current_password")}
-                            className="w-full h-10 px-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm"
+                            className="w-full h-11 px-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm"
                             placeholder="••••••••"
                           />
                           {passwordForm.formState.errors.current_password && (
@@ -647,7 +647,7 @@ export default function ProfilePage() {
                         </div>
 
                         <div className="space-y-2">
-                          <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                          <label className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                             New Password
                           </label>
                           <div className="relative">
@@ -663,7 +663,7 @@ export default function ProfilePage() {
                                   calculatePasswordStrength(e.target.value)
                                 );
                               }}
-                              className="w-full h-10 px-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all pr-10 text-sm"
+                              className="w-full h-11 px-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all pr-10 text-sm"
                               placeholder="Min. 8 characters"
                             />
                             <div className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">
@@ -703,13 +703,13 @@ export default function ProfilePage() {
                         </div>
 
                         <div className="space-y-2">
-                          <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                          <label className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                             Confirm New Password
                           </label>
                           <input
                             type="password"
                             {...passwordForm.register("password_confirmation")}
-                            className="w-full h-10 px-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm"
+                            className="w-full h-11 px-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm"
                             placeholder="Repeat new password"
                           />
                           {passwordForm.formState.errors
@@ -728,12 +728,12 @@ export default function ProfilePage() {
                         <button
                           type="submit"
                           disabled={passwordForm.formState.isSubmitting}
-                          className="flex items-center gap-2 px-4 py-2 bg-primary dark:bg-primary/90 text-white rounded-lg font-semibold text-xs shadow-sm hover:bg-primary/90 dark:hover:bg-primary transition-all disabled:opacity-50"
+                          className="flex items-center gap-2 px-6 py-3 bg-primary dark:bg-primary/90 text-white rounded-lg font-bold text-sm shadow-lg hover:bg-primary/90 dark:hover:bg-primary hover:shadow-xl transition-all disabled:opacity-50 active:scale-95"
                         >
                           {passwordForm.formState.isSubmitting ? (
-                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            <Loader2 className="w-4 h-4 animate-spin" />
                           ) : (
-                            <Save size={14} />
+                            <Save size={16} />
                           )}
                           Update Password
                         </button>
@@ -755,9 +755,9 @@ export default function ProfilePage() {
                     </p>
                     <button
                       onClick={onDeactivate}
-                      className="w-full flex items-center justify-center gap-2 px-4 py-2 border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/20 text-red-600 dark:text-red-400 rounded-lg font-semibold text-xs hover:bg-red-100 dark:hover:bg-red-950/40 transition-all"
+                      className="w-full flex items-center justify-center gap-2 px-4 py-3 border-2 border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/20 text-red-600 dark:text-red-400 rounded-lg font-bold text-sm hover:bg-red-100 dark:hover:bg-red-950/40 transition-all active:scale-95"
                     >
-                      <Trash2 size={14} /> Deactivate Account
+                      <Trash2 size={16} /> Deactivate Account
                     </button>
                   </div>
                 </div>
@@ -811,7 +811,7 @@ export default function ProfilePage() {
                         {!session.is_current && (
                           <button
                             onClick={() => onRevokeSession(session.id)}
-                            className="px-3 py-1.5 text-[10px] font-semibold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/20 hover:bg-red-100 dark:hover:bg-red-950/40 rounded-lg transition-colors border border-red-200 dark:border-red-800"
+                            className="px-3 py-2 text-xs font-bold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/20 hover:bg-red-100 dark:hover:bg-red-950/40 rounded-lg transition-all border-2 border-red-200 dark:border-red-800 active:scale-95"
                           >
                             Revoke
                           </button>
@@ -900,7 +900,7 @@ export default function ProfilePage() {
                   <div className="mt-6 text-center">
                     <button
                       onClick={loadMoreHistory}
-                      className="px-6 py-2 text-xs font-bold text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-900 transition-all uppercase tracking-widest"
+                      className="px-6 py-3 text-sm font-bold text-slate-600 dark:text-slate-400 border-2 border-slate-200 dark:border-slate-800 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-900 transition-all uppercase tracking-wider active:scale-95"
                     >
                       Load More History
                     </button>
