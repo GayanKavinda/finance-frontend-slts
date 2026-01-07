@@ -76,7 +76,7 @@ export default function Navbar() {
                     fill
                     className="object-contain dark:brightness-0 dark:invert"
                     priority
-                />
+                />  
             </div>
           </div>
         </nav>

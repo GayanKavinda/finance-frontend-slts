@@ -19,6 +19,7 @@ import {
   Camera,
 } from "lucide-react";
 import Image from "next/image";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 // Validation Schemas
 const profileSchema = yup.object({
@@ -69,6 +70,10 @@ export default function ProfilePage() {
   const [avatarFile, setAvatarFile] = useState(null);
   const [avatarPreview, setAvatarPreview] = useState(null);
   const [loginHistory, setLoginHistory] = useState([]);
+  const [loginPagination, setLoginPagination] = useState({
+    current_page: 1,
+    last_page: 1,
+  });
   const [activeSessions, setActiveSessions] = useState([]);
   const [passwordStrength, setPasswordStrength] = useState({
     score: 0,
@@ -254,16 +259,43 @@ export default function ProfilePage() {
     };
   };
 
-  const fetchSecurityData = async () => {
+  const fetchSecurityData = async (page = 1) => {
     try {
       const [historyRes, sessionsRes] = await Promise.all([
-        axios.get("/api/login-history"),
+        axios.get(`/api/login-history?page=${page}`),
         axios.get("/api/active-sessions"),
       ]);
-      setLoginHistory(historyRes.data);
+
+      if (page === 1) {
+        setLoginHistory(historyRes.data.data);
+      } else {
+        setLoginHistory((prev) => [...prev, ...historyRes.data.data]);
+      }
+
+      setLoginPagination({
+        current_page: historyRes.data.current_page,
+        last_page: historyRes.data.last_page,
+      });
       setActiveSessions(sessionsRes.data);
     } catch (err) {
       console.error("Failed to fetch security data", err);
+    }
+  };
+
+  const loadMoreHistory = () => {
+    const nextPage = loginPagination.current_page + 1;
+    if (nextPage <= loginPagination.last_page) {
+      fetchSecurityData(nextPage);
+    }
+  };
+
+  const onDeleteHistoryEntry = async (id) => {
+    try {
+      await axios.delete(`/api/login-history/${id}`);
+      enqueueSnackbar("History entry removed", { variant: "success" });
+      setLoginHistory((prev) => prev.filter((item) => item.id !== id));
+    } catch (err) {
+      enqueueSnackbar("Failed to remove history entry", { variant: "error" });
     }
   };
 
@@ -278,522 +310,570 @@ export default function ProfilePage() {
   };
 
   useEffect(() => {
-    if (tab === "security") {
+    if (tab === "security" || tab === "activity") {
       fetchSecurityData();
     }
   }, [tab]);
 
-  if (loading) {
+  if (loading || !user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-[#020617]">
-        <Loader2 className="w-10 h-10 animate-spin text-[#00B4EB]" />
-      </div>
+      <ProtectedRoute>
+        <div />
+      </ProtectedRoute>
     );
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#020617] pt-20 pb-12">
-      <div className="max-w-5xl mx-auto px-4 md:px-8">
-        {/* Header - Centered with underline */}
-        <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-slate-600 dark:text-slate-400 mb-2">
-            Profile Settings
-          </h1>
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <div className="h-px w-16 bg-gradient-to-r from-transparent to-slate-300 dark:to-slate-700"></div>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              Manage your personal information and security
-            </p>
-            <div className="h-px w-16 bg-gradient-to-l from-transparent to-slate-300 dark:to-slate-700"></div>
+    <ProtectedRoute>
+      <div className="min-h-screen bg-white dark:bg-[#020617] pt-20 pb-12">
+        <div className="max-w-5xl mx-auto px-4 md:px-8">
+          {/* Header - Centered with underline */}
+          <div className="text-center mb-8">
+            <h1 className="text-2xl font-bold text-slate-600 dark:text-slate-400 mb-2">
+              Profile Settings
+            </h1>
+            <div className="flex items-center justify-center gap-2 mb-4">
+              <div className="h-px w-16 bg-gradient-to-r from-transparent to-slate-300 dark:to-slate-700"></div>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Manage your personal information and security
+              </p>
+              <div className="h-px w-16 bg-gradient-to-l from-transparent to-slate-300 dark:to-slate-700"></div>
+            </div>
           </div>
-        </div>
 
-        {/* Tabs */}
-        <div className="flex justify-center border-b border-slate-200 dark:border-slate-800 mb-6">
-          {[
-            { key: "personal", label: "Personal" },
-            { key: "security", label: "Security" },
-          ].map((t) => (
-            <button
-              key={t.key}
-              onClick={() => setTab(t.key)}
-              className={`px-6 py-3 text-sm font-semibold -mb-px border-b-2 transition-all ${
-                tab === t.key
-                  ? "border-primary text-primary"
-                  : "border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300"
-              }`}
-            >
-              {t.label}
-            </button>
-          ))}
-        </div>
+          {/* Tabs */}
+          <div className="flex justify-center border-b border-slate-200 dark:border-slate-800 mb-6">
+            {[
+              { key: "personal", label: "Personal" },
+              { key: "security", label: "Security" },
+              { key: "activity", label: "Activity" },
+            ].map((t) => (
+              <button
+                key={t.key}
+                onClick={() => setTab(t.key)}
+                className={`px-6 py-3 text-sm font-semibold -mb-px border-b-2 transition-all ${
+                  tab === t.key
+                    ? "border-primary text-primary"
+                    : "border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300"
+                }`}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
 
-        {/* Content */}
-        {tab === "personal" && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Left: Avatar + Meta */}
-            <div className="lg:col-span-1">
-              <div className="relative rounded-2xl border border-slate-200 dark:border-slate-800 p-5 bg-white/60 dark:bg-slate-950/40 dark:shadow-[0_0_80px_-12px_rgba(0,180,235,0.15)]">
-                {/* Glow effect for dark mode */}
-                <div className="absolute inset-0 -z-10 rounded-2xl bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 blur-2xl opacity-0 dark:opacity-60"></div>
-                
-                <h3 className="text-sm font-bold text-slate-600 dark:text-slate-400 mb-4">
-                  Profile Photo
-                </h3>
-                <div className="flex items-center gap-4">
-                  <div className="relative w-20 h-20 shrink-0">
-                    <Image
-                      src={avatarPreview || "/images/Signup.png"}
-                      alt="avatar"
-                      fill
-                      className="rounded-full object-cover border border-slate-200 dark:border-slate-800"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => fileInputRef.current?.click()}
-                      className="absolute -bottom-2 -right-2 bg-slate-900 dark:bg-slate-700 text-white p-2 rounded-full shadow hover:bg-slate-800 dark:hover:bg-slate-600 transition-colors z-10"
-                      title="Change photo"
-                    >
-                      <Camera size={14} />
-                    </button>
-                  </div>
-                  <div className="flex flex-col gap-2">
-                    <div className="text-xs text-slate-600 dark:text-slate-300">
-                      JPG, PNG, WEBP up to 2MB
-                    </div>
-                    <div className="flex gap-2">
-                      <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept="image/png,image/jpeg,image/webp"
-                        className="hidden"
-                        onChange={(e) => {
-                          const f = e.target.files?.[0];
-                          if (!f) return;
-                          if (f.size > 2 * 1024 * 1024) {
-                            enqueueSnackbar("File too large (max 2MB)", {
-                              variant: "error",
-                            });
-                            return;
-                          }
-                          setAvatarFile(f);
-                          const url = URL.createObjectURL(f);
-                          setAvatarPreview(url);
-                        }}
+          {/* Content */}
+          {tab === "personal" && (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Left: Avatar + Meta */}
+              <div className="lg:col-span-1">
+                <div className="relative rounded-2xl border border-slate-200 dark:border-slate-800 p-5 bg-white/60 dark:bg-slate-950/40 dark:shadow-[0_0_80px_-12px_rgba(0,180,235,0.15)]">
+                  {/* Glow effect for dark mode */}
+                  <div className="absolute inset-0 -z-10 rounded-2xl bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 blur-2xl opacity-0 dark:opacity-60"></div>
+
+                  <h3 className="text-sm font-bold text-slate-600 dark:text-slate-400 mb-4">
+                    Profile Photo
+                  </h3>
+                  <div className="flex items-center gap-4">
+                    <div className="relative w-20 h-20 shrink-0">
+                      <Image
+                        src={avatarPreview || "/images/Signup.png"}
+                        alt="avatar"
+                        fill
+                        className="rounded-full object-cover border border-slate-200 dark:border-slate-800"
                       />
                       <button
                         type="button"
-                        disabled={!avatarFile}
-                        onClick={onUploadAvatar}
-                        className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-primary text-white shadow-sm disabled:opacity-40 hover:bg-primary/90 transition-all"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="absolute -bottom-2 -right-2 bg-slate-900 dark:bg-slate-700 text-white p-2 rounded-full shadow hover:bg-slate-800 dark:hover:bg-slate-600 transition-colors z-10"
+                        title="Change photo"
                       >
-                        Upload
+                        <Camera size={14} />
                       </button>
-                      {avatarFile && (
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <div className="text-xs text-slate-600 dark:text-slate-300">
+                        JPG, PNG, WEBP up to 2MB
+                      </div>
+                      <div className="flex gap-2">
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          accept="image/png,image/jpeg,image/webp"
+                          className="hidden"
+                          onChange={(e) => {
+                            const f = e.target.files?.[0];
+                            if (!f) return;
+                            if (f.size > 2 * 1024 * 1024) {
+                              enqueueSnackbar("File too large (max 2MB)", {
+                                variant: "error",
+                              });
+                              return;
+                            }
+                            setAvatarFile(f);
+                            const url = URL.createObjectURL(f);
+                            setAvatarPreview(url);
+                          }}
+                        />
                         <button
                           type="button"
-                          onClick={() => {
-                            setAvatarFile(null);
-                            setAvatarPreview(user?.avatar_url || null);
-                          }}
-                          className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors border border-slate-200 dark:border-slate-700"
+                          disabled={!avatarFile}
+                          onClick={onUploadAvatar}
+                          className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-primary text-white shadow-sm disabled:opacity-40 hover:bg-primary/90 transition-all"
                         >
-                          Cancel
+                          Upload
                         </button>
-                      )}
+                        {avatarFile && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setAvatarFile(null);
+                              setAvatarPreview(user?.avatar_url || null);
+                            }}
+                            className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors border border-slate-200 dark:border-slate-700"
+                          >
+                            Cancel
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
+                  <div className="mt-6 text-xs text-slate-500 dark:text-slate-400 space-y-1">
+                    <div>
+                      Last updated:{" "}
+                      {user?.profile_updated_at
+                        ? new Date(user.profile_updated_at).toLocaleString()
+                        : "—"}
+                    </div>
+                    <div>Updated by: {user?.profile_updated_by || "—"}</div>
+                  </div>
                 </div>
-                <div className="mt-6 text-xs text-slate-500 dark:text-slate-400 space-y-1">
-                  <div>
-                    Last updated:{" "}
-                    {user?.profile_updated_at
-                      ? new Date(user.profile_updated_at).toLocaleString()
-                      : "—"}
-                  </div>
-                  <div>Updated by: {user?.profile_updated_by || "—"}</div>
-                </div>
-              </div>
-            </div>
-
-            {/* Right: Personal Info and Email Change */}
-            <div className="lg:col-span-2 space-y-6">
-              <div className="relative rounded-2xl border border-slate-200 dark:border-slate-800 p-5 bg-white/60 dark:bg-slate-950/40 dark:shadow-[0_0_80px_-12px_rgba(0,180,235,0.15)]">
-                {/* Glow effect for dark mode */}
-                <div className="absolute inset-0 -z-10 rounded-2xl bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 blur-2xl opacity-0 dark:opacity-60"></div>
-                
-                <h3 className="text-sm font-bold text-slate-600 dark:text-slate-400 mb-4">
-                  Personal Info
-                </h3>
-                <form
-                  onSubmit={profileForm.handleSubmit(onUpdateProfile)}
-                  className="grid grid-cols-1 md:grid-cols-2 gap-4"
-                >
-                  <Field
-                    label="Full name"
-                    icon={User}
-                    error={profileForm.formState.errors.name?.message}
-                  >
-                    <input
-                      {...profileForm.register("name")}
-                      className="w-full px-3 py-2 rounded-md border border-slate-200 dark:border-slate-700 bg-transparent text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
-                      placeholder="Your name"
-                    />
-                  </Field>
-                  <Field label="Email (read-only)" icon={Mail}>
-                    <input
-                      value={user?.email || ""}
-                      disabled
-                      className="w-full px-3 py-2 rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 text-sm cursor-not-allowed"
-                    />
-                  </Field>
-                  <div className="md:col-span-2 flex justify-end">
-                    <button
-                      type="submit"
-                      disabled={profileForm.formState.isSubmitting}
-                      className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-white text-xs font-semibold shadow-sm hover:bg-primary/90 transition-all disabled:opacity-40"
-                    >
-                      {profileForm.formState.isSubmitting ? (
-                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                      ) : (
-                        <Save size={13} />
-                      )}
-                      Save changes
-                    </button>
-                  </div>
-                </form>
               </div>
 
-              <div className="relative rounded-2xl border border-slate-200 dark:border-slate-800 p-5 bg-white/60 dark:bg-slate-950/40 dark:shadow-[0_0_80px_-12px_rgba(0,180,235,0.15)]">
-                {/* Glow effect for dark mode */}
-                <div className="absolute inset-0 -z-10 rounded-2xl bg-gradient-to-br from-secondary/5 via-transparent to-primary/5 blur-2xl opacity-0 dark:opacity-60"></div>
-                
-                <h3 className="text-sm font-bold text-slate-600 dark:text-slate-400 mb-4">
-                  Change Email
-                </h3>
-                <form
-                  onSubmit={emailForm.handleSubmit(onConfirmEmailChange)}
-                  className="grid grid-cols-1 md:grid-cols-3 gap-4"
-                >
-                  <Field
-                    label="New email"
-                    icon={Mail}
-                    error={emailForm.formState.errors.new_email?.message}
-                  >
-                    <input
-                      {...emailForm.register("new_email")}
-                      placeholder="name@example.com"
-                      className="w-full px-3 py-2 rounded-md border border-slate-200 dark:border-slate-700 bg-transparent text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
-                    />
-                  </Field>
-                  <Field
-                    label="Current password"
-                    icon={Lock}
-                    error={emailForm.formState.errors.current_password?.message}
-                  >
-                    <input
-                      type="password"
-                      {...emailForm.register("current_password")}
-                      placeholder="Your password"
-                      className="w-full px-3 py-2 rounded-md border border-slate-200 dark:border-slate-700 bg-transparent text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
-                    />
-                  </Field>
-                  <div className="flex items-end">
-                    <button
-                      type="button"
-                      onClick={onRequestEmailOtp}
-                      className="px-3 py-2 rounded-md border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-semibold w-full hover:bg-slate-100 dark:hover:bg-slate-700 hover:border-slate-400 dark:hover:border-slate-500 transition-all"
-                    >
-                      Send Code
-                    </button>
-                  </div>
-                  <Field
-                    label="Verification code"
-                    icon={ShieldCheck}
-                    error={emailForm.formState.errors.otp?.message}
-                  >
-                    <input
-                      {...emailForm.register("otp")}
-                      placeholder="6-digit code"
-                      className="w-full px-3 py-2 rounded-md border border-slate-200 dark:border-slate-700 bg-transparent text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
-                    />
-                  </Field>
-                  <div className="md:col-span-2 flex justify-end">
-                    <button
-                      type="submit"
-                      disabled={emailForm.formState.isSubmitting}
-                      className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-secondary dark:bg-secondary/90 text-white text-xs font-semibold shadow-sm hover:bg-secondary/90 dark:hover:bg-secondary transition-all disabled:opacity-40"
-                    >
-                      {emailForm.formState.isSubmitting ? (
-                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                      ) : (
-                        <ShieldCheck size={13} />
-                      )}
-                      Confirm Change
-                    </button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {tab === "security" && (
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2">
-                <div className="relative rounded-2xl border border-slate-200 dark:border-slate-800 p-6 bg-white/60 dark:bg-slate-950/40 dark:shadow-[0_0_80px_-12px_rgba(0,180,235,0.15)]">
+              {/* Right: Personal Info and Email Change */}
+              <div className="lg:col-span-2 space-y-6">
+                <div className="relative rounded-2xl border border-slate-200 dark:border-slate-800 p-5 bg-white/60 dark:bg-slate-950/40 dark:shadow-[0_0_80px_-12px_rgba(0,180,235,0.15)]">
                   {/* Glow effect for dark mode */}
                   <div className="absolute inset-0 -z-10 rounded-2xl bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 blur-2xl opacity-0 dark:opacity-60"></div>
-                  
-                  <h3 className="text-base font-bold text-slate-600 dark:text-slate-400 mb-6">
-                    Security Settings
+
+                  <h3 className="text-sm font-bold text-slate-600 dark:text-slate-400 mb-4">
+                    Personal Info
                   </h3>
-                  <form onSubmit={passwordForm.handleSubmit(onUpdatePassword)}>
-                    <div className="space-y-4">
-                      <div className="space-y-2">
-                        <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                          Current Password
-                        </label>
-                        <input
-                          type="password"
-                          {...passwordForm.register("current_password")}
-                          className="w-full h-10 px-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm"
-                          placeholder="••••••••"
-                        />
-                        {passwordForm.formState.errors.current_password && (
-                          <p className="text-xs text-red-500 mt-1">
-                            {
-                              passwordForm.formState.errors.current_password
-                                .message
-                            }
-                          </p>
-                        )}
-                      </div>
-
-                      <div className="space-y-2">
-                        <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                          New Password
-                        </label>
-                        <div className="relative">
-                          <input
-                            type="password"
-                            {...passwordForm.register("password")}
-                            onChange={(e) => {
-                              passwordForm.setValue("password", e.target.value);
-                              setPasswordStrength(
-                                calculatePasswordStrength(e.target.value)
-                              );
-                            }}
-                            className="w-full h-10 px-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all pr-10 text-sm"
-                            placeholder="Min. 8 characters"
-                          />
-                          <div className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">
-                            <Lock size={16} />
-                          </div>
-                        </div>
-                        {passwordForm.watch("password") && (
-                          <div className="space-y-1.5">
-                            <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-wider">
-                              <span className="text-slate-500">Strength</span>
-                              <span
-                                className={passwordStrength.color.replace(
-                                  "bg-",
-                                  "text-"
-                                )}
-                              >
-                                {passwordStrength.label}
-                              </span>
-                            </div>
-                            <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                              <div
-                                className={`h-full ${passwordStrength.color} transition-all duration-500`}
-                                style={{
-                                  width: `${
-                                    (passwordStrength.score / 4) * 100
-                                  }%`,
-                                }}
-                              />
-                            </div>
-                          </div>
-                        )}
-                        {passwordForm.formState.errors.password && (
-                          <p className="text-xs text-red-500 mt-1">
-                            {passwordForm.formState.errors.password.message}
-                          </p>
-                        )}
-                      </div>
-
-                      <div className="space-y-2">
-                        <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                          Confirm New Password
-                        </label>
-                        <input
-                          type="password"
-                          {...passwordForm.register("password_confirmation")}
-                          className="w-full h-10 px-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm"
-                          placeholder="Repeat new password"
-                        />
-                        {passwordForm.formState.errors
-                          .password_confirmation && (
-                          <p className="text-xs text-red-500 mt-1">
-                            {
-                              passwordForm.formState.errors
-                                .password_confirmation.message
-                            }
-                          </p>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="mt-6">
+                  <form
+                    onSubmit={profileForm.handleSubmit(onUpdateProfile)}
+                    className="grid grid-cols-1 md:grid-cols-2 gap-4"
+                  >
+                    <Field
+                      label="Full name"
+                      icon={User}
+                      error={profileForm.formState.errors.name?.message}
+                    >
+                      <input
+                        {...profileForm.register("name")}
+                        className="w-full px-3 py-2 rounded-md border border-slate-200 dark:border-slate-700 bg-transparent text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                        placeholder="Your name"
+                      />
+                    </Field>
+                    <Field label="Email (read-only)" icon={Mail}>
+                      <input
+                        value={user?.email || ""}
+                        disabled
+                        className="w-full px-3 py-2 rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 text-sm cursor-not-allowed"
+                      />
+                    </Field>
+                    <div className="md:col-span-2 flex justify-end">
                       <button
                         type="submit"
-                        disabled={passwordForm.formState.isSubmitting}
-                        className="flex items-center gap-2 px-4 py-2 bg-primary dark:bg-primary/90 text-white rounded-lg font-semibold text-xs shadow-sm hover:bg-primary/90 dark:hover:bg-primary transition-all disabled:opacity-50"
+                        disabled={profileForm.formState.isSubmitting}
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-white text-xs font-semibold shadow-sm hover:bg-primary/90 transition-all disabled:opacity-40"
                       >
-                        {passwordForm.formState.isSubmitting ? (
+                        {profileForm.formState.isSubmitting ? (
                           <Loader2 className="w-3.5 h-3.5 animate-spin" />
                         ) : (
-                          <Save size={14} />
+                          <Save size={13} />
                         )}
-                        Update Password
+                        Save changes
+                      </button>
+                    </div>
+                  </form>
+                </div>
+
+                <div className="relative rounded-2xl border border-slate-200 dark:border-slate-800 p-5 bg-white/60 dark:bg-slate-950/40 dark:shadow-[0_0_80px_-12px_rgba(0,180,235,0.15)]">
+                  {/* Glow effect for dark mode */}
+                  <div className="absolute inset-0 -z-10 rounded-2xl bg-gradient-to-br from-secondary/5 via-transparent to-primary/5 blur-2xl opacity-0 dark:opacity-60"></div>
+
+                  <h3 className="text-sm font-bold text-slate-600 dark:text-slate-400 mb-4">
+                    Change Email
+                  </h3>
+                  <form
+                    onSubmit={emailForm.handleSubmit(onConfirmEmailChange)}
+                    className="grid grid-cols-1 md:grid-cols-3 gap-4"
+                  >
+                    <Field
+                      label="New email"
+                      icon={Mail}
+                      error={emailForm.formState.errors.new_email?.message}
+                    >
+                      <input
+                        {...emailForm.register("new_email")}
+                        placeholder="name@example.com"
+                        className="w-full px-3 py-2 rounded-md border border-slate-200 dark:border-slate-700 bg-transparent text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                      />
+                    </Field>
+                    <Field
+                      label="Current password"
+                      icon={Lock}
+                      error={
+                        emailForm.formState.errors.current_password?.message
+                      }
+                    >
+                      <input
+                        type="password"
+                        {...emailForm.register("current_password")}
+                        placeholder="Your password"
+                        className="w-full px-3 py-2 rounded-md border border-slate-200 dark:border-slate-700 bg-transparent text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                      />
+                    </Field>
+                    <div className="flex items-end">
+                      <button
+                        type="button"
+                        onClick={onRequestEmailOtp}
+                        className="px-3 py-2 rounded-md border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-semibold w-full hover:bg-slate-100 dark:hover:bg-slate-700 hover:border-slate-400 dark:hover:border-slate-500 transition-all"
+                      >
+                        Send Code
+                      </button>
+                    </div>
+                    <Field
+                      label="Verification code"
+                      icon={ShieldCheck}
+                      error={emailForm.formState.errors.otp?.message}
+                    >
+                      <input
+                        {...emailForm.register("otp")}
+                        placeholder="6-digit code"
+                        className="w-full px-3 py-2 rounded-md border border-slate-200 dark:border-slate-700 bg-transparent text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                      />
+                    </Field>
+                    <div className="md:col-span-2 flex justify-end">
+                      <button
+                        type="submit"
+                        disabled={emailForm.formState.isSubmitting}
+                        className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-secondary dark:bg-secondary/90 text-white text-xs font-semibold shadow-sm hover:bg-secondary/90 dark:hover:bg-secondary transition-all disabled:opacity-40"
+                      >
+                        {emailForm.formState.isSubmitting ? (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        ) : (
+                          <ShieldCheck size={13} />
+                        )}
+                        Confirm Change
                       </button>
                     </div>
                   </form>
                 </div>
               </div>
+            </div>
+          )}
 
-              <div className="lg:col-span-1">
-                <div className="relative rounded-2xl border border-slate-200 dark:border-slate-800 p-6 bg-white/60 dark:bg-slate-950/40 dark:shadow-[0_0_80px_-12px_rgba(239,68,68,0.1)]">
-                  {/* Red glow for danger zone */}
-                  <div className="absolute inset-0 -z-10 rounded-2xl bg-gradient-to-br from-red-500/5 via-transparent to-red-500/5 blur-2xl opacity-0 dark:opacity-40"></div>
-                  
-                  <h3 className="text-base font-bold text-red-600 dark:text-red-400 mb-2">
-                    Danger Zone
-                  </h3>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mb-6">
-                    Once you deactivate your account, you will have 30 days to
-                    request restoration.
-                  </p>
-                  <button
-                    onClick={onDeactivate}
-                    className="w-full flex items-center justify-center gap-2 px-4 py-2 border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/20 text-red-600 dark:text-red-400 rounded-lg font-semibold text-xs hover:bg-red-100 dark:hover:bg-red-950/40 transition-all"
-                  >
-                    <Trash2 size={14} /> Deactivate Account
-                  </button>
+          {tab === "security" && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-2">
+                  <div className="relative rounded-2xl border border-slate-200 dark:border-slate-800 p-6 bg-white/60 dark:bg-slate-950/40 dark:shadow-[0_0_80px_-12px_rgba(0,180,235,0.15)]">
+                    {/* Glow effect for dark mode */}
+                    <div className="absolute inset-0 -z-10 rounded-2xl bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 blur-2xl opacity-0 dark:opacity-60"></div>
+
+                    <h3 className="text-base font-bold text-slate-600 dark:text-slate-400 mb-6">
+                      Update Password
+                    </h3>
+                    <form
+                      onSubmit={passwordForm.handleSubmit(onUpdatePassword)}
+                    >
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                            Current Password
+                          </label>
+                          <input
+                            type="password"
+                            {...passwordForm.register("current_password")}
+                            className="w-full h-10 px-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm"
+                            placeholder="••••••••"
+                          />
+                          {passwordForm.formState.errors.current_password && (
+                            <p className="text-xs text-red-500 mt-1">
+                              {
+                                passwordForm.formState.errors.current_password
+                                  .message
+                              }
+                            </p>
+                          )}
+                        </div>
+
+                        <div className="space-y-2">
+                          <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                            New Password
+                          </label>
+                          <div className="relative">
+                            <input
+                              type="password"
+                              {...passwordForm.register("password")}
+                              onChange={(e) => {
+                                passwordForm.setValue(
+                                  "password",
+                                  e.target.value
+                                );
+                                setPasswordStrength(
+                                  calculatePasswordStrength(e.target.value)
+                                );
+                              }}
+                              className="w-full h-10 px-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all pr-10 text-sm"
+                              placeholder="Min. 8 characters"
+                            />
+                            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">
+                              <Lock size={16} />
+                            </div>
+                          </div>
+                          {passwordForm.watch("password") && (
+                            <div className="space-y-1.5">
+                              <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-wider">
+                                <span className="text-slate-500">Strength</span>
+                                <span
+                                  className={passwordStrength.color.replace(
+                                    "bg-",
+                                    "text-"
+                                  )}
+                                >
+                                  {passwordStrength.label}
+                                </span>
+                              </div>
+                              <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                                <div
+                                  className={`h-full ${passwordStrength.color} transition-all duration-500`}
+                                  style={{
+                                    width: `${
+                                      (passwordStrength.score / 4) * 100
+                                    }%`,
+                                  }}
+                                />
+                              </div>
+                            </div>
+                          )}
+                          {passwordForm.formState.errors.password && (
+                            <p className="text-xs text-red-500 mt-1">
+                              {passwordForm.formState.errors.password.message}
+                            </p>
+                          )}
+                        </div>
+
+                        <div className="space-y-2">
+                          <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                            Confirm New Password
+                          </label>
+                          <input
+                            type="password"
+                            {...passwordForm.register("password_confirmation")}
+                            className="w-full h-10 px-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm"
+                            placeholder="Repeat new password"
+                          />
+                          {passwordForm.formState.errors
+                            .password_confirmation && (
+                            <p className="text-xs text-red-500 mt-1">
+                              {
+                                passwordForm.formState.errors
+                                  .password_confirmation.message
+                              }
+                            </p>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="mt-6">
+                        <button
+                          type="submit"
+                          disabled={passwordForm.formState.isSubmitting}
+                          className="flex items-center gap-2 px-4 py-2 bg-primary dark:bg-primary/90 text-white rounded-lg font-semibold text-xs shadow-sm hover:bg-primary/90 dark:hover:bg-primary transition-all disabled:opacity-50"
+                        >
+                          {passwordForm.formState.isSubmitting ? (
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          ) : (
+                            <Save size={14} />
+                          )}
+                          Update Password
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+
+                <div className="lg:col-span-1">
+                  <div className="relative rounded-2xl border border-slate-200 dark:border-slate-800 p-6 bg-white/60 dark:bg-slate-950/40 dark:shadow-[0_0_80px_-12px_rgba(239,68,68,0.1)]">
+                    <div className="absolute inset-0 -z-10 rounded-2xl bg-gradient-to-br from-red-500/5 via-transparent to-red-500/5 blur-2xl opacity-0 dark:opacity-40"></div>
+
+                    <h3 className="text-base font-bold text-red-600 dark:text-red-400 mb-2">
+                      Danger Zone
+                    </h3>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mb-6">
+                      Once you deactivate your account, you will have 30 days to
+                      request restoration.
+                    </p>
+                    <button
+                      onClick={onDeactivate}
+                      className="w-full flex items-center justify-center gap-2 px-4 py-2 border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/20 text-red-600 dark:text-red-400 rounded-lg font-semibold text-xs hover:bg-red-100 dark:hover:bg-red-950/40 transition-all"
+                    >
+                      <Trash2 size={14} /> Deactivate Account
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
+          )}
 
-            <div className="relative rounded-2xl border border-slate-200 dark:border-slate-800 p-6 bg-white/60 dark:bg-slate-950/40 dark:shadow-[0_0_80px_-12px_rgba(0,180,235,0.15)]">
-              {/* Glow effect for dark mode */}
-              <div className="absolute inset-0 -z-10 rounded-2xl bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 blur-2xl opacity-0 dark:opacity-60"></div>
-              
-              <h3 className="text-base font-bold text-slate-600 dark:text-slate-400 mb-6">
-                Active Sessions
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {activeSessions.length > 0 ? (
-                  activeSessions.map((session) => (
-                    <div
-                      key={session.id}
-                      className="flex items-center justify-between p-4 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/20 hover:border-slate-200 dark:hover:border-slate-700 transition-colors"
-                    >
-                      <div className="flex items-center gap-4">
-                        <div className="p-2.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm">
-                          <ShieldCheck size={18} className="text-primary" />
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2 text-sm font-bold text-slate-900 dark:text-slate-200">
-                            <span className="truncate max-w-[120px] font-mono text-[11px]">
-                              {session.ip_address}
-                            </span>
-                            {session.is_current && (
-                              <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px]">
-                                Active Now
+          {tab === "activity" && (
+            <div className="space-y-6">
+              <div className="relative rounded-2xl border border-slate-200 dark:border-slate-800 p-6 bg-white/60 dark:bg-slate-950/40 dark:shadow-[0_0_80px_-12px_rgba(0,180,235,0.15)]">
+                {/* Glow effect for dark mode */}
+                <div className="absolute inset-0 -z-10 rounded-2xl bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 blur-2xl opacity-0 dark:opacity-60"></div>
+
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-base font-bold text-slate-600 dark:text-slate-400">
+                    Active Sessions
+                  </h3>
+                  <span className="text-[10px] bg-primary/10 text-primary px-2 py-1 rounded-md font-medium">
+                    {activeSessions.length} active
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {activeSessions.length > 0 ? (
+                    activeSessions.map((session) => (
+                      <div
+                        key={session.id}
+                        className="flex items-center justify-between p-4 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/20 hover:border-slate-200 dark:hover:border-slate-700 transition-colors"
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className="p-2.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm">
+                            <ShieldCheck size={18} className="text-primary" />
+                          </div>
+                          <div>
+                            <div className="flex items-center gap-2 text-sm font-bold text-slate-900 dark:text-slate-200">
+                              <span className="truncate max-w-[120px] font-mono text-[11px]">
+                                {session.ip_address}
                               </span>
-                            )}
-                          </div>
-                          <div className="text-[10px] text-slate-400 mt-1">
-                            Last active:{" "}
-                            {new Date(session.last_active).toLocaleString()}
+                              {session.is_current && (
+                                <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px]">
+                                  Active Now
+                                </span>
+                              )}
+                            </div>
+                            <div className="text-[10px] text-slate-400 mt-1">
+                              Last active:{" "}
+                              {new Date(session.last_active).toLocaleString()}
+                            </div>
                           </div>
                         </div>
+                        {!session.is_current && (
+                          <button
+                            onClick={() => onRevokeSession(session.id)}
+                            className="px-3 py-1.5 text-[10px] font-semibold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/20 hover:bg-red-100 dark:hover:bg-red-950/40 rounded-lg transition-colors border border-red-200 dark:border-red-800"
+                          >
+                            Revoke
+                          </button>
+                        )}
                       </div>
-                      {!session.is_current && (
-                        <button
-                          onClick={() => onRevokeSession(session.id)}
-                          className="px-3 py-1.5 text-[10px] font-semibold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/20 hover:bg-red-100 dark:hover:bg-red-950/40 rounded-lg transition-colors border border-red-200 dark:border-red-800"
-                        >
-                          Revoke
-                        </button>
-                      )}
+                    ))
+                  ) : (
+                    <div className="col-span-2 text-center py-6 text-slate-500 dark:text-slate-400 text-sm">
+                      No active sessions found
                     </div>
-                  ))
-                ) : (
-                  <div className="col-span-2 text-center py-6 text-slate-500 dark:text-slate-400 text-sm">
-                    No active sessions found
+                  )}
+                </div>
+              </div>
+
+              <div className="relative rounded-2xl border border-slate-200 dark:border-slate-800 p-6 bg-white/60 dark:bg-slate-950/40 dark:shadow-[0_0_80px_-12px_rgba(0,180,235,0.15)]">
+                {/* Glow effect for dark mode */}
+                <div className="absolute inset-0 -z-10 rounded-2xl bg-gradient-to-br from-secondary/5 via-transparent to-primary/5 blur-2xl opacity-0 dark:opacity-60"></div>
+
+                <h3 className="text-base font-bold text-slate-600 dark:text-slate-400 mb-6">
+                  Login History
+                </h3>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-sm">
+                    <thead>
+                      <tr className="text-slate-500 dark:text-slate-400 font-bold border-b border-slate-100 dark:border-slate-800">
+                        <th className="pb-4 pr-4 uppercase text-[10px] tracking-wider">
+                          Device / OS
+                        </th>
+                        <th className="pb-4 pr-4 uppercase text-[10px] tracking-wider">
+                          IP Address
+                        </th>
+                        <th className="pb-4 pr-4 uppercase text-[10px] tracking-wider">
+                          Date & Time
+                        </th>
+                        <th className="pb-4 pr-4 uppercase text-[10px] tracking-wider">
+                          Status
+                        </th>
+                        <th className="pb-4 uppercase text-[10px] tracking-wider text-right">
+                          Action
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-50 dark:divide-slate-800/50">
+                      {loginHistory.map((login) => (
+                        <tr key={login.id} className="group">
+                          <td className="py-4 pr-4">
+                            <div className="flex items-center gap-3">
+                              <span className="text-slate-700 dark:text-slate-300 font-medium text-sm">
+                                {login.platform} ({login.browser})
+                              </span>
+                            </div>
+                          </td>
+                          <td className="py-4 pr-4 text-slate-500 dark:text-slate-400 font-mono text-xs">
+                            {login.ip_address}
+                          </td>
+                          <td className="py-4 pr-4 text-slate-500 dark:text-slate-400 text-xs">
+                            {new Date(login.created_at).toLocaleString()}
+                          </td>
+                          <td className="py-4 pr-4">
+                            <span
+                              className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                                login.status === "failed"
+                                  ? "bg-red-100 dark:bg-red-500/10 text-red-600 dark:text-red-400"
+                                  : "bg-emerald-100 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                              }`}
+                            >
+                              {login.status === "failed" ? "Failed" : "Success"}
+                            </span>
+                          </td>
+                          <td className="py-4 text-right">
+                            <button
+                              onClick={() => onDeleteHistoryEntry(login.id)}
+                              className="p-2 text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-colors rounded-lg hover:bg-red-50 dark:hover:bg-red-950/20"
+                              title="Delete log"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {loginPagination.current_page < loginPagination.last_page && (
+                  <div className="mt-6 text-center">
+                    <button
+                      onClick={loadMoreHistory}
+                      className="px-6 py-2 text-xs font-bold text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-900 transition-all uppercase tracking-widest"
+                    >
+                      Load More History
+                    </button>
                   </div>
                 )}
               </div>
             </div>
-
-            <div className="relative rounded-2xl border border-slate-200 dark:border-slate-800 p-6 bg-white/60 dark:bg-slate-950/40 dark:shadow-[0_0_80px_-12px_rgba(0,180,235,0.15)]">
-              {/* Glow effect for dark mode */}
-              <div className="absolute inset-0 -z-10 rounded-2xl bg-gradient-to-br from-secondary/5 via-transparent to-primary/5 blur-2xl opacity-0 dark:opacity-60"></div>
-              
-              <h3 className="text-base font-bold text-slate-600 dark:text-slate-400 mb-6">
-                Login History
-              </h3>
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-sm">
-                  <thead>
-                    <tr className="text-slate-500 dark:text-slate-400 font-bold border-b border-slate-100 dark:border-slate-800">
-                      <th className="pb-4 pr-4 uppercase text-[10px] tracking-wider">
-                        Device / OS
-                      </th>
-                      <th className="pb-4 pr-4 uppercase text-[10px] tracking-wider">
-                        IP Address
-                      </th>
-                      <th className="pb-4 pr-4 uppercase text-[10px] tracking-wider">
-                        Date & Time
-                      </th>
-                      <th className="pb-4 uppercase text-[10px] tracking-wider">
-                        Status
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-50 dark:divide-slate-800/50">
-                    {loginHistory.map((login) => (
-                      <tr key={login.id} className="group">
-                        <td className="py-4 pr-4">
-                          <div className="flex items-center gap-3">
-                            <span className="text-slate-700 dark:text-slate-300 font-medium text-sm">
-                              {login.platform} ({login.browser})
-                            </span>
-                          </div>
-                        </td>
-                        <td className="py-4 pr-4 text-slate-500 dark:text-slate-400 font-mono text-xs">
-                          {login.ip_address}
-                        </td>
-                        <td className="py-4 pr-4 text-slate-500 dark:text-slate-400 text-xs">
-                          {new Date(login.created_at).toLocaleString()}
-                        </td>
-                        <td className="py-4">
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold">
-                            Success
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
-    </div>
+    </ProtectedRoute>
   );
 }
