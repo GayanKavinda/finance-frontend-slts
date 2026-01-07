@@ -439,16 +439,81 @@ export default function Navbar() {
 
             <div className="space-y-6 flex-1">
               {user ? (
-                navLinks.map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-4 text-lg font-bold text-slate-700 dark:text-slate-300"
-                  >
-                    <link.icon className="w-5 h-5" /> {link.label}
-                  </Link>
-                ))
+                <>
+                  {/* User Info Card */}
+                  <div className="bg-slate-50 dark:bg-slate-900/50 rounded-xl p-4 border border-slate-200 dark:border-slate-800">
+                    <div className="flex items-center gap-3 mb-3">
+                      {user.avatar_url ? (
+                        <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-slate-200 dark:border-slate-700 relative flex-shrink-0">
+                          <Image
+                            src={user.avatar_url}
+                            alt={user.name}
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
+                      ) : (
+                        <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary text-lg font-bold uppercase flex-shrink-0 border-2 border-slate-200 dark:border-slate-700">
+                          {user.name.charAt(0)}
+                        </div>
+                      )}
+                      <div className="min-w-0">
+                        <p className="text-sm font-bold text-slate-900 dark:text-white truncate">
+                          {user.name}
+                        </p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
+                          {user.email}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Navigation Links */}
+                  {navLinks.map((link) => (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex items-center gap-4 text-lg font-bold text-slate-700 dark:text-slate-300 hover:text-primary dark:hover:text-primary transition-colors"
+                    >
+                      <link.icon className="w-5 h-5" /> {link.label}
+                    </Link>
+                  ))}
+
+                  {/* Profile Menu Items */}
+                  <div className="pt-4 border-t border-slate-200 dark:border-slate-800 space-y-4">
+                    <Link
+                      href="/profile"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex items-center gap-4 text-base font-semibold text-slate-600 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors"
+                    >
+                      <UserIcon className="w-5 h-5" /> Profile
+                    </Link>
+                    <Link
+                      href="/billing"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex items-center gap-4 text-base font-semibold text-slate-600 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors"
+                    >
+                      <CreditCard className="w-5 h-5" /> Billing
+                    </Link>
+                    <Link
+                      href="/help"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex items-center gap-4 text-base font-semibold text-slate-600 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors"
+                    >
+                      <HelpCircle className="w-5 h-5" /> Help & Support
+                    </Link>
+                    <button
+                      onClick={() => {
+                        setMobileMenuOpen(false);
+                        handleLogout();
+                      }}
+                      className="flex items-center gap-4 text-base font-semibold text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 transition-colors w-full text-left"
+                    >
+                      <LogOut className="w-5 h-5" /> Sign Out
+                    </button>
+                  </div>
+                </>
               ) : (
                 <>
                   <Link

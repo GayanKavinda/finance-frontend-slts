@@ -403,7 +403,7 @@ export default function ProfilePage() {
           {tab === "personal" && (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Left: Avatar + Meta */}
-              <div className="lg:col-span-1">
+              <div className="w-full lg:col-span-1">
                 <div className="relative rounded-2xl border border-slate-200 dark:border-slate-800 p-5 bg-white/60 dark:bg-slate-950/40 dark:shadow-[0_0_80px_-12px_rgba(0,180,235,0.15)]">
                   {/* Glow effect for dark mode */}
                   <div className="absolute inset-0 -z-10 rounded-2xl bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 blur-2xl opacity-0 dark:opacity-60"></div>
@@ -488,7 +488,7 @@ export default function ProfilePage() {
               </div>
 
               {/* Right: Personal Info and Email Change */}
-              <div className="lg:col-span-2 space-y-6">
+              <div className="w-full lg:col-span-2 space-y-6">
                 <div className="relative rounded-2xl border border-slate-200 dark:border-slate-800 p-5 bg-white/60 dark:bg-slate-950/40 dark:shadow-[0_0_80px_-12px_rgba(0,180,235,0.15)]">
                   {/* Glow effect for dark mode */}
                   <div className="absolute inset-0 -z-10 rounded-2xl bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 blur-2xl opacity-0 dark:opacity-60"></div>
@@ -498,7 +498,7 @@ export default function ProfilePage() {
                   </h3>
                   <form
                     onSubmit={profileForm.handleSubmit(onUpdateProfile)}
-                    className="grid grid-cols-1 md:grid-cols-2 gap-4"
+                    className="grid grid-cols-1 sm:grid-cols-2 gap-4"
                   >
                     <Field
                       label="Full name"
@@ -518,11 +518,11 @@ export default function ProfilePage() {
                         className="w-full px-3 py-2 rounded-md border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 text-sm cursor-not-allowed"
                       />
                     </Field>
-                    <div className="md:col-span-2 flex justify-end">
+                    <div className="sm:col-span-2 flex justify-end">
                       <button
                         type="submit"
                         disabled={profileForm.formState.isSubmitting}
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-white text-xs font-semibold shadow-sm hover:bg-primary/90 transition-all disabled:opacity-40"
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-white text-xs font-semibold shadow-sm hover:bg-primary/90 transition-all disabled:opacity-40 w-full sm:w-auto justify-center"
                       >
                         {profileForm.formState.isSubmitting ? (
                           <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -544,7 +544,7 @@ export default function ProfilePage() {
                   </h3>
                   <form
                     onSubmit={emailForm.handleSubmit(onConfirmEmailChange)}
-                    className="grid grid-cols-1 md:grid-cols-3 gap-4"
+                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
                   >
                     <Field
                       label="New email"
@@ -591,11 +591,11 @@ export default function ProfilePage() {
                         className="w-full px-3 py-2 rounded-md border border-slate-200 dark:border-slate-700 bg-transparent text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                       />
                     </Field>
-                    <div className="md:col-span-2 flex justify-end">
+                    <div className="sm:col-span-2 lg:col-span-3 flex justify-end">
                       <button
                         type="submit"
                         disabled={emailForm.formState.isSubmitting}
-                        className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-secondary dark:bg-secondary/90 text-white text-xs font-semibold shadow-sm hover:bg-secondary/90 dark:hover:bg-secondary transition-all disabled:opacity-40"
+                        className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-secondary dark:bg-secondary/90 text-white text-xs font-semibold shadow-sm hover:bg-secondary/90 dark:hover:bg-secondary transition-all disabled:opacity-40 w-full sm:w-auto justify-center"
                       >
                         {emailForm.formState.isSubmitting ? (
                           <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -614,7 +614,7 @@ export default function ProfilePage() {
           {tab === "security" && (
             <div className="space-y-6">
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-2">
+                <div className="w-full lg:col-span-2">
                   <div className="relative rounded-2xl border border-slate-200 dark:border-slate-800 p-6 bg-white/60 dark:bg-slate-950/40 dark:shadow-[0_0_80px_-12px_rgba(0,180,235,0.15)]">
                     {/* Glow effect for dark mode */}
                     <div className="absolute inset-0 -z-10 rounded-2xl bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 blur-2xl opacity-0 dark:opacity-60"></div>
@@ -742,7 +742,7 @@ export default function ProfilePage() {
                   </div>
                 </div>
 
-                <div className="lg:col-span-1">
+                <div className="w-full lg:col-span-1">
                   <div className="relative rounded-2xl border border-slate-200 dark:border-slate-800 p-6 bg-white/60 dark:bg-slate-950/40 dark:shadow-[0_0_80px_-12px_rgba(239,68,68,0.1)]">
                     <div className="absolute inset-0 -z-10 rounded-2xl bg-gradient-to-br from-red-500/5 via-transparent to-red-500/5 blur-2xl opacity-0 dark:opacity-40"></div>
 
@@ -780,7 +780,7 @@ export default function ProfilePage() {
                   </span>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {activeSessions.length > 0 ? (
                     activeSessions.map((session) => (
                       <div
@@ -833,23 +833,23 @@ export default function ProfilePage() {
                 <h3 className="text-base font-bold text-slate-600 dark:text-slate-400 mb-6">
                   Login History
                 </h3>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-sm">
+                <div className="overflow-x-auto -mx-6 px-6 sm:mx-0 sm:px-0">
+                  <table className="w-full text-left text-sm min-w-[600px]">
                     <thead>
                       <tr className="text-slate-500 dark:text-slate-400 font-bold border-b border-slate-100 dark:border-slate-800">
-                        <th className="pb-4 pr-4 uppercase text-[10px] tracking-wider">
+                        <th className="pb-4 pr-4 uppercase text-[10px] tracking-wider whitespace-nowrap">
                           Device / OS
                         </th>
-                        <th className="pb-4 pr-4 uppercase text-[10px] tracking-wider">
+                        <th className="pb-4 pr-4 uppercase text-[10px] tracking-wider whitespace-nowrap">
                           IP Address
                         </th>
-                        <th className="pb-4 pr-4 uppercase text-[10px] tracking-wider">
+                        <th className="pb-4 pr-4 uppercase text-[10px] tracking-wider whitespace-nowrap">
                           Date & Time
                         </th>
-                        <th className="pb-4 pr-4 uppercase text-[10px] tracking-wider">
+                        <th className="pb-4 pr-4 uppercase text-[10px] tracking-wider whitespace-nowrap">
                           Status
                         </th>
-                        <th className="pb-4 uppercase text-[10px] tracking-wider text-right">
+                        <th className="pb-4 uppercase text-[10px] tracking-wider text-right whitespace-nowrap">
                           Action
                         </th>
                       </tr>
