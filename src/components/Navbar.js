@@ -93,7 +93,7 @@ export default function Navbar() {
   // Render minimal navbar during loading to avoid layout jump
   if (loading) {
     return (
-      <nav className="w-full border-b border-slate-200/50 dark:border-slate-800/50 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl transition-colors duration-300 pl-4 pr-6">
+      <nav className="w-full border-b border-slate-200/30 dark:border-slate-800/30 bg-white/40 dark:bg-slate-950/40 backdrop-blur-xl transition-colors duration-300 pl-4 pr-6">
         <div className="max-w-7xl mx-auto h-16 flex items-center justify-between">
           <div className="flex items-center gap-4 group">
             <div className="relative w-[120px] h-[40px]">
@@ -123,7 +123,7 @@ export default function Navbar() {
   return (
     <>
       <div className="w-full flex justify-center relative z-50">
-        <nav className="w-full border-b border-slate-200/50 dark:border-slate-800/50 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl transition-colors duration-300 pl-4 pr-6">
+        <nav className="w-full border-b border-slate-200/30 dark:border-slate-800/30 bg-white/40 dark:bg-slate-950/40 backdrop-blur-xl transition-colors duration-300 pl-4 pr-6">
           <div className="max-w-7xl mx-auto h-16 flex items-center justify-between">
             {/* Logo and Name */}
             <Link href="/" className="flex items-center gap-4 group">
@@ -307,11 +307,6 @@ export default function Navbar() {
                               label: "Profile",
                               icon: UserIcon,
                               href: "/profile",
-                            },
-                            {
-                              label: "Billing",
-                              icon: CreditCard,
-                              href: "/billing",
                             },
                             {
                               label: "Help & Support",
@@ -498,14 +493,6 @@ export default function Navbar() {
                     >
                       <UserIcon className="w-5 h-5 flex-shrink-0" />
                       <span>Profile</span>
-                    </Link>
-                    <Link
-                      href="/billing"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="flex items-center gap-3 px-3 py-2.5 text-base font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/50 rounded-lg transition-all active:scale-95"
-                    >
-                      <CreditCard className="w-5 h-5 flex-shrink-0" />
-                      <span>Billing</span>
                     </Link>
                     <Link
                       href="/help"
