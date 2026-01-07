@@ -13,12 +13,20 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   const fetchUser = async () => {
+    console.log("[AuthContext] Fetching user...");
     try {
       const response = await axios.get("/api/user");
+      console.log("[AuthContext] User fetched successfully:", response.data);
       setUser(response.data);
     } catch (error) {
       if (error.response?.status !== 401) {
-        console.error("fetchUser failed:", error.response?.status);
+        console.error(
+          "[AuthContext] fetchUser failed:",
+          error.response?.status,
+          error.message
+        );
+      } else {
+        console.log("[AuthContext] User not logged in (401)");
       }
       setUser(null);
     } finally {
@@ -27,23 +35,28 @@ export function AuthProvider({ children }) {
   };
 
   useEffect(() => {
+    console.log("[AuthContext] Initial check for user session...");
     if (
       window.location.pathname !== "/signin" &&
       window.location.pathname !== "/signup"
     ) {
       fetchUser();
     } else {
+      console.log("[AuthContext] On auth page, skipping initial fetchUser");
       setLoading(false);
     }
   }, []);
 
   const logout = async () => {
+    console.log("[AuthContext] Logout initiation started");
     try {
       await axios.post("/api/logout");
+      console.log("[AuthContext] Logout successful");
     } catch (e) {
-      console.error("Logout failed");
+      console.error("[AuthContext] Logout API call failed:", e);
     }
     setUser(null);
+    console.log("[AuthContext] User state cleared locally");
   };
 
   return (

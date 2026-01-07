@@ -193,6 +193,13 @@ export default function Dashboard() {
   const router = useRouter();
   const { theme } = useTheme();
 
+  useEffect(() => {
+    console.log("[Dashboard] Page mounted, authentication state:", {
+      loading,
+      hasUser: !!user,
+    });
+  }, [loading, user]);
+
   if (loading || !user) {
     return (
       <ProtectedRoute>

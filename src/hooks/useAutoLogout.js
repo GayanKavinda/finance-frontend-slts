@@ -1,44 +1,53 @@
-'use client';
+"use client";
 
-import { useEffect, useRef } from 'react';
-import axios from '@/lib/axios';
+import { useEffect, useRef, useCallback } from "react";
+import axios from "@/lib/axios";
 
-const useAutoLogout = (timeout = 30 * 60 * 1000) => { // Default 30 minutes
+const useAutoLogout = (timeout = 30 * 60 * 1000) => {
+  // Default 30 minutes
   const timerRef = useRef(null);
 
-  const resetTimer = () => {
+  const logoutUser = useCallback(async () => {
+    console.warn("[AutoLogout] Inactivity detected, logging out user...");
+    try {
+      await axios.post("/api/logout");
+      console.log("[AutoLogout] Remote logout successful");
+      window.location.href = "/signin?reason=inactivity";
+    } catch (err) {
+      console.error("[AutoLogout] Remote logout failed", err);
+      window.location.href = "/signin";
+    }
+  }, []);
+
+  const resetTimer = useCallback(() => {
     if (timerRef.current) clearTimeout(timerRef.current);
     timerRef.current = setTimeout(logoutUser, timeout);
-  };
-
-  const logoutUser = async () => {
-    try {
-      await axios.post('/api/logout');
-      window.location.href = '/signin?reason=inactivity';
-    } catch (err) {
-      console.error('Auto logout failed', err);
-      window.location.href = '/signin';
-    }
-  };
+  }, [logoutUser, timeout]);
 
   useEffect(() => {
-    const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'];
-    
+    const events = [
+      "mousedown",
+      "mousemove",
+      "keypress",
+      "scroll",
+      "touchstart",
+    ];
+
     const handleActivity = () => resetTimer();
 
-    events.forEach(event => {
+    events.forEach((event) => {
       document.addEventListener(event, handleActivity);
     });
 
     resetTimer();
 
     return () => {
-      events.forEach(event => {
+      events.forEach((event) => {
         document.removeEventListener(event, handleActivity);
       });
       if (timerRef.current) clearTimeout(timerRef.current);
     };
-  }, [timeout]);
+  }, [resetTimer]);
 };
 
 export default useAutoLogout;

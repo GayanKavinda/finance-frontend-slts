@@ -112,14 +112,20 @@ export default function ProfilePage() {
 
   // Handlers
   const onUpdateProfile = async (data) => {
+    console.log("[Profile] Update profile initiated:", data);
     try {
       await fetchCsrf();
       const res = await axios.post("/api/update-profile", data);
+      console.log("[Profile] Update profile successful:", res.data);
       await refetch();
       enqueueSnackbar(res.data.message || "Profile updated", {
         variant: "success",
       });
     } catch (e) {
+      console.error(
+        "[Profile] Update profile failed:",
+        e.response?.data || e.message
+      );
       const msg =
         e.response?.data?.errors?.name?.[0] ||
         e.response?.data?.message ||
@@ -130,6 +136,7 @@ export default function ProfilePage() {
 
   const onUploadAvatar = async () => {
     if (!avatarFile) return;
+    console.log("[Profile] Uploading avatar:", avatarFile.name);
     const form = new FormData();
     form.append("avatar", avatarFile);
     try {
@@ -137,12 +144,17 @@ export default function ProfilePage() {
       const res = await axios.post("/api/upload-avatar", form, {
         headers: { "Content-Type": "multipart/form-data" },
       });
+      console.log("[Profile] Avatar upload successful:", res.data);
       enqueueSnackbar(res.data.message || "Avatar updated", {
         variant: "success",
       });
       setAvatarFile(null);
       await refetch();
     } catch (e) {
+      console.error(
+        "[Profile] Avatar upload failed:",
+        e.response?.data || e.message
+      );
       const msg =
         e.response?.data?.errors?.avatar?.[0] ||
         e.response?.data?.message ||
@@ -152,14 +164,20 @@ export default function ProfilePage() {
   };
 
   const onUpdatePassword = async (data) => {
+    console.log("[Profile] Password update initiated");
     try {
       await fetchCsrf();
       const res = await axios.post("/api/update-password", data);
+      console.log("[Profile] Password update successful");
       enqueueSnackbar(res.data.message || "Password updated", {
         variant: "success",
       });
       passwordForm.reset();
     } catch (e) {
+      console.error(
+        "[Profile] Password update failed:",
+        e.response?.data || e.message
+      );
       const msg =
         e.response?.data?.errors?.current_password?.[0] ||
         e.response?.data?.errors?.password?.[0] ||
@@ -171,16 +189,22 @@ export default function ProfilePage() {
 
   const onRequestEmailOtp = async () => {
     const values = emailForm.getValues();
+    console.log("[Profile] Requesting email OTP for:", values.new_email);
     try {
       await fetchCsrf();
       await axios.post("/api/request-email-change", {
         new_email: values.new_email,
         current_password: values.current_password,
       });
+      console.log("[Profile] OTP requested successfully");
       enqueueSnackbar("Verification code sent to your new email", {
         variant: "success",
       });
     } catch (e) {
+      console.error(
+        "[Profile] OTP request failed:",
+        e.response?.data || e.message
+      );
       const msg =
         e.response?.data?.errors?.new_email?.[0] ||
         e.response?.data?.errors?.current_password?.[0] ||
@@ -191,18 +215,24 @@ export default function ProfilePage() {
   };
 
   const onConfirmEmailChange = async (data) => {
+    console.log("[Profile] Confirming email change to:", data.new_email);
     try {
       await fetchCsrf();
       const res = await axios.post("/api/confirm-email-change", {
         new_email: data.new_email,
         otp: data.otp,
       });
+      console.log("[Profile] Email change confirmed successfully");
       enqueueSnackbar(res.data.message || "Email updated", {
         variant: "success",
       });
       emailForm.reset();
       await refetch();
     } catch (e) {
+      console.error(
+        "[Profile] Email change confirmation failed:",
+        e.response?.data || e.message
+      );
       const msg =
         e.response?.data?.errors?.otp?.[0] ||
         e.response?.data?.errors?.new_email?.[0] ||
@@ -219,17 +249,24 @@ export default function ProfilePage() {
       )
     )
       return;
+    console.warn("[Profile] Deactivating account...");
     try {
       await fetchCsrf();
       const res = await axios.post("/api/deactivate-account");
+      console.log("[Profile] Account deactivated successfully");
       enqueueSnackbar(res.data.message || "Account deactivated", {
         variant: "success",
       });
       try {
+        console.log("[Profile] Logging out after deactivation...");
         await axios.post("/api/logout");
       } catch {}
       window.location.href = "/signin";
     } catch (e) {
+      console.error(
+        "[Profile] Deactivation failed:",
+        e.response?.data || e.message
+      );
       enqueueSnackbar(e.response?.data?.message || "Failed to deactivate", {
         variant: "error",
       });
