@@ -37,12 +37,16 @@ axios.interceptors.response.use(
     return response;
   },
   function (error) {
-    console.error(
-      `[Axios] Response Error: ${error.response?.status || "Network Error"} ${
-        error.config?.url
-      }`,
-      error.response?.data
-    );
+    if (error.response?.status === 401 && error.config?.url === "/api/user") {
+      // expected for unauthenticated users
+    } else {
+      console.error(
+        `[Axios] Response Error: ${error.response?.status || "Network Error"} ${
+          error.config?.url
+        }`,
+        error.response?.data
+      );
+    }
     return Promise.reject(error);
   }
 );

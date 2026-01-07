@@ -99,7 +99,7 @@ export default function Signin() {
   };
 
   return (
-    <div className="flex flex-col lg:flex-row min-h-screen w-full bg-white dark:bg-[#020617] overflow-y-auto transition-colors duration-500">
+    <div className="flex flex-col lg:flex-row min-h-screen w-full overflow-y-auto transition-colors duration-500">
       {/* Navigation Logo */}
       <div className="absolute top-0 left-0 right-0 z-50 pointer-events-none pl-4 pr-6">
         <div className="max-w-7xl mx-auto h-16 flex items-center">

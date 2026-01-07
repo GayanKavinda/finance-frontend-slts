@@ -362,7 +362,7 @@ export default function ProfilePage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-white dark:bg-[#020617] pt-20 pb-12">
+      <div className="min-h-screen pt-12 pb-12">
         <div className="max-w-5xl mx-auto px-4 md:px-8">
           {/* Header - Centered with underline */}
           <div className="text-center mb-8">

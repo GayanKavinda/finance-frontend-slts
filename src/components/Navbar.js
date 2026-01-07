@@ -56,10 +56,10 @@ export default function Navbar() {
 
   useEffect(() => {
     console.log("[Navbar] Pathname changed to:", pathname);
-    if (mobileMenuOpen) setMobileMenuOpen(false);
-    if (profileMenuOpen) setProfileMenuOpen(false);
-    if (themeMenuOpen) setThemeMenuOpen(false);
-  }, [pathname, mobileMenuOpen, profileMenuOpen, themeMenuOpen]);
+    setMobileMenuOpen(false);
+    setProfileMenuOpen(false);
+    setThemeMenuOpen(false);
+  }, [pathname]);
 
   // Lock body scroll when mobile menu is open
   useEffect(() => {
@@ -93,38 +93,36 @@ export default function Navbar() {
   // Render minimal navbar during loading to avoid layout jump
   if (loading) {
     return (
-      <div className="fixed top-0 left-0 right-0 z-50 flex justify-center">
-        <nav className="w-full border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-[#0F172A]/80 backdrop-blur-md transition-colors duration-300 pl-4 pr-6">
-          <div className="max-w-7xl mx-auto h-16 flex items-center justify-between">
-            <div className="flex items-center gap-4 group">
-              <div className="relative w-[120px] h-[40px]">
-                <Image
-                  src="/icons/slt_digital_icon.png"
-                  alt="SLT Digital Logo"
-                  fill
-                  className="object-contain dark:brightness-0 dark:invert transition-all duration-300"
-                  priority
-                />
-              </div>
-              <div className="h-8 w-px bg-slate-200 dark:bg-slate-800 self-center hidden md:block" />
-              <div className="hidden md:flex flex-col justify-center">
-                <span className="text-[9px] font-extrabold text-[#00B4EB] uppercase tracking-wider leading-none mb-0.5">
-                  Sri Lanka Telecom Services
-                </span>
-                <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest leading-none">
-                  Finance Division
-                </span>
-              </div>
+      <nav className="w-full border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-[#0F172A]/80 backdrop-blur-md transition-colors duration-300 pl-4 pr-6">
+        <div className="max-w-7xl mx-auto h-16 flex items-center justify-between">
+          <div className="flex items-center gap-4 group">
+            <div className="relative w-[120px] h-[40px]">
+              <Image
+                src="/icons/slt_digital_icon.png"
+                alt="SLT Digital Logo"
+                fill
+                className="object-contain dark:brightness-0 dark:invert transition-all duration-300"
+                priority
+              />
+            </div>
+            <div className="h-8 w-px bg-slate-200 dark:bg-slate-800 self-center hidden md:block" />
+            <div className="hidden md:flex flex-col justify-center">
+              <span className="text-[9px] font-extrabold text-[#00B4EB] uppercase tracking-wider leading-none mb-0.5">
+                Sri Lanka Telecom Services
+              </span>
+              <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest leading-none">
+                Finance Division
+              </span>
             </div>
           </div>
-        </nav>
-      </div>
+        </div>
+      </nav>
     );
   }
 
   return (
     <>
-      <div className="fixed top-0 left-0 right-0 z-50 flex justify-center">
+      <div className="w-full flex justify-center relative z-50">
         <nav className="w-full border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-[#0F172A]/80 backdrop-blur-md transition-colors duration-300 pl-4 pr-6">
           <div className="max-w-7xl mx-auto h-16 flex items-center justify-between">
             {/* Logo and Name */}
