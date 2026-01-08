@@ -176,7 +176,9 @@ export default function Signup() {
         console.log("[Signup] Real-time email validation for:", email);
         setIsCheckingEmail(true);
         try {
-          const response = await axios.post("/api/check-email", { email });
+          const response = await axios.post("/api/check-email-exists", {
+            email,
+          });
           console.log("[Signup] Email check result:", response.data);
           if (response.data.exists) {
             setError("email", {

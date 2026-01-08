@@ -72,7 +72,8 @@ export default function HelpPage() {
             </h1>
 
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Quick answers, direct contacts, and resources for SLT Digital Finance team members.
+              Quick answers, direct contacts, and resources for SLT Digital
+              Finance team members.
             </p>
           </div>
 
@@ -133,7 +134,9 @@ export default function HelpPage() {
                     <item.icon size={24} />
                   </div>
                   <div className="space-y-1">
-                    <h3 className="font-semibold text-foreground">{item.title}</h3>
+                    <h3 className="font-semibold text-foreground">
+                      {item.title}
+                    </h3>
                     <p className="text-sm text-muted-foreground">{item.desc}</p>
                   </div>
                 </div>
@@ -174,7 +177,8 @@ export default function HelpPage() {
               ) : (
                 <div className="text-center py-16 bg-card/40 rounded-2xl border border-dashed border-border">
                   <p className="text-muted-foreground font-medium">
-                    No matching questions found. Try different keywords or contact support.
+                    No matching questions found. Try different keywords or
+                    contact support.
                   </p>
                 </div>
               )}
@@ -194,29 +198,40 @@ export default function HelpPage() {
                 {[
                   { title: "Finance Division Guidelines", size: "2.4 MB PDF" },
                   { title: "System User Manual", size: "5.1 MB PDF" },
-                  { title: "Data Privacy & Security Policy", size: "1.2 MB PDF" },
+                  {
+                    title: "Data Privacy & Security Policy",
+                    size: "1.2 MB PDF",
+                  },
                 ].map((res, i) => (
                   <div
                     key={i}
                     className="flex items-center justify-between p-4 rounded-xl bg-card/50 border border-border/30 hover:border-primary/30 hover:bg-primary/5 transition-all group cursor-pointer"
                   >
                     <div className="flex items-center gap-3">
-                      <FileText className="text-muted-foreground group-hover:text-primary" size={18} />
+                      <FileText
+                        className="text-muted-foreground group-hover:text-primary"
+                        size={18}
+                      />
                       <div>
                         <h4 className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
                           {res.title}
                         </h4>
-                        <p className="text-xs text-muted-foreground mt-0.5 uppercase">{res.size}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5 uppercase">
+                          {res.size}
+                        </p>
                       </div>
                     </div>
-                    <ChevronDown size={16} className="text-muted-foreground group-hover:text-primary -rotate-90" />
+                    <ChevronDown
+                      size={16}
+                      className="text-muted-foreground group-hover:text-primary -rotate-90"
+                    />
                   </div>
                 ))}
               </div>
             </div>
 
             {/* Final CTA Card */}
-            <div className="relative p-8 rounded-2xl bg-gradient-to-br from-primary to-accent text-white overflow-hidden shadow-2xl">
+            <div className="relative p-8 rounded-2xl bg-gradient-to-br from-cta-start to-cta-end text-white overflow-hidden shadow-2xl">
               <div className="absolute -top-10 -right-10 opacity-10">
                 <HelpCircle size={140} />
               </div>
@@ -224,7 +239,8 @@ export default function HelpPage() {
               <div className="relative space-y-4">
                 <h3 className="text-2xl font-bold">Still need assistance?</h3>
                 <p className="text-white/90">
-                  Our finance support team is here for SLT Digital employees — reach out anytime.
+                  Our finance support team is here for SLT Digital employees —
+                  reach out anytime.
                 </p>
                 <button className="mt-2 px-8 py-3 bg-white text-primary font-semibold rounded-xl shadow-lg hover:bg-white/95 active:scale-98 transition-all">
                   Submit Support Ticket
