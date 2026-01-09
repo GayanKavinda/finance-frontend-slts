@@ -1,10 +1,9 @@
 import "./globals.css";
 import { Outfit } from "next/font/google";
 import Providers from "@/components/Providers"; // Client wrapper
-import Navbar from "@/components/Navbar";
 import Image from "next/image";
 
-import Footer from "@/components/Footer";
+import LayoutContent from "@/components/LayoutContent";
 
 import { ScrollArea } from "@/components/ui/scroll-area";
 
@@ -25,13 +24,7 @@ export default function RootLayout({ children }) {
         className={`${outfit.variable} font-sans h-screen w-full overflow-hidden antialiased bg-slate-50 dark:bg-slate-950 transition-colors duration-300`}
       >
         <Providers>
-          <ScrollArea className="h-full w-full bg-inherit">
-            <div className="flex flex-col min-h-screen">
-              <Navbar />
-              <main className="flex-1">{children}</main>
-              <Footer />
-            </div>
-          </ScrollArea>
+          <LayoutContent>{children}</LayoutContent>
         </Providers>
       </body>
     </html>

@@ -2,41 +2,52 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import {
-  ChevronLeft,
-  ChevronRight,
-  TrendingUp,
-  Lock,
-  Zap,
-  Database,
-  ArrowRight,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 import { useState, useEffect } from "react";
+import Image from "next/image";
 
 const slides = [
   {
-    title: "Next-Gen Financial Intelligence",
-    subtitle: "AI-powered insights for smarter corporate decisions",
-    icon: TrendingUp,
-    color: "from-[#00B4EB] to-[#009bc9]",
+    title: "SLT Finance Division",
+    subtitle:
+      "Empowering employees with comprehensive salary and payment management",
+    image: "/slides/jonatan-pie-iokiwAq05UU-unsplash.jpg",
+    cta: "View Dashboard",
   },
   {
-    title: "Bank-Grade Security",
-    subtitle: "Enterprise encryption, compliance & zero-trust architecture",
-    icon: Lock,
-    color: "from-[#008001] to-[#006d00]",
+    title: "Instant Salary Insights",
+    subtitle:
+      "View your monthly earnings, deductions, and net pay in real-time",
+    image: "/slides/wp9223826-finance-4k-wallpapers.jpg",
+    cta: "Check Salary",
   },
   {
-    title: "Real-Time Financial Control",
-    subtitle: "Live analytics, cash flow & instant budget enforcement",
-    icon: Zap,
-    color: "from-[#00B4EB] to-[#008001]",
+    title: "Digital Pay Sheets",
+    subtitle:
+      "Download and export your monthly payment slips as secure PDFs instantly",
+    image: "/slides/uwp4831664.jpeg",
+    cta: "Download PDF",
   },
   {
-    title: "Unified Enterprise Finance",
-    subtitle: "Seamless integration across all your financial platforms",
-    icon: Database,
-    color: "from-cyan-400 to-teal-500",
+    title: "Track Your Earnings",
+    subtitle:
+      "Analyze your financial growth with detailed monthly earning histories",
+    image: "/slides/wp11893992-anime-technology-wallpapers.jpg",
+    cta: "View History",
+  },
+  {
+    title: "Streamlined Allowances",
+    subtitle:
+      "Review and manage your financial benefits and operational claims efficiently",
+    image: "/slides/wp15425485-nasa-earth-wallpapers.jpg",
+    cta: "Manage Claims",
+  },
+  {
+    title: "Secure Financial Access",
+    subtitle:
+      "Your financial data, protected by enterprise-grade security protocols",
+    image: "/slides/wp10965088-modified-lamborghini-wallpapers.jpg",
+    cta: "Login Now",
   },
 ];
 
@@ -64,153 +75,110 @@ export default function Home() {
     setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
   };
 
-  const CurrentIcon = slides[currentSlide].icon;
-
   return (
-    <div className="relative overflow-hidden transition-colors duration-700">
-      {/* Subtle circuit background */}
-      <div className="absolute inset-0 opacity-[0.07] pointer-events-none">
-        <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <pattern
-              id="circuit"
-              width="100"
-              height="100"
-              patternUnits="userSpaceOnUse"
-            >
-              <circle cx="50" cy="50" r="1.5" fill="#00B4EB" opacity="0.4" />
-              <line
-                x1="50"
-                y1="50"
-                x2="100"
-                y2="50"
-                stroke="#00B4EB"
-                strokeWidth="0.8"
-                opacity="0.25"
+    <div className="relative w-full h-screen overflow-hidden bg-black">
+      {/* Background Slideshow with Crossfade */}
+      <div className="absolute inset-0">
+        {slides.map((slide, idx) => (
+          <motion.div
+            key={idx}
+            initial={false}
+            animate={{
+              opacity: idx === currentSlide ? 1 : 0,
+              scale: idx === currentSlide ? 1 : 1.05,
+            }}
+            transition={{
+              opacity: { duration: 1, ease: "easeInOut" },
+              scale: { duration: 1.2, ease: "easeOut" },
+            }}
+            className="absolute inset-0"
+            style={{ pointerEvents: idx === currentSlide ? "auto" : "none" }}
+          >
+            {/* Image with overlay */}
+            <div className="relative w-full h-full">
+              <Image
+                src={slide.image}
+                alt={slide.title}
+                fill
+                className="object-cover"
+                priority={idx === 0}
+                quality={100}
               />
-              <line
-                x1="50"
-                y1="50"
-                x2="50"
-                y2="0"
-                stroke="#00B4EB"
-                strokeWidth="0.8"
-                opacity="0.25"
-              />
-            </pattern>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#circuit)" />
-        </svg>
+              {/* Dark overlay for text readability with blur effect */}
+              <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+            </div>
+          </motion.div>
+        ))}
       </div>
 
-      {/* Dynamic gradient orbs */}
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={currentSlide}
-          initial={{ opacity: 0, scale: 0.75 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.75 }}
-          transition={{ duration: 1.4 }}
-          className="absolute inset-0 pointer-events-none"
-        >
-          <div
-            className={`absolute -top-40 -left-40 w-[600px] h-[600px] rounded-full bg-gradient-to-br ${slides[currentSlide].color} opacity-20 blur-3xl`}
-          />
-          <div
-            className={`absolute -bottom-40 -right-40 w-[600px] h-[600px] rounded-full bg-gradient-to-tl ${slides[currentSlide].color} opacity-20 blur-3xl`}
-          />
-        </motion.div>
-      </AnimatePresence>
-
-      {/* Main content */}
-      <div className="relative z-10 flex flex-col items-center justify-center px-5 sm:px-8 py-10 lg:py-16 min-h-[calc(100vh-80px)]">
-        {/* Brand mark */}
-        <motion.div
-          initial={{ opacity: 0, y: -40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="mb-6 md:mb-8"
-        >
-          <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl backdrop-blur-xl border bg-white/75 dark:bg-slate-900/50 border-slate-200/70 dark:border-slate-700/50 shadow-sm">
-            <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-br from-[#00B4EB] to-[#008001] rounded-lg blur-md opacity-40" />
-              <div className="relative w-8 h-8 rounded-lg bg-gradient-to-br from-[#00B4EB] to-[#008001] flex items-center justify-center">
-                <span className="text-lg font-bold text-white tracking-tight">
-                  S
-                </span>
-              </div>
-            </div>
-            <span className="text-base md:text-lg font-light tracking-wide text-slate-900 dark:text-white">
-              SLT Digital Services
-            </span>
-          </div>
-        </motion.div>
-
-        {/* Carousel content */}
-        <div className="w-full max-w-4xl text-center space-y-6 md:space-y-8">
-          {/* Icon */}
+      {/* Content Overlay */}
+      <div className="relative z-10 flex flex-col items-center justify-center h-full px-6 sm:px-8 lg:px-16">
+        <div className="max-w-6xl w-full">
+          {/* Main Content */}
           <AnimatePresence mode="wait">
             <motion.div
               key={currentSlide}
-              initial={{ opacity: 0, scale: 0.5, rotateY: 75 }}
-              animate={{ opacity: 1, scale: 1, rotateY: 0 }}
-              exit={{ opacity: 0, scale: 0.5, rotateY: -75 }}
-              transition={{ duration: 0.7 }}
-              className="flex justify-center"
-            >
-              <div className="p-6 md:p-8 rounded-2xl backdrop-blur-xl border bg-white/75 dark:bg-slate-900/50 border-slate-200/60 dark:border-slate-700/50 shadow-xl">
-                <CurrentIcon
-                  size={56}
-                  strokeWidth={1.3}
-                  className="text-[#00B4EB] dark:text-[#00B4EB]"
-                />
-              </div>
-            </motion.div>
-          </AnimatePresence>
-
-          {/* Title & Subtitle */}
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={currentSlide}
-              initial={{ opacity: 0, y: 35 }}
+              initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -35 }}
-              transition={{ duration: 0.6 }}
-              className="space-y-3 md:space-y-4"
+              exit={{ opacity: 0, y: -30 }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+              className="text-center space-y-8"
             >
-              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight leading-tight text-slate-900 dark:text-white px-4">
+              {/* Centered Logo */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+                className="flex justify-center mb-6"
+              >
+                <div className="relative w-[180px] h-[60px] md:w-[220px] md:h-[70px]">
+                  <Image
+                    src="/icons/slt_digital_icon.png"
+                    alt="SLT Digital Services"
+                    fill
+                    className="object-contain brightness-0 invert"
+                    priority
+                  />
+                </div>
+              </motion.div>
+              {/* Title */}
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight leading-tight text-white">
                 {slides[currentSlide].title}
               </h1>
 
-              <p className="text-sm sm:text-base md:text-lg font-light text-slate-600 dark:text-slate-400 max-w-2xl mx-auto px-4">
+              {/* Subtitle */}
+              <p className="text-base sm:text-lg md:text-xl font-normal text-white/90 max-w-2xl mx-auto">
                 {slides[currentSlide].subtitle}
               </p>
+
+              {/* CTA Buttons */}
+              <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
+                <Link href="/signup">
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="px-8 py-3.5 bg-[#005FA9] hover:bg-[#004c87] text-white font-semibold text-base rounded-lg shadow-lg transition-all duration-300 flex items-center justify-center gap-2 w-full sm:w-auto"
+                  >
+                    {slides[currentSlide].cta}
+                    <ArrowRight className="w-5 h-5" />
+                  </motion.button>
+                </Link>
+
+                <Link href="/signin">
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="px-8 py-3.5 text-base font-semibold rounded-lg border-2 border-white/40 backdrop-blur-sm bg-white/10 hover:bg-white/20 text-white transition-all duration-300 w-full sm:w-auto"
+                  >
+                    Sign In
+                  </motion.button>
+                </Link>
+              </div>
             </motion.div>
           </AnimatePresence>
 
-          {/* Buttons */}
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.7 }}
-            className="flex flex-col sm:flex-row gap-3 justify-center pt-4"
-          >
-            <Link href="/signup">
-              <button className="px-6 py-3 bg-gradient-to-r from-[#00B4EB] to-[#009bc9] hover:from-[#009bc9] hover:to-[#008cc1] text-white font-semibold text-sm md:text-base rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2 active:scale-[0.98] w-full sm:w-auto">
-                Get Started
-                <ArrowRight size={18} />
-              </button>
-            </Link>
-
-            <Link href="/signin">
-              <button className="px-6 py-3 text-sm md:text-base font-medium rounded-lg border transition-all duration-300 active:scale-[0.98] bg-white dark:bg-slate-800/60 border-slate-300 dark:border-slate-700/70 hover:bg-slate-100 dark:hover:bg-slate-700/60 text-slate-800 dark:text-white w-full sm:w-auto">
-                Sign In
-              </button>
-            </Link>
-          </motion.div>
-
-          {/* Progress indicators */}
-          <div className="flex justify-center gap-2 pt-4">
+          {/* Progress Indicators */}
+          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex justify-center gap-2">
             {slides.map((_, idx) => (
               <button
                 key={idx}
@@ -219,39 +187,61 @@ export default function Home() {
                   setIsAutoPlaying(false);
                 }}
                 className={`
-                  h-1.5 rounded-full transition-all duration-600
+                  h-1.5 rounded-full transition-all duration-300
                   ${
                     idx === currentSlide
-                      ? `w-8 bg-gradient-to-r ${slides[currentSlide].color}`
-                      : "w-6 bg-slate-300 dark:bg-slate-700"
+                      ? "w-10 bg-white"
+                      : "w-8 bg-white/40 hover:bg-white/60"
                   }
                 `}
               />
             ))}
           </div>
         </div>
-
-        {/* Navigation arrows */}
-        <div className="absolute left-3 right-3 md:left-6 md:right-6 top-1/2 -translate-y-1/2 flex justify-between pointer-events-none">
-          <motion.button
-            whileHover={{ scale: 1.1, x: -3 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={prevSlide}
-            className="pointer-events-auto p-2.5 rounded-full backdrop-blur-lg border transition-all bg-white/70 dark:bg-slate-900/60 border-slate-200/60 dark:border-slate-700/50 text-slate-700 dark:text-cyan-400 hover:bg-white/90 dark:hover:bg-slate-800/60 shadow-md"
-          >
-            <ChevronLeft size={20} />
-          </motion.button>
-
-          <motion.button
-            whileHover={{ scale: 1.1, x: 3 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={nextSlide}
-            className="pointer-events-auto p-2.5 rounded-full backdrop-blur-lg border transition-all bg-white/70 dark:bg-slate-900/60 border-slate-200/60 dark:border-slate-700/50 text-slate-700 dark:text-cyan-400 hover:bg-white/90 dark:hover:bg-slate-800/60 shadow-md"
-          >
-            <ChevronRight size={20} />
-          </motion.button>
-        </div>
       </div>
+
+      {/* Navigation Arrows */}
+      <div className="absolute left-6 right-6 md:left-8 md:right-8 top-1/2 -translate-y-1/2 flex justify-between pointer-events-none z-20">
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={prevSlide}
+          className="pointer-events-auto p-3 rounded-full backdrop-blur-sm bg-white/20 hover:bg-white/30 border border-white/30 text-white transition-all"
+        >
+          <ChevronLeft className="w-6 h-6" />
+        </motion.button>
+
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={nextSlide}
+          className="pointer-events-auto p-3 rounded-full backdrop-blur-sm bg-white/20 hover:bg-white/30 border border-white/30 text-white transition-all"
+        >
+          <ChevronRight className="w-6 h-6" />
+        </motion.button>
+      </div>
+
+      {/* Scroll Indicator */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1 }}
+        className="absolute bottom-20 left-1/2 -translate-x-1/2 text-white/70 text-xs font-medium hidden md:block"
+      >
+        <motion.div
+          animate={{ y: [0, 8, 0] }}
+          transition={{ duration: 2, repeat: Infinity }}
+          className="flex flex-col items-center gap-2"
+        >
+          <div className="w-5 h-8 border-2 border-white/40 rounded-full flex items-start justify-center p-1">
+            <motion.div
+              animate={{ y: [0, 10, 0] }}
+              transition={{ duration: 1.5, repeat: Infinity }}
+              className="w-1 h-1 bg-white/60 rounded-full"
+            />
+          </div>
+        </motion.div>
+      </motion.div>
     </div>
   );
 }

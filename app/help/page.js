@@ -186,7 +186,7 @@ export default function HelpPage() {
           </section>
 
           {/* Resources & CTA */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 pt-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Documentation */}
             <div className="space-y-6">
               <h3 className="text-xl font-bold text-foreground flex items-center gap-3">

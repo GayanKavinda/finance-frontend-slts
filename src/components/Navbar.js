@@ -12,12 +12,10 @@ import {
   Target,
   PieChart,
   User as UserIcon,
-  CreditCard,
   HelpCircle,
   Sun,
   Moon,
   Laptop,
-  Leaf,
   ArrowRight,
   Sparkles,
 } from "lucide-react";
@@ -27,6 +25,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useRouter, usePathname } from "next/navigation";
 import Image from "next/image";
 import useAutoLogout from "@/hooks/useAutoLogout";
+import { useScroll } from "@/contexts/ScrollContext";
 
 const navLinks = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -37,33 +36,29 @@ const navLinks = [
 
 export default function Navbar() {
   const { user, loading, logout } = useAuth();
-
-  // Auto-logout after 30 mins
   useAutoLogout(30 * 60 * 1000);
 
   const router = useRouter();
   const pathname = usePathname();
   const { theme, setTheme } = useTheme();
+  const { scrollY } = useScroll();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [themeMenuOpen, setThemeMenuOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    console.log("[Navbar] Component mounted");
     setMounted(true);
   }, []);
 
   useEffect(() => {
-    console.log("[Navbar] Pathname changed to:", pathname);
     setMobileMenuOpen(false);
     setProfileMenuOpen(false);
     setThemeMenuOpen(false);
   }, [pathname]);
 
-  // Lock body scroll when mobile menu is open
   useEffect(() => {
-    console.log("[Navbar] Mobile menu open status:", mobileMenuOpen);
     if (mobileMenuOpen) {
       document.body.style.overflow = "hidden";
     } else {
@@ -71,18 +66,19 @@ export default function Navbar() {
     }
   }, [mobileMenuOpen]);
 
+  useEffect(() => {
+    setScrolled(scrollY > 50);
+  }, [scrollY]);
+
   const handleLogout = async () => {
-    console.log("[Navbar] Logout initiated");
     try {
       await logout();
-      console.log("[Navbar] Logout successful, redirecting to /signin");
       router.push("/signin");
     } catch (error) {
-      console.error("[Navbar] Logout failed:", error);
+      console.error("Logout failed:", error);
     }
   };
 
-  // Hide Navbar on auth pages
   if (
     ["/signup", "/signin", "/forgot-password", "/reset-password"].includes(
       pathname
@@ -90,30 +86,56 @@ export default function Navbar() {
   )
     return null;
 
-  // No early return for loading to avoid layout jump. Skeletons used below.
+  const isHomePage = pathname === "/";
 
   return (
     <>
-      <div className="w-full flex justify-center relative z-50">
-        <nav className="w-full border-b border-slate-200/30 dark:border-slate-800/30 bg-white/40 dark:bg-slate-950/40 backdrop-blur-xl transition-colors duration-300 pl-4 pr-6">
+      <div className="w-full flex justify-center fixed top-0 z-50">
+        <nav
+          className={`w-full transition-all duration-500 ${
+            isHomePage
+              ? scrolled
+                ? "bg-[#0F172A]/90 backdrop-blur-xl border-b border-slate-800/30"
+                : "bg-transparent border-transparent"
+              : "bg-white/80 dark:bg-[#0F172A]/80 backdrop-blur-xl border-b border-slate-200/30 dark:border-slate-800/30"
+          } px-4 md:px-6`}
+        >
           <div className="max-w-7xl mx-auto h-16 flex items-center justify-between">
-            {/* Logo and Name */}
+            {/* Logo */}
             <Link href="/" className="flex items-center gap-4 group">
               <div className="relative w-[120px] h-[40px]">
                 <Image
                   src="/icons/slt_digital_icon.png"
                   alt="SLT Digital Logo"
                   fill
-                  className="object-contain dark:brightness-0 dark:invert transition-all duration-300"
+                  className={`object-contain transition-all duration-300 ${
+                    isHomePage
+                      ? "brightness-0 invert"
+                      : "dark:brightness-0 dark:invert"
+                  }`}
                   priority
                 />
               </div>
-              <div className="h-8 w-px bg-slate-200 dark:bg-slate-800 self-center hidden md:block" />
+              <div
+                className={`h-8 w-px self-center hidden md:block transition-colors ${
+                  isHomePage ? "bg-white/30" : "bg-slate-200 dark:bg-slate-800"
+                }`}
+              />
               <div className="hidden md:flex flex-col justify-center">
-                <span className="text-[9px] font-extrabold text-[#00B4EB] uppercase tracking-wider leading-none mb-0.5">
+                <span
+                  className={`text-[9px] font-extrabold uppercase tracking-wider leading-none mb-0.5 transition-colors ${
+                    isHomePage ? "text-white" : "text-[#00B4EB]"
+                  }`}
+                >
                   Sri Lanka Telecom Services
                 </span>
-                <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest leading-none">
+                <span
+                  className={`text-[11px] font-bold uppercase tracking-widest leading-none transition-colors ${
+                    isHomePage
+                      ? "text-white/80"
+                      : "text-slate-500 dark:text-slate-400"
+                  }`}
+                >
                   Finance Division
                 </span>
               </div>
@@ -141,12 +163,11 @@ export default function Navbar() {
                         <Link
                           key={link.href}
                           href={link.href}
-                          className={`px-3 py-2 text-sm font-medium transition-all flex items-center gap-2 rounded-md
-                            ${
-                              isActive
-                                ? "text-primary bg-primary/5"
-                                : "text-slate-600 dark:text-slate-400 hover:text-primary dark:hover:text-primary hover:bg-slate-50 dark:hover:bg-slate-800"
-                            }`}
+                          className={`px-3 py-2 text-sm font-medium transition-all flex items-center gap-2 rounded-md ${
+                            isActive
+                              ? "text-primary bg-primary/5"
+                              : "text-slate-600 dark:text-slate-400 hover:text-primary dark:hover:text-primary hover:bg-slate-50 dark:hover:bg-slate-800"
+                          }`}
                         >
                           <Icon
                             className={`w-4 h-4 ${
@@ -169,7 +190,11 @@ export default function Navbar() {
                   <>
                     <button
                       onClick={() => setThemeMenuOpen(!themeMenuOpen)}
-                      className="p-2 rounded-full text-slate-500 hover:text-[#00B4EB] hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                      className={`p-2 rounded-full transition-colors ${
+                        isHomePage
+                          ? "text-white hover:bg-white/20"
+                          : "text-slate-500 hover:text-[#00B4EB] hover:bg-slate-100 dark:hover:bg-slate-800"
+                      }`}
                       aria-label="Toggle Theme"
                     >
                       {theme === "dark" ? (
@@ -197,19 +222,14 @@ export default function Navbar() {
                             <button
                               key={t.name}
                               onClick={() => {
-                                console.log(
-                                  "[Navbar] Theme changed to:",
-                                  t.name
-                                );
                                 setTheme(t.name);
                                 setThemeMenuOpen(false);
                               }}
-                              className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-semibold uppercase tracking-wide transition-colors
-                                    ${
-                                      theme === t.name
-                                        ? "bg-[#00B4EB]/10 text-[#00B4EB]"
-                                        : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800"
-                                    }`}
+                              className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-semibold uppercase tracking-wide transition-colors ${
+                                theme === t.name
+                                  ? "bg-[#00B4EB]/10 text-[#00B4EB]"
+                                  : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800"
+                              }`}
                             >
                               <t.icon size={14} />
                               {t.label}
@@ -233,7 +253,7 @@ export default function Navbar() {
                   {pathname === "/" && (
                     <Link
                       href="/dashboard"
-                      className="px-5 py-2.5 text-sm font-bold text-white bg-primary rounded-lg hover:bg-primary/90 transition-all shadow-[0_0_15px_rgba(0,95,169,0.3)] flex items-center gap-2"
+                      className="px-5 py-2.5 text-sm font-bold text-white bg-gradient-to-r from-[#005FA9] to-[#00B4EB] rounded-lg hover:from-[#004c87] hover:to-[#009bc9] transition-all shadow-lg flex items-center gap-2"
                     >
                       <LayoutDashboard className="w-4 h-4" />
                       <span>Dashboard</span>
@@ -242,7 +262,11 @@ export default function Navbar() {
                   <div className="relative">
                     <button
                       onClick={() => setProfileMenuOpen(!profileMenuOpen)}
-                      className="flex items-center gap-3 pl-2 pr-1 py-1.5 rounded-full hover:bg-slate-50 dark:hover:bg-slate-800 transition-all border border-transparent"
+                      className={`flex items-center gap-3 pl-2 pr-1 py-1.5 rounded-full transition-all border ${
+                        isHomePage
+                          ? "hover:bg-white/20 border-white/30"
+                          : "hover:bg-slate-50 dark:hover:bg-slate-800 border-transparent"
+                      }`}
                     >
                       {user.avatar_url ? (
                         <div className="w-8 h-8 rounded-full overflow-hidden border border-slate-200 dark:border-slate-700 relative">
@@ -259,9 +283,9 @@ export default function Navbar() {
                         </div>
                       )}
                       <ChevronDown
-                        className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${
+                        className={`w-4 h-4 transition-transform duration-200 ${
                           profileMenuOpen ? "rotate-180" : ""
-                        }`}
+                        } ${isHomePage ? "text-white" : "text-slate-400"}`}
                       />
                     </button>
 
@@ -339,13 +363,17 @@ export default function Navbar() {
                 <div className="flex items-center gap-4">
                   <Link
                     href="/signin"
-                    className="text-sm font-bold text-slate-600 dark:text-slate-300 hover:text-primary transition-colors"
+                    className={`text-sm font-bold transition-colors ${
+                      isHomePage
+                        ? "text-white hover:text-white/80"
+                        : "text-slate-600 dark:text-slate-300 hover:text-primary"
+                    }`}
                   >
                     Sign In
                   </Link>
                   <Link
                     href="/signup"
-                    className="px-5 py-2.5 text-sm font-bold text-white bg-primary rounded-lg hover:bg-primary/90 transition-all shadow-[0_0_15px_rgba(0,95,169,0.3)]"
+                    className="px-5 py-2.5 text-sm font-bold text-white bg-gradient-to-r from-[#005FA9] to-[#00B4EB] rounded-lg hover:from-[#004c87] hover:to-[#009bc9] transition-all shadow-lg"
                   >
                     Get Started
                   </Link>
@@ -361,7 +389,9 @@ export default function Navbar() {
                 ) : (
                   <button
                     onClick={() => setThemeMenuOpen(!themeMenuOpen)}
-                    className="p-2 text-slate-500 hover:text-[#00B4EB]"
+                    className={`p-2 ${
+                      isHomePage ? "text-white" : "text-slate-500"
+                    } hover:text-[#00B4EB]`}
                   >
                     {theme === "dark" ? (
                       <Moon size={20} />
@@ -375,7 +405,11 @@ export default function Navbar() {
               </div>
               <button
                 onClick={() => setMobileMenuOpen(true)}
-                className="p-2 text-slate-600 dark:text-slate-300"
+                className={`p-2 ${
+                  isHomePage
+                    ? "text-white"
+                    : "text-slate-600 dark:text-slate-300"
+                }`}
               >
                 <Menu size={24} />
               </button>
@@ -384,14 +418,14 @@ export default function Navbar() {
         </nav>
       </div>
 
-      {/* theme drawer for mobile is integrated above or handled similarly, simplifying for brevity/focus on desktop fix first */}
+      {/* Mobile Menu */}
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[60] bg-white dark:bg-slate-950 flex flex-col p-6"
+            className="fixed inset-0 z-[60] bg-white dark:bg-[#0F172A] flex flex-col p-6"
           >
             <div className="flex items-center justify-between mb-10">
               <motion.div
@@ -435,7 +469,6 @@ export default function Navbar() {
             <div className="flex-1 flex flex-col">
               {user ? (
                 <>
-                  {/* User Info Card */}
                   <div className="bg-gradient-to-br from-primary/10 to-secondary/10 dark:from-primary/20 dark:to-secondary/20 rounded-2xl p-4 mb-6 border border-slate-200/50 dark:border-slate-700/50">
                     <div className="flex items-center gap-3">
                       {user.avatar_url ? (
@@ -463,7 +496,6 @@ export default function Navbar() {
                     </div>
                   </div>
 
-                  {/* Navigation Section */}
                   <div className="space-y-1 mb-4">
                     <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-3 mb-2">
                       Navigation
@@ -481,7 +513,6 @@ export default function Navbar() {
                     ))}
                   </div>
 
-                  {/* Account Section */}
                   <div className="space-y-1 pt-4 border-t border-slate-200 dark:border-slate-800">
                     <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider px-3 mb-2">
                       Account
@@ -504,7 +535,6 @@ export default function Navbar() {
                     </Link>
                   </div>
 
-                  {/* Sign Out Button - Fixed at bottom */}
                   <div className="mt-auto pt-6 border-t border-slate-200 dark:border-slate-800">
                     <button
                       onClick={() => {
@@ -524,7 +554,7 @@ export default function Navbar() {
                     Get Started
                   </p>
                   <Link href="/signup" onClick={() => setMobileMenuOpen(false)}>
-                    <button className="w-full bg-gradient-to-r from-primary to-secondary text-white px-6 py-3.5 rounded-xl font-bold hover:shadow-xl transition-all active:scale-95 shadow-lg text-base">
+                    <button className="w-full bg-gradient-to-r from-[#005FA9] to-[#00B4EB] text-white px-6 py-3.5 rounded-xl font-bold hover:shadow-xl transition-all active:scale-95 shadow-lg text-base">
                       Create Account
                     </button>
                   </Link>
@@ -566,7 +596,6 @@ export default function Navbar() {
                 </div>
               )}
 
-              {/* Theme Selector - At Bottom */}
               <div className="mt-auto pt-6 border-t border-slate-200 dark:border-slate-800">
                 <div className="grid grid-cols-3 gap-2">
                   {["light", "dark", "system"].map((mode) => (
