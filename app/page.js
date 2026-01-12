@@ -11,7 +11,7 @@ const slides = [
     title: "SLT Finance Division",
     subtitle:
       "Empowering employees with comprehensive salary and payment management",
-    image: "/slides/jonatan-pie-iokiwAq05UU-unsplash.jpg",
+    image: "/slides/2.santa-claus-chariot-3840x2160-24949.avif",
     cta: "View Dashboard",
   },
   {
