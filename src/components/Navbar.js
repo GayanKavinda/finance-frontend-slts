@@ -546,12 +546,12 @@ export default function Navbar() {
                 </div>
               )}
 
-              <div className="pt-8 mt-4 border-t border-slate-100 dark:border-slate-800 shrink-0">
+              {/* <div className="pt-8 mt-4 border-t border-slate-100 dark:border-slate-800 shrink-0">
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 }}
-                  className="bg-primary/5 dark:bg-primary/10 rounded-2xl p-6 border border-primary/10 relative overflow-hidden group"
+                  className="bg-white dark:bg-primary/10 rounded-2xl p-6 border border-slate-100 dark:border-primary/10 relative overflow-hidden group shadow-lg shadow-slate-200/50 dark:shadow-none"
                 >
                   <div className="relative z-10">
                     <div className="flex items-center gap-2 mb-3">
@@ -574,7 +574,7 @@ export default function Navbar() {
                     </button>
                   </div>
                 </motion.div>
-              </div>
+              </div> */}
 
               <div className="mt-auto pt-6 border-t border-slate-200 dark:border-slate-800 shrink-0">
                 <div className="grid grid-cols-3 gap-2">
