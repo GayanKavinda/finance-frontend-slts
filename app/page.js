@@ -18,35 +18,35 @@ const slides = [
     title: "Instant Salary Insights",
     subtitle:
       "View your monthly earnings, deductions, and net pay in real-time",
-    image: "/slides/wp9223826-finance-4k-wallpapers.jpg",
+    image: "/slides/6.wp9223826-finance-4k-wallpapers.avif",
     cta: "Check Salary",
   },
   {
     title: "Digital Pay Sheets",
     subtitle:
       "Download and export your monthly payment slips as secure PDFs instantly",
-    image: "/slides/uwp4831664.jpeg",
+    image: "/slides/5.uwp4831664.avif",
     cta: "Download PDF",
   },
   {
     title: "Track Your Earnings",
     subtitle:
       "Analyze your financial growth with detailed monthly earning histories",
-    image: "/slides/wp11893992-anime-technology-wallpapers.jpg",
+    image: "/slides/8.wp11893992-anime-technology-wallpapers.avif",
     cta: "View History",
   },
   {
     title: "Streamlined Allowances",
     subtitle:
       "Review and manage your financial benefits and operational claims efficiently",
-    image: "/slides/wp15425485-nasa-earth-wallpapers.jpg",
+    image: "/slides/9.wp15425485-nasa-earth-wallpapers.avif",
     cta: "Manage Claims",
   },
   {
     title: "Secure Financial Access",
     subtitle:
       "Your financial data, protected by enterprise-grade security protocols",
-    image: "/slides/wp10965088-modified-lamborghini-wallpapers.jpg",
+    image: "/slides/7.wp10965088-modified-lamborghini-wallpapers.avif",
     cta: "Login Now",
   },
 ];
@@ -157,7 +157,7 @@ export default function Home() {
                   <motion.button
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    className="px-8 py-3.5 bg-[#005FA9] hover:bg-[#004c87] text-white font-semibold text-base rounded-lg shadow-lg transition-all duration-300 flex items-center justify-center gap-2 w-full sm:w-auto"
+                    className="px-8 py-3.5 bg-[#005FA9] hover:bg-[#004c87] text-white font-semibold text-base rounded-lg shadow-lg transition-all duration-300 flex items-center justify-center gap-2 w-full sm:w-auto cursor-pointer"
                   >
                     {slides[currentSlide].cta}
                     <ArrowRight className="w-5 h-5" />
@@ -168,7 +168,7 @@ export default function Home() {
                   <motion.button
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    className="px-8 py-3.5 text-base font-semibold rounded-lg border-2 border-white/40 backdrop-blur-sm bg-white/10 hover:bg-white/20 text-white transition-all duration-300 w-full sm:w-auto"
+                    className="px-8 py-3.5 text-base font-semibold rounded-lg border-2 border-white/40 backdrop-blur-sm bg-white/10 hover:bg-white/20 text-white transition-all duration-300 w-full sm:w-auto cursor-pointer"
                   >
                     Sign In
                   </motion.button>
@@ -208,7 +208,7 @@ export default function Home() {
           onClick={prevSlide}
           className="pointer-events-auto p-3 rounded-full backdrop-blur-sm bg-white/20 hover:bg-white/30 border border-white/30 text-white transition-all"
         >
-          <ChevronLeft className="w-6 h-6" />
+          <ChevronLeft className="w-6 h-6 cursor-pointer" />
         </motion.button>
 
         <motion.button
@@ -217,7 +217,7 @@ export default function Home() {
           onClick={nextSlide}
           className="pointer-events-auto p-3 rounded-full backdrop-blur-sm bg-white/20 hover:bg-white/30 border border-white/30 text-white transition-all"
         >
-          <ChevronRight className="w-6 h-6" />
+          <ChevronRight className="w-6 h-6 cursor-pointer" />
         </motion.button>
       </div>
 

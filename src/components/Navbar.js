@@ -124,7 +124,7 @@ export default function Navbar() {
           <div className="relative">
             <button
               onClick={() => setProfileMenuOpen(!profileMenuOpen)}
-              className={`flex items-center gap-3 pl-2 pr-1 py-1.5 rounded-full transition-all border ${
+              className={`flex items-center gap-3 pl-2 pr-1 py-1.5 rounded-full transition-all border cursor-pointer ${
                 isHomePage
                   ? "hover:bg-white/20 border-white/30"
                   : "hover:bg-slate-50 dark:hover:bg-slate-800 border-transparent"
@@ -210,7 +210,7 @@ export default function Navbar() {
                   <div className="mt-2 pt-2 border-t border-slate-100 dark:border-slate-800">
                     <button
                       onClick={handleLogout}
-                      className="flex items-center gap-3 w-full px-4 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wide text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10 transition-all"
+                      className="flex items-center gap-3 w-full px-4 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wide text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10 transition-all cursor-pointer"
                     >
                       <LogOut className="w-4 h-4" />
                       Sign Out
@@ -225,7 +225,7 @@ export default function Navbar() {
     }
 
     return (
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-4 cursor-pointer">
         <Link
           href="/signin"
           className={`text-sm font-bold transition-colors ${
@@ -238,7 +238,7 @@ export default function Navbar() {
         </Link>
         <Link
           href="/signup"
-          className="px-5 py-2.5 text-sm font-bold text-white bg-gradient-to-r from-[#005FA9] to-[#00B4EB] rounded-lg hover:from-[#004c87] hover:to-[#009bc9] transition-all shadow-lg"
+          className="px-5 py-2.5 text-sm font-bold text-white bg-gradient-to-r from-[#005FA9] to-[#00B4EB] rounded-lg hover:from-[#004c87] hover:to-[#009bc9] transition-all shadow-lg cursor-pointer"
         >
           Get Started
         </Link>
@@ -348,7 +348,7 @@ export default function Navbar() {
                   <>
                     <button
                       onClick={() => setThemeMenuOpen(!themeMenuOpen)}
-                      className={`p-2 rounded-full transition-colors ${
+                      className={`p-2 rounded-full transition-colors cursor-pointer ${
                         isHomePage
                           ? "text-white hover:bg-white/20"
                           : "text-slate-500 hover:text-[#00B4EB] hover:bg-slate-100 dark:hover:bg-slate-800"
@@ -403,7 +403,7 @@ export default function Navbar() {
               <div className="relative">
                 <button
                   onClick={() => setNotificationsOpen(!notificationsOpen)}
-                  className={`p-2 rounded-full transition-all relative ${
+                  className={`p-2 rounded-full transition-all relative cursor-pointer ${
                     isHomePage
                       ? "text-white hover:bg-white/20"
                       : "text-slate-500 hover:text-primary hover:bg-slate-100 dark:hover:bg-slate-800"
