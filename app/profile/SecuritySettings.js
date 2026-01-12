@@ -1,0 +1,279 @@
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
+import axios from "@/lib/axios";
+import { fetchCsrf } from "@/lib/auth";
+import { useSnackbar } from "notistack";
+import { motion } from "framer-motion";
+import { Loader2, Lock, Save, Trash2 } from "lucide-react";
+
+// Validation Schema
+const passwordSchema = yup.object({
+  current_password: yup.string().required("Current password is required"),
+  password: yup
+    .string()
+    .required("New password is required")
+    .min(8, "At least 8 characters")
+    .matches(/[a-z]/, "Must contain lowercase")
+    .matches(/[A-Z]/, "Must contain uppercase")
+    .matches(/[0-9]/, "Must contain a number"),
+  password_confirmation: yup
+    .string()
+    .oneOf([yup.ref("password")], "Passwords do not match")
+    .required("Confirm password required"),
+});
+
+export default function SecuritySettings() {
+  const { enqueueSnackbar } = useSnackbar();
+
+  const [passwordStrength, setPasswordStrength] = useState({
+    score: 0,
+    label: "",
+    color: "",
+  });
+
+  const passwordForm = useForm({
+    resolver: yupResolver(passwordSchema),
+    mode: "onTouched",
+  });
+
+  const calculatePasswordStrength = (pwd) => {
+    if (!pwd) return { score: 0, label: "", color: "" };
+    let score = 0;
+    if (pwd.length >= 8) score++;
+    if (/[A-Z]/.test(pwd)) score++;
+    if (/[0-9]/.test(pwd)) score++;
+    if (/[^A-Za-z0-9]/.test(pwd)) score++;
+
+    const labels = ["Weak", "Fair", "Good", "Strong"];
+    const colors = [
+      "bg-red-500",
+      "bg-orange-500",
+      "bg-yellow-500",
+      "bg-emerald-500",
+    ];
+
+    return {
+      score,
+      label: labels[score - 1] || "Weak",
+      color: colors[score - 1] || "bg-red-500",
+    };
+  };
+
+  const onUpdatePassword = async (data) => {
+    console.log("[Profile] Password update initiated");
+    try {
+      await fetchCsrf();
+      const res = await axios.post("/api/update-password", data);
+      console.log("[Profile] Password update successful");
+      enqueueSnackbar(res.data.message || "Password updated", {
+        variant: "success",
+      });
+      passwordForm.reset();
+    } catch (e) {
+      console.error(
+        "[Profile] Password update failed:",
+        e.response?.data || e.message
+      );
+      const msg =
+        e.response?.data?.errors?.current_password?.[0] ||
+        e.response?.data?.errors?.password?.[0] ||
+        e.response?.data?.message ||
+        "Security update failed";
+      enqueueSnackbar(msg, { variant: "error" });
+    }
+  };
+
+  const onDeactivate = async () => {
+    if (
+      !confirm(
+        "Deactivate your account? You can request restore within 30 days."
+      )
+    )
+      return;
+    console.warn("[Profile] Deactivating account...");
+    try {
+      await fetchCsrf();
+      const res = await axios.post("/api/deactivate-account");
+      console.log("[Profile] Account deactivated successfully");
+      enqueueSnackbar(res.data.message || "Account deactivated", {
+        variant: "success",
+      });
+      try {
+        console.log("[Profile] Logging out after deactivation...");
+        await axios.post("/api/logout");
+      } catch {}
+      window.location.href = "/signin";
+    } catch (e) {
+      console.error(
+        "[Profile] Deactivation failed:",
+        e.response?.data || e.message
+      );
+      enqueueSnackbar(e.response?.data?.message || "Failed to deactivate", {
+        variant: "error",
+      });
+    }
+  };
+
+  return (
+    <motion.div
+      key="security"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.3, ease: "easeInOut" }}
+      className="space-y-6"
+    >
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="w-full lg:col-span-2">
+          <div className="relative rounded-2xl border border-slate-200 dark:border-slate-800 p-6 bg-white/60 dark:bg-slate-950/40 dark:shadow-[0_0_80px_-12px_rgba(0,180,235,0.15)]">
+            {/* Glow effect for dark mode */}
+            <div className="absolute inset-0 -z-10 rounded-2xl bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 blur-2xl opacity-0 dark:opacity-60"></div>
+
+            <h3 className="text-base font-bold text-slate-600 dark:text-slate-400 mb-6">
+              Update Password
+            </h3>
+            <form onSubmit={passwordForm.handleSubmit(onUpdatePassword)}>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                    Current Password
+                  </label>
+                  <input
+                    type="password"
+                    {...passwordForm.register("current_password")}
+                    className="w-full h-11 px-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm"
+                    placeholder="••••••••"
+                  />
+                  {passwordForm.formState.errors.current_password && (
+                    <p className="text-xs text-red-500 mt-1">
+                      {passwordForm.formState.errors.current_password.message}
+                    </p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                    New Password
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="password"
+                      {...passwordForm.register("password")}
+                      onChange={(e) => {
+                        passwordForm.setValue("password", e.target.value);
+                        setPasswordStrength(
+                          calculatePasswordStrength(e.target.value)
+                        );
+                      }}
+                      className="w-full h-11 px-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all pr-10 text-sm"
+                      placeholder="Min. 8 characters"
+                    />
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">
+                      <Lock size={16} />
+                    </div>
+                  </div>
+                  {passwordForm.watch("password") && (
+                    <div className="space-y-1.5">
+                      <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-wider">
+                        <span className="text-slate-500">Strength</span>
+                        <span
+                          className={passwordStrength.color.replace(
+                            "bg-",
+                            "text-"
+                          )}
+                        >
+                          {passwordStrength.label}
+                        </span>
+                      </div>
+                      <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                        <div
+                          className={`h-full ${passwordStrength.color} transition-all duration-500`}
+                          style={{
+                            width: `${(passwordStrength.score / 4) * 100}%`,
+                          }}
+                        />
+                      </div>
+                    </div>
+                  )}
+                  {passwordForm.formState.errors.password && (
+                    <p className="text-xs text-red-500 mt-1">
+                      {passwordForm.formState.errors.password.message}
+                    </p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                    Confirm New Password
+                  </label>
+                  <input
+                    type="password"
+                    {...passwordForm.register("password_confirmation")}
+                    className="w-full h-11 px-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm"
+                    placeholder="Repeat new password"
+                  />
+                  {passwordForm.formState.errors.password_confirmation && (
+                    <p className="text-xs text-red-500 mt-1">
+                      {
+                        passwordForm.formState.errors.password_confirmation
+                          .message
+                      }
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <div className="mt-6">
+                <button
+                  type="submit"
+                  disabled={passwordForm.formState.isSubmitting}
+                  className="group relative flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-primary to-primary/90 text-white rounded-lg font-bold text-sm shadow-lg hover:shadow-2xl hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 overflow-hidden cursor-pointer"
+                >
+                  <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+                  <span className="relative flex items-center gap-2">
+                    {passwordForm.formState.isSubmitting ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span>Updating...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Save
+                          size={16}
+                          className="group-hover:scale-110 transition-transform duration-300"
+                        />
+                        <span>Update Password</span>
+                      </>
+                    )}
+                  </span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <div className="w-full lg:col-span-1">
+          <div className="relative rounded-2xl border border-slate-200 dark:border-slate-800 p-6 bg-white/60 dark:bg-slate-950/40 dark:shadow-[0_0_80px_-12px_rgba(239,68,68,0.1)]">
+            <div className="absolute inset-0 -z-10 rounded-2xl bg-gradient-to-br from-red-500/5 via-transparent to-red-500/5 blur-2xl opacity-0 dark:opacity-40"></div>
+
+            <h3 className="text-base font-bold text-red-600 dark:text-red-400 mb-2">
+              Danger Zone
+            </h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mb-6">
+              Once you deactivate your account, you will have 30 days to request
+              restoration.
+            </p>
+            <button
+              onClick={onDeactivate}
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 border-2 border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/20 text-red-600 dark:text-red-400 rounded-lg font-bold text-sm hover:bg-red-100 dark:hover:bg-red-950/40 transition-all active:scale-95 cursor-pointer"
+            >
+              <Trash2 size={16} /> Deactivate Account
+            </button>
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
