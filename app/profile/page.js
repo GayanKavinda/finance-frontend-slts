@@ -59,7 +59,7 @@ export default function ProfilePage() {
                 {tab === t.key && (
                   <motion.div
                     layoutId="activeTab"
-                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary via-primary to-secondary"
+                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-rose-700 to-purple-600"
                     initial={false}
                     transition={{
                       type: "spring",

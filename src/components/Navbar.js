@@ -383,26 +383,6 @@ export default function Navbar() {
 
             {/* Mobile Menu Toggle */}
             <div className="md:hidden flex items-center gap-4">
-              <div className="relative">
-                {!mounted ? (
-                  <div className="w-9 h-9 bg-slate-200/50 dark:bg-slate-800/50 animate-pulse rounded-full" />
-                ) : (
-                  <button
-                    onClick={() => setThemeMenuOpen(!themeMenuOpen)}
-                    className={`p-2 ${
-                      isHomePage ? "text-white" : "text-slate-500"
-                    } hover:text-[#00B4EB]`}
-                  >
-                    {theme === "dark" ? (
-                      <Moon size={20} />
-                    ) : theme === "light" ? (
-                      <Sun size={20} />
-                    ) : (
-                      <Laptop size={20} />
-                    )}
-                  </button>
-                )}
-              </div>
               <button
                 onClick={() => setMobileMenuOpen(true)}
                 className={`p-2 ${
@@ -466,7 +446,7 @@ export default function Navbar() {
               </motion.button>
             </div>
 
-            <div className="flex-1 flex flex-col">
+            <div className="flex-1 flex flex-col overflow-y-auto touch-pan-y custom-scrollbar">
               {user ? (
                 <>
                   <div className="bg-gradient-to-br from-primary/10 to-secondary/10 dark:from-primary/20 dark:to-secondary/20 rounded-2xl p-4 mb-6 border border-slate-200/50 dark:border-slate-700/50">
@@ -563,40 +543,40 @@ export default function Navbar() {
                       Sign In
                     </button>
                   </Link>
-
-                  <div className="pt-8 mt-4 border-t border-slate-100 dark:border-slate-800">
-                    <motion.div
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.2 }}
-                      className="bg-primary/5 dark:bg-primary/10 rounded-2xl p-6 border border-primary/10 relative overflow-hidden group"
-                    >
-                      <div className="relative z-10">
-                        <div className="flex items-center gap-2 mb-3">
-                          <div className="p-2 rounded-xl bg-primary/20 text-primary">
-                            <Sparkles size={16} />
-                          </div>
-                          <span className="text-[11px] font-bold text-primary uppercase tracking-widest">
-                            Premium Finance
-                          </span>
-                        </div>
-                        <h4 className="text-base font-bold text-slate-900 dark:text-white mb-2 leading-tight">
-                          Empower Growth, <br />
-                          Digital SLT
-                        </h4>
-                        <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-5">
-                          Join the future of corporate finance with SLT Digital.
-                        </p>
-                        <button className="px-4 py-2 bg-primary text-white text-[10px] font-bold uppercase tracking-widest rounded-lg flex items-center gap-2 hover:bg-primary/90 transition-all shadow-lg shadow-primary/20">
-                          Learn More <ArrowRight size={12} />
-                        </button>
-                      </div>
-                    </motion.div>
-                  </div>
                 </div>
               )}
 
-              <div className="mt-auto pt-6 border-t border-slate-200 dark:border-slate-800">
+              <div className="pt-8 mt-4 border-t border-slate-100 dark:border-slate-800 shrink-0">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                  className="bg-primary/5 dark:bg-primary/10 rounded-2xl p-6 border border-primary/10 relative overflow-hidden group"
+                >
+                  <div className="relative z-10">
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="p-2 rounded-xl bg-primary/20 text-primary">
+                        <Sparkles size={16} />
+                      </div>
+                      <span className="text-[11px] font-bold text-primary uppercase tracking-widest">
+                        Premium Finance
+                      </span>
+                    </div>
+                    <h4 className="text-base font-bold text-slate-900 dark:text-white mb-2 leading-tight">
+                      Empower Growth, <br />
+                      Digital SLT
+                    </h4>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-5">
+                      Join the future of corporate finance with SLT Digital.
+                    </p>
+                    <button className="px-4 py-2 bg-primary text-white text-[10px] font-bold uppercase tracking-widest rounded-lg flex items-center gap-2 hover:bg-primary/90 transition-all shadow-lg shadow-primary/20">
+                      Learn More <ArrowRight size={12} />
+                    </button>
+                  </div>
+                </motion.div>
+              </div>
+
+              <div className="mt-auto pt-6 border-t border-slate-200 dark:border-slate-800 shrink-0">
                 <div className="grid grid-cols-3 gap-2">
                   {["light", "dark", "system"].map((mode) => (
                     <button
