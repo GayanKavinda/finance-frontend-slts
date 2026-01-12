@@ -14,6 +14,7 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { useState } from "react";
+import Breadcrumb from "@/components/Breadcrumb";
 import ProtectedRoute from "@/components/ProtectedRoute";
 
 const faqs = [
@@ -55,10 +56,17 @@ export default function HelpPage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-background py-12 px-4 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-5xl space-y-16">
-          {/* Hero / Header */}
-          <div className="text-center space-y-6">
+      <div className="min-h-screen bg-slate-50 dark:bg-[#0F172A] pt-24 pb-12 transition-colors duration-300">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Breadcrumb
+            items={[
+              { label: "Dashboard", href: "/dashboard" },
+              { label: "Help & Support" },
+            ]}
+          />
+
+          {/* Header Section */}
+          <div className="text-center mb-12">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-semibold uppercase tracking-wider border border-primary/20">
               <LifeBuoy size={16} />
               <span>Support Center</span>

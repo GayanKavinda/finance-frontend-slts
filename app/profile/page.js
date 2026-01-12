@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import Breadcrumb from "@/components/Breadcrumb";
 import PersonalDetails from "./PersonalDetails";
 import SecuritySettings from "./SecuritySettings";
 import ActivityLog from "./ActivityLog";
@@ -22,8 +23,15 @@ export default function ProfilePage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen pt-12 pb-12">
+      <div className="min-h-screen pt-6 pb-12">
         <div className="max-w-5xl mx-auto px-4 md:px-8">
+          <Breadcrumb
+            items={[
+              { label: "Dashboard", href: "/dashboard" },
+              { label: "Profile" },
+            ]}
+          />
+
           {/* Header - Centered with underline */}
           <div className="text-center mb-8">
             <h1 className="text-2xl font-bold text-slate-600 dark:text-slate-400 mb-2">
