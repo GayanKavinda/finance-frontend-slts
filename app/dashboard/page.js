@@ -1,349 +1,171 @@
-// app/dashboard/page.js
 "use client";
 
-import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import Image from "next/image";
 import {
-  Wallet,
-  TrendingDown,
-  Target,
-  Plus,
-  BarChart3,
-  Goal,
-  Calculator,
-  Sparkles,
-  TrendingUp,
-  ArrowUpRight,
-  ArrowDownRight,
-  DollarSign,
-  CreditCard,
-  PiggyBank,
-  Receipt,
-  MoreVertical,
-  ChevronRight,
-  Filter,
-  Download,
-  Eye,
+  Wallet, TrendingDown, Plus, MoreVertical, Download, 
+  CheckCircle2, AlertTriangle, Activity, ShieldCheck, Zap
 } from "lucide-react";
 import {
-  LineChart,
-  Line,
-  AreaChart,
-  Area,
-  BarChart,
-  Bar,
-  PieChart,
-  Pie,
-  Cell,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Legend,
+  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
 } from "recharts";
 import { useAuth } from "@/context/AuthContext";
-import { useRouter } from "next/navigation";
-import StatCard from "@/components/StatCard";
-import ActionCard from "@/components/ActionCard";
 import { useTheme } from "next-themes";
+import StatCard from "@/components/StatCard";
 import ProtectedRoute from "@/components/ProtectedRoute";
 
 const COLORS = {
-  primary: "#14b8a6", // Fallback
-  secondary: "#06b6d4",
-  tertiary: "#6366f1",
-  success: "#10b981",
-  warning: "#f59e0b",
+  primary: "#14b8a6", 
   danger: "#f43f5e",
 };
 
+const systemStable = true;
 const monthlyExpenses = [
-  { month: "Jul", income: 4200, expenses: 2800, savings: 1400 },
-  { month: "Aug", income: 4500, expenses: 3100, savings: 1400 },
-  { month: "Sep", income: 4300, expenses: 2900, savings: 1400 },
-  { month: "Oct", income: 4600, expenses: 3200, savings: 1400 },
-  { month: "Nov", income: 4800, expenses: 3400, savings: 1400 },
-  { month: "Dec", income: 5200, expenses: 3600, savings: 1600 },
+  { month: "Jul", income: 4200, expenses: 2800 },
+  { month: "Aug", income: 4500, expenses: 3100 },
+  { month: "Sep", income: 4300, expenses: 2900 },
+  { month: "Oct", income: 4600, expenses: 3200 },
+  { month: "Nov", income: 4800, expenses: 3400 },
+  { month: "Dec", income: 5200, expenses: 3600 },
 ];
 
-// Simplified Chart Card
-const ChartCard = ({ title, subtitle, children, delay, action }) => (
+const ChartCard = ({ title, subtitle, children, delay }) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ duration: 0.5, delay }}
-    className="h-full"
+    className="premium-card p-6 h-full flex flex-col"
   >
-    <div className="premium-card p-6 h-full flex flex-col">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h3 className="text-lg font-bold text-card-foreground tracking-tight">
-            {title}
-          </h3>
-          {subtitle && (
-            <p className="text-sm text-muted-foreground mt-0.5">{subtitle}</p>
-          )}
-        </div>
-        {action && (
-          <button className="p-2 hover:bg-muted rounded-lg transition-colors group">
-            <MoreVertical className="w-5 h-5 text-muted-foreground group-hover:text-foreground" />
-          </button>
-        )}
-      </div>
-      <div className="flex-1 min-h-0">{children}</div>
-    </div>
-  </motion.div>
-);
-
-// Clean Tooltip
-const CustomTooltip = ({ active, payload, label }) => {
-  if (active && payload && payload.length) {
-    return (
-      <div className="bg-popover/95 backdrop-blur-md border border-border p-3 rounded-xl shadow-xl">
-        <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">
-          {label}
-        </p>
-        <div className="space-y-1">
-          {payload.map((entry, index) => (
-            <div
-              key={index}
-              className="flex items-center justify-between gap-4"
-            >
-              <div className="flex items-center gap-2">
-                <div
-                  className="w-2 h-2 rounded-full"
-                  style={{ backgroundColor: entry.color }}
-                />
-                <span className="text-xs font-semibold text-popover-foreground">
-                  {entry.name}
-                </span>
-              </div>
-              <span className="text-sm font-bold text-foreground">
-                ${entry.value.toLocaleString()}
-              </span>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
-  return null;
-};
-
-// Progress Bar
-const ProgressBar = ({ label, percentage, current, target, color, delay }) => (
-  <div className="space-y-2">
-    <div className="flex justify-between items-end">
+    <div className="flex items-center justify-between mb-6">
       <div>
-        <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
-          {label}
-        </span>
+        <h3 className="text-sm font-bold text-card-foreground uppercase tracking-wider">{title}</h3>
+        {subtitle && <p className="text-xs text-muted-foreground mt-1">{subtitle}</p>}
       </div>
-      <div className="text-right">
-        <span className="text-sm font-bold text-foreground">{percentage}%</span>
-      </div>
+      <button className="p-2 hover:bg-muted rounded-full transition-colors text-muted-foreground">
+        <MoreVertical className="w-4 h-4" />
+      </button>
     </div>
-    <div className="h-2 bg-muted rounded-full overflow-hidden">
-      <motion.div
-        initial={{ width: 0 }}
-        animate={{ width: `${percentage}%` }}
-        transition={{ duration: 1.5, delay, ease: "circOut" }}
-        className="h-full rounded-full"
-        style={{ backgroundColor: color }}
-      />
-    </div>
-    <div className="flex justify-between text-[10px] text-muted-foreground font-medium">
-      <span>${current.toLocaleString()}</span>
-      <span>${target.toLocaleString()}</span>
-    </div>
-  </div>
+    <div className="flex-1 min-h-[280px]">{children}</div>
+  </motion.div>
 );
 
 export default function Dashboard() {
   const { user, loading } = useAuth();
-  const router = useRouter();
   const { theme } = useTheme();
 
-  useEffect(() => {
-    console.log("[Dashboard] Page mounted, authentication state:", {
-      loading,
-      hasUser: !!user,
-    });
-  }, [loading, user]);
+  const getTimeGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good Morning";
+    if (hour < 18) return "Good Afternoon";
+    return "Good Evening";
+  };
 
-  if (loading || !user) {
-    return (
-      <ProtectedRoute>
-        <div />
-      </ProtectedRoute>
-    );
-  }
+  if (loading || !user) return <ProtectedRoute><div /></ProtectedRoute>;
+
+  // Detect color for chart labels based on theme
+  const chartLabelColor = theme === "dark" ? "#94a3b8" : "#64748b";
 
   return (
     <ProtectedRoute>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 pt-8">
         <div className="space-y-8">
-          {/* Header */}
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-            <div>
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="flex items-center gap-2 mb-2"
+          
+          {/* HEADER SECTION */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="flex items-center gap-4">
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="relative p-1 rounded-full border-2 border-primary/20 bg-background shadow-lg"
               >
-                <div className="p-1.5 rounded-lg bg-primary/10 text-primary">
-                  <Sparkles className="w-3.5 h-3.5" />
+                <div className="w-14 h-14 md:w-16 md:h-16 rounded-full overflow-hidden relative">
+                  {user.avatar_url ? (
+                    <Image src={user.avatar_url} alt={user.name} fill className="object-cover" />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center text-white font-bold">
+                      {user.name.charAt(0)}
+                    </div>
+                  )}
                 </div>
-                <span className="text-[10px] font-bold text-primary uppercase tracking-widest">
-                  Personal Dashboard
-                </span>
+                <div className="absolute bottom-0 right-0 w-4 h-4 bg-emerald-500 border-2 border-background rounded-full" />
               </motion.div>
-              <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-foreground">
-                Hello,{" "}
-                <span className="text-primary">{user.name.split(" ")[0]}</span>
-              </h1>
-              <p className="text-muted-foreground mt-2 max-w-xl">
-                Here is your financial overview for today.
-              </p>
+
+              <div>
+                <h1 className="text-xl md:text-2xl font-bold text-foreground">
+                  {getTimeGreeting()}, <span className="gradient-text">{user.name.split(" ")[0]}</span>
+                </h1>
+                <div className="flex items-center gap-2 mt-1">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-widest">
+                    System Status: <span className="text-emerald-500">Operational</span>
+                  </p>
+                </div>
+              </div>
             </div>
+
             <div className="flex items-center gap-3">
-              <button className="px-5 py-2.5 text-xs font-bold text-foreground bg-card border border-border rounded-xl hover:bg-muted/50 transition-all flex items-center gap-2 active:scale-95 shadow-sm">
-                <Download className="w-4 h-4 text-muted-foreground" />
-                Export
+              <button className="px-4 py-2 text-xs font-bold bg-card border border-border rounded-lg hover:bg-muted transition-all flex items-center gap-2">
+                <Download className="w-4 h-4" /> Export
               </button>
-              <button className="px-5 py-2.5 text-xs font-bold text-primary-foreground bg-primary rounded-xl hover:bg-primary/90 transition-all flex items-center gap-2 active:scale-95 shadow-lg shadow-primary/20">
-                <Plus className="w-4 h-4" />
-                Deposit
+              <button className="px-4 py-2 text-xs font-bold text-white bg-primary rounded-lg hover:opacity-90 transition-all flex items-center gap-2 shadow-lg shadow-primary/20">
+                <Plus className="w-4 h-4" /> Deposit
               </button>
             </div>
           </div>
 
-          {/* Stats Grid */}
+          {/* STATS */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatCard
-              icon={<Wallet className="w-5 h-5 text-primary" />}
-              title="Total Balance"
-              value={12450.0}
-              change={5.2}
-              changeLabel="vs last month"
-              delay={0.1}
-            />
-            <StatCard
-              icon={<TrendingDown className="w-5 h-5 text-indigo-500" />}
-              title="Monthly Expenses"
-              value={3210.0}
-              change={-2.4}
-              changeLabel="vs last month"
-              delay={0.2}
-            />
+            <StatCard icon={<Wallet className="w-4 h-4 text-primary" />} title="Balance" value={12450.0} change={5.2} delay={0.1} />
+            <StatCard icon={<TrendingDown className="w-4 h-4 text-rose-500" />} title="Expenses" value={3210.0} change={-2.4} delay={0.2} />
           </div>
 
-          {/* Charts Section */}
+          {/* CHARTS & HEALTH SIDEBAR */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            {/* Income vs Expenses - WIDER */}
+            {/* Reduced Chart size by making it col-span-8 */}
             <div className="lg:col-span-8">
-              <ChartCard
-                title="Financial Performance"
-                subtitle="Income vs Expenses"
-                delay={0.5}
-              >
-                <div className="h-72 mt-2">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart
-                      data={monthlyExpenses}
-                      margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
-                    >
+              <ChartCard title="Revenue Flow" subtitle="Monthly performance metrics" delay={0.3}>
+                <div className="h-full w-full">
+                  <ResponsiveContainer width="100%" height={280}>
+                    <AreaChart data={monthlyExpenses} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                       <defs>
-                        <linearGradient
-                          id="colorIncome"
-                          x1="0"
-                          y1="0"
-                          x2="0"
-                          y2="1"
-                        >
-                          <stop
-                            offset="5%"
-                            stopColor={COLORS.primary}
-                            stopOpacity={0.2}
-                          />
-                          <stop
-                            offset="95%"
-                            stopColor={COLORS.primary}
-                            stopOpacity={0}
-                          />
-                        </linearGradient>
-                        <linearGradient
-                          id="colorExpenses"
-                          x1="0"
-                          y1="0"
-                          x2="0"
-                          y2="1"
-                        >
-                          <stop
-                            offset="5%"
-                            stopColor={COLORS.danger}
-                            stopOpacity={0.2}
-                          />
-                          <stop
-                            offset="95%"
-                            stopColor={COLORS.danger}
-                            stopOpacity={0}
-                          />
+                        <linearGradient id="colorIncome" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor={COLORS.primary} stopOpacity={0.1} />
+                          <stop offset="95%" stopColor={COLORS.primary} stopOpacity={0} />
                         </linearGradient>
                       </defs>
-                      <CartesianGrid
-                        strokeDasharray="3 3"
-                        stroke="var(--border)"
-                        vertical={false}
-                        opacity={0.4}
-                      />
-                      <XAxis
-                        dataKey="month"
-                        axisLine={false}
-                        tickLine={false}
-                        tick={{
-                          fill: "var(--muted-foreground)",
-                          fontSize: 11,
-                          fontWeight: 500,
-                        }}
-                        dy={10}
-                      />
-                      <YAxis
-                        axisLine={false}
-                        tickLine={false}
-                        tick={{
-                          fill: "var(--muted-foreground)",
-                          fontSize: 11,
-                          fontWeight: 500,
-                        }}
-                        tickFormatter={(value) => `$${value}`}
-                      />
-                      <Tooltip content={<CustomTooltip />} />
-                      <Area
-                        type="monotone"
-                        dataKey="income"
-                        stroke={COLORS.primary}
-                        fillOpacity={1}
-                        fill="url(#colorIncome)"
-                        strokeWidth={3}
-                      />
-                      <Area
-                        type="monotone"
-                        dataKey="expenses"
-                        stroke={COLORS.danger}
-                        fillOpacity={1}
-                        fill="url(#colorExpenses)"
-                        strokeWidth={3}
-                      />
+                      <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} opacity={0.3} />
+                      <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fill: chartLabelColor, fontSize: 11 }} dy={10} />
+                      <YAxis axisLine={false} tickLine={false} tick={{ fill: chartLabelColor, fontSize: 11 }} tickFormatter={(v) => `$${v}`} />
+                      <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', backgroundColor: 'hsl(var(--card))' }} />
+                      <Area type="monotone" dataKey="income" stroke={COLORS.primary} fill="url(#colorIncome)" strokeWidth={2} />
                     </AreaChart>
                   </ResponsiveContainer>
                 </div>
               </ChartCard>
             </div>
-          </div>
 
-          
+            {/* NEW: System Health Sidebar */}
+            <div className="lg:col-span-4 space-y-4">
+              <div className="premium-card p-5">
+                <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-4">Live Health</h3>
+                <div className="space-y-4">
+                  {[
+                    { label: "Server Load", val: "24%", icon: Activity, color: "text-blue-500" },
+                    { label: "DB Latency", val: "12ms", icon: Zap, color: "text-amber-500" },
+                    { label: "Security", val: "Active", icon: ShieldCheck, color: "text-emerald-500" },
+                  ].map((item, i) => (
+                    <div key={i} className="flex items-center justify-between p-3 rounded-xl bg-muted/30">
+                      <div className="flex items-center gap-3">
+                        <item.icon className={`w-4 h-4 ${item.color}`} />
+                        <span className="text-sm font-medium">{item.label}</span>
+                      </div>
+                      <span className="text-sm font-bold">{item.val}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </ProtectedRoute>

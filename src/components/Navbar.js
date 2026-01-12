@@ -18,6 +18,12 @@ import {
   Laptop,
   ArrowRight,
   Sparkles,
+  AlertTriangle,
+  Bell,
+  AlertCircle,
+  Database,
+  Server,
+  Cpu,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import Link from "next/link";
@@ -40,11 +46,13 @@ export default function Navbar() {
 
   const router = useRouter();
   const pathname = usePathname();
+  const isHomePage = pathname === "/";
   const { theme, setTheme } = useTheme();
   const { scrollY } = useScroll();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [themeMenuOpen, setThemeMenuOpen] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -86,7 +94,185 @@ export default function Navbar() {
   )
     return null;
 
-  const isHomePage = pathname === "/";
+  const systemAlerts = [
+    {
+      id: 1,
+      type: "error",
+      title: "Database Latency",
+      description: "High read latency detected in PostgreSQL cluster.",
+      time: "2m ago",
+      icon: Database,
+      color: "text-red-500",
+      bg: "bg-red-500/10",
+    },
+    {
+      id: 2,
+      type: "warning",
+      title: "Backend Memory",
+      description: "Node.js process reaching 85% memory threshold.",
+      time: "15m ago",
+      icon: Server,
+      color: "text-amber-500",
+      bg: "bg-amber-500/10",
+    },
+    {
+      id: 3,
+      type: "info",
+      title: "Frontend Build",
+      description: "New production deployment successful.",
+      time: "1h ago",
+      icon: Cpu,
+      color: "text-blue-500",
+      bg: "bg-blue-500/10",
+    },
+  ];
+
+  const renderUserActions = () => {
+    if (loading) {
+      return (
+        <div className="flex items-center gap-4">
+          <div className="w-24 h-10 bg-slate-200/50 dark:bg-slate-800/50 animate-pulse rounded-lg" />
+          <div className="w-10 h-10 bg-slate-200/50 dark:bg-slate-800/50 animate-pulse rounded-full" />
+        </div>
+      );
+    }
+
+    if (user) {
+      return (
+        <div className="flex items-center gap-4">
+          {pathname === "/" && (
+            <Link
+              href="/dashboard"
+              className="px-5 py-2.5 text-sm font-bold text-white bg-gradient-to-r from-[#005FA9] to-[#00B4EB] rounded-lg hover:from-[#004c87] hover:to-[#009bc9] transition-all shadow-lg flex items-center gap-2"
+            >
+              <LayoutDashboard className="w-4 h-4" />
+              <span>Dashboard</span>
+            </Link>
+          )}
+          <div className="relative">
+            <button
+              onClick={() => setProfileMenuOpen(!profileMenuOpen)}
+              className={`flex items-center gap-3 pl-2 pr-1 py-1.5 rounded-full transition-all border ${
+                isHomePage
+                  ? "hover:bg-white/20 border-white/30"
+                  : "hover:bg-slate-50 dark:hover:bg-slate-800 border-transparent"
+              }`}
+            >
+              {user.avatar_url ? (
+                <div className="w-8 h-8 rounded-full overflow-hidden border border-slate-200 dark:border-slate-700 relative">
+                  <Image
+                    src={user.avatar_url}
+                    alt={user.name}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+              ) : (
+                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary text-sm font-bold uppercase">
+                  {user.name?.charAt(0) || "U"}
+                </div>
+              )}
+              <ChevronDown
+                className={`w-4 h-4 transition-transform duration-200 ${
+                  profileMenuOpen ? "rotate-180" : ""
+                } ${isHomePage ? "text-white" : "text-slate-400"}`}
+              />
+            </button>
+
+            <AnimatePresence>
+              {profileMenuOpen && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                  className="absolute right-0 top-full mt-4 w-60 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-2xl p-2 z-60"
+                >
+                  <div className="px-4 py-3 mb-2 border-b border-slate-100 dark:border-slate-800 flex items-center gap-3">
+                    {user.avatar_url ? (
+                      <div className="w-10 h-10 rounded-full overflow-hidden border border-slate-200 dark:border-slate-700 relative flex-shrink-0">
+                        <Image
+                          src={user.avatar_url}
+                          alt={user.name}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                    ) : (
+                      <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary text-sm font-bold uppercase flex-shrink-0">
+                        {user.name?.charAt(0) || "U"}
+                      </div>
+                    )}
+                    <div className="min-w-0">
+                      <p className="text-sm font-bold text-slate-900 dark:text-white truncate">
+                        {user.name}
+                      </p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
+                        {user.email}
+                      </p>
+                    </div>
+                  </div>
+
+                  {[
+                    {
+                      label: "Profile",
+                      icon: UserIcon,
+                      href: "/profile",
+                    },
+                    {
+                      label: "Help & Support",
+                      icon: HelpCircle,
+                      href: "/help",
+                    },
+                  ].map((item, i) => (
+                    <Link
+                      key={i}
+                      href={item.href}
+                      onClick={() => setProfileMenuOpen(false)}
+                      className="flex items-center gap-3 w-full px-4 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary hover:bg-primary/5 transition-all"
+                    >
+                      <item.icon className="w-4 h-4" />
+                      {item.label}
+                    </Link>
+                  ))}
+
+                  <div className="mt-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+                    <button
+                      onClick={handleLogout}
+                      className="flex items-center gap-3 w-full px-4 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wide text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10 transition-all"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      Sign Out
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="flex items-center gap-4">
+        <Link
+          href="/signin"
+          className={`text-sm font-bold transition-colors ${
+            isHomePage
+              ? "text-white hover:text-white/80"
+              : "text-slate-600 dark:text-slate-300 hover:text-primary"
+          }`}
+        >
+          Sign In
+        </Link>
+        <Link
+          href="/signup"
+          className="px-5 py-2.5 text-sm font-bold text-white bg-gradient-to-r from-[#005FA9] to-[#00B4EB] rounded-lg hover:from-[#004c87] hover:to-[#009bc9] transition-all shadow-lg"
+        >
+          Get Started
+        </Link>
+      </div>
+    );
+  };
 
   return (
     <>
@@ -242,143 +428,77 @@ export default function Navbar() {
                 )}
               </div>
 
-              {/* User Actions */}
-              {loading ? (
-                <div className="flex items-center gap-4">
-                  <div className="w-24 h-10 bg-slate-200/50 dark:bg-slate-800/50 animate-pulse rounded-lg" />
-                  <div className="w-10 h-10 bg-slate-200/50 dark:bg-slate-800/50 animate-pulse rounded-full" />
-                </div>
-              ) : user ? (
-                <div className="flex items-center gap-4">
-                  {pathname === "/" && (
-                    <Link
-                      href="/dashboard"
-                      className="px-5 py-2.5 text-sm font-bold text-white bg-gradient-to-r from-[#005FA9] to-[#00B4EB] rounded-lg hover:from-[#004c87] hover:to-[#009bc9] transition-all shadow-lg flex items-center gap-2"
-                    >
-                      <LayoutDashboard className="w-4 h-4" />
-                      <span>Dashboard</span>
-                    </Link>
-                  )}
-                  <div className="relative">
-                    <button
-                      onClick={() => setProfileMenuOpen(!profileMenuOpen)}
-                      className={`flex items-center gap-3 pl-2 pr-1 py-1.5 rounded-full transition-all border ${
-                        isHomePage
-                          ? "hover:bg-white/20 border-white/30"
-                          : "hover:bg-slate-50 dark:hover:bg-slate-800 border-transparent"
-                      }`}
-                    >
-                      {user.avatar_url ? (
-                        <div className="w-8 h-8 rounded-full overflow-hidden border border-slate-200 dark:border-slate-700 relative">
-                          <Image
-                            src={user.avatar_url}
-                            alt={user.name}
-                            fill
-                            className="object-cover"
-                          />
-                        </div>
-                      ) : (
-                        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary text-sm font-bold uppercase">
-                          {user.name?.charAt(0) || "U"}
-                        </div>
-                      )}
-                      <ChevronDown
-                        className={`w-4 h-4 transition-transform duration-200 ${
-                          profileMenuOpen ? "rotate-180" : ""
-                        } ${isHomePage ? "text-white" : "text-slate-400"}`}
-                      />
-                    </button>
+              <div className="relative">
+  <button
+    onClick={() => setNotificationsOpen(!notificationsOpen)}
+    className={`p-2 rounded-full transition-all relative ${
+      isHomePage
+        ? "text-white hover:bg-white/20"
+        : "text-slate-500 hover:text-primary hover:bg-slate-100 dark:hover:bg-slate-800"
+    }`}
+  >
+    <Bell size={20} />
+    <span className="absolute top-2 right-2 flex h-2 w-2">
+      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+      <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+    </span>
+  </button>
 
-                    <AnimatePresence>
-                      {profileMenuOpen && (
-                        <motion.div
-                          initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                          animate={{ opacity: 1, scale: 1, y: 0 }}
-                          exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                          className="absolute right-0 top-full mt-4 w-60 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-2xl p-2 z-60"
-                        >
-                          <div className="px-4 py-3 mb-2 border-b border-slate-100 dark:border-slate-800 flex items-center gap-3">
-                            {user.avatar_url ? (
-                              <div className="w-10 h-10 rounded-full overflow-hidden border border-slate-200 dark:border-slate-700 relative flex-shrink-0">
-                                <Image
-                                  src={user.avatar_url}
-                                  alt={user.name}
-                                  fill
-                                  className="object-cover"
-                                />
-                              </div>
-                            ) : (
-                              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary text-sm font-bold uppercase flex-shrink-0">
-                                {user.name?.charAt(0) || "U"}
-                              </div>
-                            )}
-                            <div className="min-w-0">
-                              <p className="text-sm font-bold text-slate-900 dark:text-white truncate">
-                                {user.name}
-                              </p>
-                              <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
-                                {user.email}
-                              </p>
-                            </div>
-                          </div>
+  <AnimatePresence>
+    {notificationsOpen && (
+      <>
+        <div className="fixed inset-0 z-40" onClick={() => setNotificationsOpen(false)} />
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95, y: 10 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.95, y: 10 }}
+          className="absolute right-0 top-full mt-4 w-[360px] rounded-2xl bg-white/80 dark:bg-slate-900/90 backdrop-blur-xl border border-slate-200 dark:border-slate-800 shadow-2xl z-50 overflow-hidden"
+        >
+          <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+            <div>
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white">System Notifications</h3>
+              <p className="text-[10px] text-slate-500 uppercase tracking-tighter">Live environment alerts</p>
+            </div>
+            <span className="bg-red-500/10 text-red-500 text-[10px] px-2 py-0.5 rounded-full font-bold">
+              3 NEW
+            </span>
+          </div>
 
-                          {[
-                            {
-                              label: "Profile",
-                              icon: UserIcon,
-                              href: "/profile",
-                            },
-                            {
-                              label: "Help & Support",
-                              icon: HelpCircle,
-                              href: "/help",
-                            },
-                          ].map((item, i) => (
-                            <Link
-                              key={i}
-                              href={item.href}
-                              onClick={() => setProfileMenuOpen(false)}
-                              className="flex items-center gap-3 w-full px-4 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary hover:bg-primary/5 transition-all"
-                            >
-                              <item.icon className="w-4 h-4" />
-                              {item.label}
-                            </Link>
-                          ))}
-
-                          <div className="mt-2 pt-2 border-t border-slate-100 dark:border-slate-800">
-                            <button
-                              onClick={handleLogout}
-                              className="flex items-center gap-3 w-full px-4 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wide text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10 transition-all"
-                            >
-                              <LogOut className="w-4 h-4" />
-                              Sign Out
-                            </button>
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
+          <div className="max-h-[350px] overflow-y-auto">
+            {systemAlerts.map((alert) => (
+              <div 
+                key={alert.id} 
+                className="px-5 py-4 border-b border-slate-50 dark:border-slate-800/40 hover:bg-slate-100/50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer group"
+              >
+                <div className="flex gap-3">
+                  <div className={`p-2 rounded-lg ${alert.bg} ${alert.color} h-fit`}>
+                    <alert.icon size={16} />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex justify-between items-start">
+                      <h4 className="text-xs font-bold text-slate-900 dark:text-white leading-none">{alert.title}</h4>
+                      <span className="text-[9px] text-slate-400 font-medium">{alert.time}</span>
+                    </div>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">
+                      {alert.description}
+                    </p>
                   </div>
                 </div>
-              ) : (
-                <div className="flex items-center gap-4">
-                  <Link
-                    href="/signin"
-                    className={`text-sm font-bold transition-colors ${
-                      isHomePage
-                        ? "text-white hover:text-white/80"
-                        : "text-slate-600 dark:text-slate-300 hover:text-primary"
-                    }`}
-                  >
-                    Sign In
-                  </Link>
-                  <Link
-                    href="/signup"
-                    className="px-5 py-2.5 text-sm font-bold text-white bg-gradient-to-r from-[#005FA9] to-[#00B4EB] rounded-lg hover:from-[#004c87] hover:to-[#009bc9] transition-all shadow-lg"
-                  >
-                    Get Started
-                  </Link>
-                </div>
-              )}
+              </div>
+            ))}
+          </div>
+
+          <Link href="/system-logs" onClick={() => setNotificationsOpen(false)} className="block w-full py-3 text-center text-[11px] font-bold text-primary hover:bg-primary/5 transition-colors uppercase tracking-widest">
+            Open System Monitor
+          </Link>
+        </motion.div>
+      </>
+    )}
+  </AnimatePresence>
+</div>
+
+              {/* User Actions */}
+              {renderUserActions()}
             </div>
 
             {/* Mobile Menu Toggle */}
