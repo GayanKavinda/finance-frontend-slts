@@ -121,7 +121,7 @@ export default function Signin() {
       </div>
 
       {/* Left Side: Centered Form */}
-      <div className="w-full lg:w-1/2 min-h-screen flex items-center justify-center p-6 lg:p-12 relative pt-24 pb-12 lg:py-0">
+      <div className="w-full lg:w-1/2 min-h-screen flex items-center justify-center p-6 lg:p-12 relative pt-16 pb-12 lg:py-0">
         {/* Ambient Glows for the form side */}
         <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-[#00B4EB]/5 rounded-full blur-[100px] pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[#008001]/5 rounded-full blur-[100px] pointer-events-none" />
