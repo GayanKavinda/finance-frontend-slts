@@ -226,12 +226,14 @@ export default function SecuritySettings() {
               </div>
 
               <div className="mt-6">
-                <button
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
                   type="submit"
                   disabled={passwordForm.formState.isSubmitting}
-                  className="group relative flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-primary to-primary/90 text-white rounded-lg font-bold text-sm shadow-lg hover:shadow-2xl hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 overflow-hidden cursor-pointer"
+                  className="group relative flex items-center gap-2 px-6 py-3 bg-white/10 dark:bg-white/5 backdrop-blur-md text-primary rounded-xl font-bold text-sm border border-primary/30 shadow-lg hover:bg-white/20 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden cursor-pointer"
                 >
-                  <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+                  <div className="absolute inset-0 bg-primary/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
                   <span className="relative flex items-center gap-2">
                     {passwordForm.formState.isSubmitting ? (
                       <>
@@ -248,7 +250,7 @@ export default function SecuritySettings() {
                       </>
                     )}
                   </span>
-                </button>
+                </motion.button>
               </div>
             </form>
           </div>
@@ -265,12 +267,14 @@ export default function SecuritySettings() {
               Once you deactivate your account, you will have 30 days to request
               restoration.
             </p>
-            <button
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               onClick={onDeactivate}
-              className="w-full flex items-center justify-center gap-2 px-4 py-3 border-2 border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/20 text-red-600 dark:text-red-400 rounded-lg font-bold text-sm hover:bg-red-100 dark:hover:bg-red-950/40 transition-all active:scale-95 cursor-pointer"
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-red-500/10 dark:bg-red-950/20 backdrop-blur-md text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800 rounded-xl font-bold text-sm hover:bg-red-500/20 transition-all cursor-pointer shadow-md"
             >
               <Trash2 size={16} /> Deactivate Account
-            </button>
+            </motion.button>
           </div>
         </div>
       </div>

@@ -115,7 +115,7 @@ export default function Navbar() {
           {pathname === "/" && (
             <Link
               href="/dashboard"
-              className="px-5 py-2.5 text-sm font-bold text-white bg-gradient-to-r from-[#005FA9] to-[#00B4EB] rounded-lg hover:from-[#004c87] hover:to-[#009bc9] transition-all shadow-lg flex items-center gap-2"
+              className="px-5 py-2.5 text-sm font-medium rounded-xl backdrop-blur-md bg-white/5 hover:bg-white/10 border border-white/30 text-white transition-all duration-300 flex items-center gap-2"
             >
               <LayoutDashboard className="w-4 h-4" />
               <span>Dashboard</span>

@@ -56,10 +56,10 @@ export default function ProfilePage() {
               <button
                 key={t.key}
                 onClick={() => setTab(t.key)}
-                className={`relative px-6 py-3 text-sm font-semibold -mb-px transition-all duration-300 cursor-pointer ${
+                className={`relative px-6 py-3 text-sm font-bold -mb-px transition-all duration-300 cursor-pointer rounded-t-xl ${
                   tab === t.key
-                    ? "text-primary"
-                    : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300"
+                    ? "text-primary bg-white/10 dark:bg-white/5 backdrop-blur-md"
+                    : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-white/5"
                 }`}
               >
                 {t.label}
@@ -67,7 +67,7 @@ export default function ProfilePage() {
                 {tab === t.key && (
                   <motion.div
                     layoutId="activeTab"
-                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-rose-700 to-purple-600"
+                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-rose-700 to-purple-600 shadow-[0_-2px_10px_rgba(225,29,72,0.3)]"
                     initial={false}
                     transition={{
                       type: "spring",

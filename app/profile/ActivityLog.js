@@ -157,13 +157,15 @@ export default function ActivityLog() {
                   </div>
                 </div>
                 {!session.is_current && (
-                  <button
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                     onClick={() => onRevokeSession(session.id)}
-                    className="group px-3 py-2 text-xs font-bold text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/20 hover:bg-red-600 hover:text-white dark:hover:bg-red-600 rounded-lg transition-all duration-300 border-2 border-red-200 dark:border-red-800 hover:border-red-600 active:scale-95 flex items-center gap-1.5 cursor-pointer"
+                    className="group px-3 py-2 text-xs font-bold text-red-600 dark:text-red-400 bg-red-500/10 dark:bg-red-950/20 backdrop-blur-md rounded-xl transition-all duration-300 border border-red-200 dark:border-red-800 hover:bg-red-500/20 cursor-pointer flex items-center gap-1.5"
                   >
                     <XCircle className="w-3.5 h-3.5 group-hover:scale-110 transition-transform duration-300" />
                     <span>Revoke</span>
-                  </button>
+                  </motion.button>
                 )}
               </div>
             ))
@@ -223,35 +225,39 @@ export default function ActivityLog() {
               { value: "week", label: "This Week" },
               { value: "month", label: "This Month" },
             ].map((filter) => (
-              <button
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 key={filter.value}
                 onClick={() => {
                   setTimeFilter(filter.value);
                   setShowDatePicker(false);
                 }}
-                className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all duration-300 cursor-pointer ${
+                className={`px-3 py-1.5 text-xs font-bold rounded-xl transition-all duration-300 cursor-pointer backdrop-blur-md ${
                   timeFilter === filter.value
-                    ? "bg-primary text-white shadow-lg scale-105"
-                    : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 hover:scale-105"
+                    ? "bg-primary/20 text-primary border border-primary/40 shadow-lg"
+                    : "bg-white/10 dark:bg-white/5 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:bg-white/20"
                 }`}
               >
                 {filter.label}
-              </button>
+              </motion.button>
             ))}
 
             {/* Custom Date Range Button */}
             <div className="relative">
-              <button
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={() => {
                   setShowDatePicker(!showDatePicker);
                   if (!showDatePicker) {
                     setTimeFilter("custom");
                   }
                 }}
-                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg transition-all duration-300 cursor-pointer ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl transition-all duration-300 cursor-pointer backdrop-blur-md ${
                   timeFilter === "custom"
-                    ? "bg-secondary text-white shadow-lg scale-105"
-                    : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 hover:scale-105"
+                    ? "bg-secondary/20 text-secondary border border-secondary/40 shadow-lg"
+                    : "bg-white/10 dark:bg-white/5 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:bg-white/20"
                 }`}
               >
                 <svg
@@ -268,7 +274,7 @@ export default function ActivityLog() {
                   />
                 </svg>
                 Custom Range
-              </button>
+              </motion.button>
 
               {/* Date Range Picker Dropdown */}
               {showDatePicker && (
@@ -317,7 +323,9 @@ export default function ActivityLog() {
                       >
                         Clear
                       </button>
-                      <button
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
                         onClick={() => {
                           if (dateRange.start && dateRange.end) {
                             setTimeFilter("custom");
@@ -325,10 +333,10 @@ export default function ActivityLog() {
                           }
                         }}
                         disabled={!dateRange.start || !dateRange.end}
-                        className="flex-1 px-3 py-2 text-xs font-bold bg-secondary text-white rounded-lg hover:bg-secondary/90 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="flex-1 px-3 py-2 text-xs font-bold bg-secondary/20 text-secondary border border-secondary/30 rounded-lg hover:bg-secondary/30 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         Apply
-                      </button>
+                      </motion.button>
                     </div>
                   </div>
                 </motion.div>
@@ -414,9 +422,11 @@ export default function ActivityLog() {
         {timeFilter === "all" &&
           loginPagination.current_page < loginPagination.last_page && (
             <div className="mt-6 text-center">
-              <button
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={loadMoreHistory}
-                className="group px-6 py-3 text-sm font-bold text-slate-600 dark:text-slate-400 border-2 border-slate-200 dark:border-slate-800 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-900 transition-all uppercase tracking-wider active:scale-95 cursor-pointer hover:border-primary dark:hover:border-primary"
+                className="group px-6 py-3 text-sm font-bold text-slate-600 dark:text-slate-400 bg-white/10 dark:bg-white/5 backdrop-blur-md border border-slate-200 dark:border-slate-800 rounded-xl hover:bg-white/20 transition-all uppercase tracking-wider cursor-pointer active:shadow-inner"
               >
                 <span className="flex items-center gap-2">
                   Load More History
@@ -425,7 +435,7 @@ export default function ActivityLog() {
                     {loginPagination.last_page})
                   </span>
                 </span>
-              </button>
+              </motion.button>
             </div>
           )}
 

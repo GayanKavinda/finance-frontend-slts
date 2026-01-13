@@ -273,14 +273,16 @@ export default function PersonalDetails({ user, refetch }) {
                   />
                 </div>
               )}
-              <button
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="absolute -bottom-2 -right-2 bg-slate-900 dark:bg-slate-700 text-white p-2 rounded-full shadow hover:bg-slate-800 dark:hover:bg-slate-600 transition-colors z-10 cursor-pointer"
+                className="absolute -bottom-2 -right-2 bg-white/10 dark:bg-black/20 backdrop-blur-md text-slate-900 dark:text-white p-2 rounded-full shadow-lg border border-white/20 dark:border-slate-800 hover:bg-white/20 dark:hover:bg-white/10 transition-colors z-10 cursor-pointer"
                 title="Change photo"
               >
                 <Camera size={14} />
-              </button>
+              </motion.button>
             </div>
             <div className="flex flex-col gap-2">
               <div className="text-xs text-slate-600 dark:text-slate-300">
@@ -311,13 +313,15 @@ export default function PersonalDetails({ user, refetch }) {
                     reader.readAsDataURL(f);
                   }}
                 />
-                <button
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                   type="button"
                   disabled={!avatarFile || isUploadingAvatar}
                   onClick={onUploadAvatar}
-                  className="group relative px-4 py-2 text-xs font-bold rounded-lg bg-gradient-to-r from-primary to-primary/90 text-white shadow-lg disabled:opacity-40 hover:shadow-xl hover:scale-105 transition-all duration-300 active:scale-95 flex items-center gap-2 cursor-pointer disabled:cursor-not-allowed overflow-hidden"
+                  className="group relative px-4 py-2 text-xs font-bold rounded-xl bg-white/10 dark:bg-white/5 backdrop-blur-md text-primary border border-primary/30 shadow-lg disabled:opacity-40 hover:bg-white/20 transition-all duration-300 flex items-center gap-2 cursor-pointer disabled:cursor-not-allowed overflow-hidden"
                 >
-                  <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+                  <div className="absolute inset-0 bg-primary/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
                   <span className="relative flex items-center gap-2">
                     {isUploadingAvatar ? (
                       <>
@@ -331,9 +335,11 @@ export default function PersonalDetails({ user, refetch }) {
                       </>
                     )}
                   </span>
-                </button>
+                </motion.button>
                 {avatarFile && !isUploadingAvatar && (
                   <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.8 }}
@@ -343,7 +349,7 @@ export default function PersonalDetails({ user, refetch }) {
                       setAvatarPreview(user?.avatar_url || null);
                       enqueueSnackbar("Crop cancelled", { variant: "info" });
                     }}
-                    className="px-4 py-2 text-xs font-bold rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-all duration-300 border-2 border-slate-200 dark:border-slate-700 active:scale-95 cursor-pointer"
+                    className="px-4 py-2 text-xs font-bold rounded-xl bg-white/5 dark:bg-black/20 backdrop-blur-md text-slate-700 dark:text-slate-300 hover:bg-white/10 transition-all duration-300 border border-slate-200 dark:border-slate-800 shadow-md cursor-pointer"
                   >
                     Cancel
                   </motion.button>
@@ -395,12 +401,14 @@ export default function PersonalDetails({ user, refetch }) {
               />
             </Field>
             <div className="sm:col-span-2 flex justify-end">
-              <button
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 type="submit"
                 disabled={profileForm.formState.isSubmitting}
-                className="group relative inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-gradient-to-r from-primary to-primary/90 text-white text-sm font-bold shadow-lg hover:shadow-2xl hover:scale-105 transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100 w-full sm:w-auto justify-center overflow-hidden cursor-pointer"
+                className="group relative inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white/10 dark:bg-white/5 backdrop-blur-md text-primary text-sm font-bold border border-primary/30 shadow-lg hover:bg-white/20 transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed w-full sm:w-auto justify-center overflow-hidden cursor-pointer"
               >
-                <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+                <div className="absolute inset-0 bg-primary/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
                 <span className="relative flex items-center gap-2">
                   {profileForm.formState.isSubmitting ? (
                     <>
@@ -417,7 +425,7 @@ export default function PersonalDetails({ user, refetch }) {
                     </>
                   )}
                 </span>
-              </button>
+              </motion.button>
             </div>
           </form>
         </div>
@@ -460,15 +468,17 @@ export default function PersonalDetails({ user, refetch }) {
                 />
               </Field>
               <div className="flex items-end">
-                <button
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                   type="button"
                   onClick={onRequestEmailOtp}
                   disabled={emailForm.formState.isSubmitting}
-                  className="group px-4 py-2.5 rounded-lg border-2 border-primary dark:border-primary bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary text-sm font-bold w-full hover:bg-primary hover:text-white dark:hover:bg-primary transition-all duration-300 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
+                  className="group px-4 py-2.5 rounded-xl bg-white/10 dark:bg-white/5 backdrop-blur-md border border-primary/30 text-primary text-sm font-bold w-full hover:bg-white/20 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <Mail className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
                   <span>Send Code</span>
-                </button>
+                </motion.button>
               </div>
             </div>
 
@@ -487,12 +497,14 @@ export default function PersonalDetails({ user, refetch }) {
               </Field>
             </div>
             <div className="flex justify-end pt-2">
-              <button
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 type="submit"
                 disabled={emailForm.formState.isSubmitting}
-                className="group relative inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-gradient-to-r from-secondary to-secondary/90 text-white text-sm font-bold shadow-lg hover:shadow-2xl hover:scale-105 transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100 w-full sm:w-auto justify-center overflow-hidden cursor-pointer"
+                className="group relative inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white/10 dark:bg-white/5 backdrop-blur-md text-secondary text-sm font-bold border border-secondary/30 shadow-lg hover:bg-white/20 transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed w-full sm:w-auto justify-center overflow-hidden cursor-pointer"
               >
-                <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+                <div className="absolute inset-0 bg-secondary/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
                 <span className="relative flex items-center gap-2">
                   {emailForm.formState.isSubmitting ? (
                     <>
@@ -509,7 +521,7 @@ export default function PersonalDetails({ user, refetch }) {
                     </>
                   )}
                 </span>
-              </button>
+              </motion.button>
             </div>
           </form>
         </div>
