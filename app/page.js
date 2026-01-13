@@ -105,7 +105,7 @@ export default function Home() {
                 quality={100}
               />
               {/* Dark overlay for text readability with blur effect */}
-              <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+              <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" />
             </div>
           </motion.div>
         ))}
@@ -113,25 +113,25 @@ export default function Home() {
 
       {/* Content Overlay */}
       <div className="relative z-10 flex flex-col items-center justify-center h-full px-6 sm:px-8 lg:px-16">
-        <div className="max-w-6xl w-full">
+        <div className="max-w-5xl w-full">
           {/* Main Content */}
           <AnimatePresence mode="wait">
             <motion.div
               key={currentSlide}
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -30 }}
+              exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.6, ease: "easeOut" }}
-              className="text-center space-y-8"
+              className="text-center space-y-6"
             >
               {/* Centered Logo */}
               <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
+                initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.6, delay: 0.2 }}
-                className="flex justify-center mb-6"
+                className="flex justify-center mb-4"
               >
-                <div className="relative w-[180px] h-[60px] md:w-[220px] md:h-[70px]">
+                <div className="relative w-[160px] h-[50px] md:w-[180px] md:h-[55px]">
                   <Image
                     src="/icons/slt_digital_icon.png"
                     alt="SLT Digital Services"
@@ -142,25 +142,25 @@ export default function Home() {
                 </div>
               </motion.div>
               {/* Title */}
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight leading-tight text-white">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-medium tracking-normal leading-tight text-white">
                 {slides[currentSlide].title}
               </h1>
 
               {/* Subtitle */}
-              <p className="text-base sm:text-lg md:text-xl font-normal text-white/90 max-w-2xl mx-auto">
+              <p className="text-sm sm:text-base md:text-lg font-normal text-white/90 max-w-xl mx-auto leading-relaxed">
                 {slides[currentSlide].subtitle}
               </p>
 
               {/* CTA Buttons */}
-              <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
+              <div className="flex flex-col sm:flex-row gap-3 justify-center pt-6">
                 <Link href="/signup">
                   <motion.button
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    className="px-8 py-3.5 bg-[#005FA9] hover:bg-[#004c87] text-white font-semibold text-base rounded-lg shadow-lg transition-all duration-300 flex items-center justify-center gap-2 w-full sm:w-auto cursor-pointer"
+                    className="px-6 py-3 bg-white/10 hover:bg-white/20 text-white font-medium text-sm rounded-xl backdrop-blur-md border border-white/20 shadow-lg transition-all duration-300 flex items-center justify-center gap-2 w-full sm:w-auto cursor-pointer"
                   >
                     {slides[currentSlide].cta}
-                    <ArrowRight className="w-5 h-5" />
+                    <ArrowRight className="w-4 h-4" />
                   </motion.button>
                 </Link>
 
@@ -168,7 +168,7 @@ export default function Home() {
                   <motion.button
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    className="px-8 py-3.5 text-base font-semibold rounded-lg border-2 border-white/40 backdrop-blur-sm bg-white/10 hover:bg-white/20 text-white transition-all duration-300 w-full sm:w-auto cursor-pointer"
+                    className="px-6 py-3 text-sm font-medium rounded-xl backdrop-blur-md bg-white/5 hover:bg-white/10 border border-white/30 text-white transition-all duration-300 w-full sm:w-auto cursor-pointer"
                   >
                     Sign In
                   </motion.button>
@@ -178,7 +178,7 @@ export default function Home() {
           </AnimatePresence>
 
           {/* Progress Indicators */}
-          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex justify-center gap-2">
+          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex justify-center gap-2">
             {slides.map((_, idx) => (
               <button
                 key={idx}
@@ -187,11 +187,11 @@ export default function Home() {
                   setIsAutoPlaying(false);
                 }}
                 className={`
-                  h-1.5 rounded-full transition-all duration-300
+                  h-1 rounded-full transition-all duration-300
                   ${
                     idx === currentSlide
-                      ? "w-10 bg-white"
-                      : "w-8 bg-white/40 hover:bg-white/60"
+                      ? "w-8 bg-white"
+                      : "w-6 bg-white/30 hover:bg-white/50"
                   }
                 `}
               />
@@ -201,23 +201,23 @@ export default function Home() {
       </div>
 
       {/* Navigation Arrows */}
-      <div className="absolute left-6 right-6 md:left-8 md:right-8 top-1/2 -translate-y-1/2 flex justify-between pointer-events-none z-20">
+      <div className="absolute left-4 right-4 md:left-6 md:right-6 top-1/2 -translate-y-1/2 flex justify-between pointer-events-none z-20">
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={prevSlide}
-          className="pointer-events-auto p-3 rounded-full backdrop-blur-sm bg-white/20 hover:bg-white/30 border border-white/30 text-white transition-all"
+          className="pointer-events-auto p-2.5 rounded-full backdrop-blur-md bg-white/10 hover:bg-white/20 border border-white/20 text-white transition-all"
         >
-          <ChevronLeft className="w-6 h-6 cursor-pointer" />
+          <ChevronLeft className="w-5 h-5 cursor-pointer" />
         </motion.button>
 
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={nextSlide}
-          className="pointer-events-auto p-3 rounded-full backdrop-blur-sm bg-white/20 hover:bg-white/30 border border-white/30 text-white transition-all"
+          className="pointer-events-auto p-2.5 rounded-full backdrop-blur-md bg-white/10 hover:bg-white/20 border border-white/20 text-white transition-all"
         >
-          <ChevronRight className="w-6 h-6 cursor-pointer" />
+          <ChevronRight className="w-5 h-5 cursor-pointer" />
         </motion.button>
       </div>
 
@@ -226,18 +226,18 @@ export default function Home() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1 }}
-        className="absolute bottom-20 left-1/2 -translate-x-1/2 text-white/70 text-xs font-medium hidden md:block"
+        className="absolute bottom-16 left-1/2 -translate-x-1/2 text-white/60 text-xs font-medium hidden md:block"
       >
         <motion.div
-          animate={{ y: [0, 8, 0] }}
+          animate={{ y: [0, 6, 0] }}
           transition={{ duration: 2, repeat: Infinity }}
           className="flex flex-col items-center gap-2"
         >
-          <div className="w-5 h-8 border-2 border-white/40 rounded-full flex items-start justify-center p-1">
+          <div className="w-4 h-6 border-2 border-white/30 rounded-full flex items-start justify-center p-1">
             <motion.div
-              animate={{ y: [0, 10, 0] }}
+              animate={{ y: [0, 8, 0] }}
               transition={{ duration: 1.5, repeat: Infinity }}
-              className="w-1 h-1 bg-white/60 rounded-full"
+              className="w-1 h-1 bg-white/50 rounded-full"
             />
           </div>
         </motion.div>
