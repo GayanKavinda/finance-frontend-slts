@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Loader2,
   User,
+  ShieldUser,
   Mail,
   Lock,
   ShieldCheck,
@@ -257,12 +258,21 @@ export default function PersonalDetails({ user, refetch }) {
           </h3>
           <div className="flex items-center gap-4">
             <div className="relative w-20 h-20 shrink-0">
-              <Image
-                src={avatarPreview || "/images/Signup.png"}
-                alt="avatar"
-                fill
-                className="rounded-full object-cover border border-slate-200 dark:border-slate-800"
-              />
+              {avatarPreview ? (
+                <Image
+                  src={avatarPreview}
+                  alt="avatar"
+                  fill
+                  className="rounded-full object-cover border border-slate-200 dark:border-slate-800"
+                />
+              ) : (
+                <div className="w-full h-full rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center border border-slate-200 dark:border-slate-700">
+                  <ShieldUser
+                    className="w-8 h-8 text-slate-400 dark:text-slate-500"
+                    strokeWidth={1.5}
+                  />
+                </div>
+              )}
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
