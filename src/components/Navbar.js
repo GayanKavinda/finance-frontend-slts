@@ -1,3 +1,5 @@
+//src/components/Navbar.js
+
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";

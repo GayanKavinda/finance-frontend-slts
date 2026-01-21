@@ -106,6 +106,35 @@ export default function ActivityLog() {
     }
   };
 
+  const getActivityStatusMessage = () => {
+    const totalLoaded = loginHistory.length;
+    const totalCount = loginPagination.total || totalLoaded;
+
+    if (timeFilter === "all") {
+      const baseMsg = `Total: ${totalCount} ${
+        totalCount === 1 ? "activity" : "activities"
+      }`;
+      const suffix =
+        loginPagination.current_page < loginPagination.last_page
+          ? ` (Loaded: ${totalLoaded})`
+          : "";
+      return baseMsg + suffix;
+    }
+
+    const filteredCount = filterLoginHistory(loginHistory, timeFilter).length;
+    const countStr = `${filteredCount} ${
+      filteredCount === 1 ? "activity" : "activities"
+    }`;
+
+    if (timeFilter === "custom" && dateRange.start && dateRange.end) {
+      const startStr = new Date(dateRange.start).toLocaleDateString();
+      const endStr = new Date(dateRange.end).toLocaleDateString();
+      return `${startStr} - ${endStr}: ${countStr}`;
+    }
+
+    return `Showing ${countStr} of ${totalLoaded} loaded`;
+  };
+
   return (
     <motion.div
       key="activity"
@@ -187,33 +216,7 @@ export default function ActivityLog() {
               Login History
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              {timeFilter === "all"
-                ? `Total: ${loginPagination.total || loginHistory.length} ${
-                    (loginPagination.total || loginHistory.length) === 1
-                      ? "activity"
-                      : "activities"
-                  }${
-                    loginPagination.current_page < loginPagination.last_page
-                      ? ` (Loaded: ${loginHistory.length})`
-                      : ""
-                  }`
-                : timeFilter === "custom" && dateRange.start && dateRange.end
-                ? `${new Date(
-                    dateRange.start
-                  ).toLocaleDateString()} - ${new Date(
-                    dateRange.end
-                  ).toLocaleDateString()}: ${
-                    filterLoginHistory(loginHistory, timeFilter).length
-                  } ${
-                    filterLoginHistory(loginHistory, timeFilter).length === 1
-                      ? "activity"
-                      : "activities"
-                  }`
-                : `Showing ${
-                    filterLoginHistory(loginHistory, timeFilter).length
-                  } of ${loginHistory.length} loaded ${
-                    loginHistory.length === 1 ? "activity" : "activities"
-                  }`}
+              {getActivityStatusMessage()}
             </p>
           </div>
 
