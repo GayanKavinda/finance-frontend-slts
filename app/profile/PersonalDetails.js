@@ -16,6 +16,9 @@ import {
   Save,
   Camera,
   Upload,
+  Use,
+  XCircle,
+  Eye,
 } from "lucide-react";
 import ImageCropModal from "@/components/ImageCropModal";
 import Image from "next/image";
@@ -53,6 +56,7 @@ export default function PersonalDetails({ user, refetch }) {
   const [avatarFile, setAvatarFile] = useState(null);
   const [avatarPreview, setAvatarPreview] = useState(null);
   const [showCropModal, setShowCropModal] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
   const [tempImage, setTempImage] = useState(null);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
 
@@ -91,7 +95,7 @@ export default function PersonalDetails({ user, refetch }) {
     } catch (e) {
       console.error(
         "[Profile] Update profile failed:",
-        e.response?.data || e.message
+        e.response?.data || e.message,
       );
       const msg =
         e.response?.data?.errors?.name?.[0] ||
@@ -126,7 +130,7 @@ export default function PersonalDetails({ user, refetch }) {
     } catch (e) {
       console.error(
         "[Profile] Avatar upload failed:",
-        e.response?.data || e.message
+        e.response?.data || e.message,
       );
       const msg =
         e.response?.data?.errors?.avatar?.[0] ||
@@ -154,7 +158,7 @@ export default function PersonalDetails({ user, refetch }) {
     } catch (e) {
       console.error(
         "[Profile] OTP request failed:",
-        e.response?.data || e.message
+        e.response?.data || e.message,
       );
       const msg =
         e.response?.data?.errors?.new_email?.[0] ||
@@ -182,7 +186,7 @@ export default function PersonalDetails({ user, refetch }) {
     } catch (e) {
       console.error(
         "[Profile] Email change confirmation failed:",
-        e.response?.data || e.message
+        e.response?.data || e.message,
       );
       const msg =
         e.response?.data?.errors?.otp?.[0] ||
@@ -236,6 +240,38 @@ export default function PersonalDetails({ user, refetch }) {
       transition={{ duration: 0.3, ease: "easeInOut" }}
       className="grid grid-cols-1 lg:grid-cols-3 gap-6"
     >
+      {/* Image Preview Modal */}
+      <AnimatePresence>
+        {showPreview && avatarPreview && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowPreview(false)}
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md p-4"
+          >
+            <motion.div
+              layoutId="avatar-preview-modal"
+              className="relative aspect-square w-full max-w-sm overflow-hidden rounded-3xl bg-slate-900 shadow-2xl ring-1 ring-white/10"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Image
+                src={avatarPreview}
+                alt="Profile Preview"
+                fill
+                className="object-cover"
+              />
+              <button
+                onClick={() => setShowPreview(false)}
+                className="absolute right-4 top-4 rounded-full bg-black/50 p-2 text-white backdrop-blur-lg transition hover:bg-black/75 cursor-pointer"
+              >
+                <XCircle size={20} />
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Image Crop Modal */}
       <AnimatePresence>
         {showCropModal && tempImage && (
@@ -259,12 +295,25 @@ export default function PersonalDetails({ user, refetch }) {
           <div className="flex items-center gap-4">
             <div className="relative w-20 h-20 shrink-0">
               {avatarPreview ? (
-                <Image
-                  src={avatarPreview}
-                  alt="avatar"
-                  fill
-                  className="rounded-full object-cover border border-slate-200 dark:border-slate-800"
-                />
+                <motion.div
+                  layoutId="avatar-preview-modal"
+                  className="relative h-full w-full cursor-zoom-in overflow-hidden rounded-full border border-slate-200 dark:border-slate-800"
+                  onClick={() => setShowPreview(true)}
+                  whileHover={{ scale: 1.05 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                >
+                  <Image
+                    src={avatarPreview}
+                    alt="avatar"
+                    fill
+                    className="object-cover"
+                  />
+
+                  {/* Hover overlay hint */}
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 transition-opacity duration-300 hover:opacity-100">
+                    <Eye size={20} className="text-white drop-shadow-md" />
+                  </div>
+                </motion.div>
               ) : (
                 <div className="w-full h-full rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center border border-slate-200 dark:border-slate-700">
                   <ShieldUser
@@ -319,9 +368,9 @@ export default function PersonalDetails({ user, refetch }) {
                   type="button"
                   disabled={!avatarFile || isUploadingAvatar}
                   onClick={onUploadAvatar}
-                  className="group relative px-4 py-2 text-xs font-bold rounded-xl bg-white/10 dark:bg-white/5 backdrop-blur-md text-primary border border-primary/30 shadow-lg disabled:opacity-40 hover:bg-white/20 transition-all duration-300 flex items-center gap-2 cursor-pointer disabled:cursor-not-allowed overflow-hidden"
+                  className="group relative flex items-center gap-2 overflow-hidden rounded-xl bg-gradient-to-br from-primary to-blue-600 px-4 py-2 text-xs font-bold text-white shadow-lg shadow-primary/25 transition-all duration-300 hover:scale-105 hover:shadow-primary/40 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  <div className="absolute inset-0 bg-primary/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+                  <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 group-hover:animate-[shimmer_1.5s_infinite]"></div>
                   <span className="relative flex items-center gap-2">
                     {isUploadingAvatar ? (
                       <>
@@ -330,7 +379,7 @@ export default function PersonalDetails({ user, refetch }) {
                       </>
                     ) : (
                       <>
-                        <Upload className="w-3.5 h-3.5 group-hover:scale-110 transition-transform duration-300" />
+                        <Upload className="w-3.5 h-3.5 transition-transform duration-300 group-hover:-translate-y-0.5" />
                         <span>Upload</span>
                       </>
                     )}
@@ -349,7 +398,7 @@ export default function PersonalDetails({ user, refetch }) {
                       setAvatarPreview(user?.avatar_url || null);
                       enqueueSnackbar("Crop cancelled", { variant: "info" });
                     }}
-                    className="px-4 py-2 text-xs font-bold rounded-xl bg-white/5 dark:bg-black/20 backdrop-blur-md text-slate-700 dark:text-slate-300 hover:bg-white/10 transition-all duration-300 border border-slate-200 dark:border-slate-800 shadow-md cursor-pointer"
+                    className="rounded-xl border border-slate-200 bg-white/50 px-4 py-2 text-xs font-bold text-slate-600 shadow-sm backdrop-blur-md transition-all hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-800/50 dark:text-slate-300 dark:hover:bg-slate-800"
                   >
                     Cancel
                   </motion.button>
@@ -406,9 +455,9 @@ export default function PersonalDetails({ user, refetch }) {
                 whileTap={{ scale: 0.98 }}
                 type="submit"
                 disabled={profileForm.formState.isSubmitting}
-                className="group relative inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white/10 dark:bg-white/5 backdrop-blur-md text-primary text-sm font-bold border border-primary/30 shadow-lg hover:bg-white/20 transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed w-full sm:w-auto justify-center overflow-hidden cursor-pointer"
+                className="group relative inline-flex w-full sm:w-auto items-center justify-center gap-2 overflow-hidden rounded-xl bg-gradient-to-br from-primary to-blue-600 px-8 py-3 text-sm font-bold text-white shadow-lg shadow-primary/25 transition-all duration-300 hover:shadow-primary/40 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                <div className="absolute inset-0 bg-primary/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+                <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 group-hover:animate-[shimmer_1.5s_infinite]"></div>
                 <span className="relative flex items-center gap-2">
                   {profileForm.formState.isSubmitting ? (
                     <>
@@ -419,7 +468,7 @@ export default function PersonalDetails({ user, refetch }) {
                     <>
                       <Save
                         size={16}
-                        className="group-hover:scale-110 transition-transform duration-300"
+                        className="transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:rotate-12"
                       />
                       <span>Save Changes</span>
                     </>
@@ -474,9 +523,9 @@ export default function PersonalDetails({ user, refetch }) {
                   type="button"
                   onClick={onRequestEmailOtp}
                   disabled={emailForm.formState.isSubmitting}
-                  className="group px-4 py-2.5 rounded-xl bg-white/10 dark:bg-white/5 backdrop-blur-md border border-primary/30 text-primary text-sm font-bold w-full hover:bg-white/20 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
+                  className="group flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-primary/20 bg-primary/5 px-4 py-2.5 text-sm font-bold text-primary transition-all duration-300 hover:border-primary/50 hover:bg-primary/10 hover:shadow-lg hover:shadow-primary/10 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  <Mail className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
+                  <Mail className="w-4 h-4 transition-transform duration-300 group-hover:scale-110" />
                   <span>Send Code</span>
                 </motion.button>
               </div>
@@ -502,9 +551,9 @@ export default function PersonalDetails({ user, refetch }) {
                 whileTap={{ scale: 0.98 }}
                 type="submit"
                 disabled={emailForm.formState.isSubmitting}
-                className="group relative inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white/10 dark:bg-white/5 backdrop-blur-md text-secondary text-sm font-bold border border-secondary/30 shadow-lg hover:bg-white/20 transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed w-full sm:w-auto justify-center overflow-hidden cursor-pointer"
+                className="group relative inline-flex w-full sm:w-auto items-center justify-center gap-2 overflow-hidden rounded-xl bg-gradient-to-br from-secondary to-orange-600 px-8 py-3 text-sm font-bold text-white shadow-lg shadow-secondary/25 transition-all duration-300 hover:shadow-secondary/40 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                <div className="absolute inset-0 bg-secondary/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+                <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 group-hover:animate-[shimmer_1.5s_infinite]"></div>
                 <span className="relative flex items-center gap-2">
                   {emailForm.formState.isSubmitting ? (
                     <>
@@ -515,7 +564,7 @@ export default function PersonalDetails({ user, refetch }) {
                     <>
                       <ShieldCheck
                         size={16}
-                        className="group-hover:scale-110 transition-transform duration-300"
+                        className="transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:rotate-12"
                       />
                       <span>Confirm Change</span>
                     </>

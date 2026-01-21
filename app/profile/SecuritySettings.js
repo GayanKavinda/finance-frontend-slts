@@ -74,7 +74,7 @@ export default function SecuritySettings() {
     } catch (e) {
       console.error(
         "[Profile] Password update failed:",
-        e.response?.data || e.message
+        e.response?.data || e.message,
       );
       const msg =
         e.response?.data?.errors?.current_password?.[0] ||
@@ -88,7 +88,7 @@ export default function SecuritySettings() {
   const onDeactivate = async () => {
     if (
       !confirm(
-        "Deactivate your account? You can request restore within 30 days."
+        "Deactivate your account? You can request restore within 30 days.",
       )
     )
       return;
@@ -108,7 +108,7 @@ export default function SecuritySettings() {
     } catch (e) {
       console.error(
         "[Profile] Deactivation failed:",
-        e.response?.data || e.message
+        e.response?.data || e.message,
       );
       enqueueSnackbar(e.response?.data?.message || "Failed to deactivate", {
         variant: "error",
@@ -131,13 +131,13 @@ export default function SecuritySettings() {
             {/* Glow effect for dark mode */}
             <div className="absolute inset-0 -z-10 rounded-2xl bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 blur-2xl opacity-0 dark:opacity-60"></div>
 
-            <h3 className="text-base font-bold text-slate-600 dark:text-slate-400 mb-6">
+            <h3 className="text-sm font-bold text-slate-600 dark:text-slate-400 mb-4">
               Update Password
             </h3>
             <form onSubmit={passwordForm.handleSubmit(onUpdatePassword)}>
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                  <label className="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
                     Current Password
                   </label>
                   <input
@@ -154,7 +154,7 @@ export default function SecuritySettings() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                  <label className="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
                     New Password
                   </label>
                   <div className="relative">
@@ -164,7 +164,7 @@ export default function SecuritySettings() {
                       onChange={(e) => {
                         passwordForm.setValue("password", e.target.value);
                         setPasswordStrength(
-                          calculatePasswordStrength(e.target.value)
+                          calculatePasswordStrength(e.target.value),
                         );
                       }}
                       className="w-full h-11 px-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all pr-10 text-sm"
@@ -181,7 +181,7 @@ export default function SecuritySettings() {
                         <span
                           className={passwordStrength.color.replace(
                             "bg-",
-                            "text-"
+                            "text-",
                           )}
                         >
                           {passwordStrength.label}
@@ -205,7 +205,7 @@ export default function SecuritySettings() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                  <label className="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
                     Confirm New Password
                   </label>
                   <input
@@ -227,13 +227,13 @@ export default function SecuritySettings() {
 
               <div className="mt-6">
                 <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                   type="submit"
                   disabled={passwordForm.formState.isSubmitting}
-                  className="group relative flex items-center gap-2 px-6 py-3 bg-white/10 dark:bg-white/5 backdrop-blur-md text-primary rounded-xl font-bold text-sm border border-primary/30 shadow-lg hover:bg-white/20 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden cursor-pointer"
+                  className="group relative flex items-center gap-2 overflow-hidden rounded-xl bg-gradient-to-br from-primary to-blue-600 px-8 py-3 text-sm font-bold text-white shadow-lg shadow-primary/25 transition-all duration-300 hover:shadow-primary/40 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  <div className="absolute inset-0 bg-primary/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+                  <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 group-hover:animate-[shimmer_1.5s_infinite]"></div>
                   <span className="relative flex items-center gap-2">
                     {passwordForm.formState.isSubmitting ? (
                       <>
@@ -244,7 +244,7 @@ export default function SecuritySettings() {
                       <>
                         <Save
                           size={16}
-                          className="group-hover:scale-110 transition-transform duration-300"
+                          className="transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:rotate-12"
                         />
                         <span>Update Password</span>
                       </>
@@ -260,7 +260,7 @@ export default function SecuritySettings() {
           <div className="relative rounded-2xl border border-slate-200 dark:border-slate-800 p-6 bg-white/60 dark:bg-slate-950/40 dark:shadow-[0_0_80px_-12px_rgba(239,68,68,0.1)]">
             <div className="absolute inset-0 -z-10 rounded-2xl bg-gradient-to-br from-red-500/5 via-transparent to-red-500/5 blur-2xl opacity-0 dark:opacity-40"></div>
 
-            <h3 className="text-base font-bold text-red-600 dark:text-red-400 mb-2">
+            <h3 className="text-sm font-bold text-red-600 dark:text-red-400 mb-4">
               Danger Zone
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400 mb-6">
@@ -271,9 +271,14 @@ export default function SecuritySettings() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={onDeactivate}
-              className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-red-500/10 dark:bg-red-950/20 backdrop-blur-md text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800 rounded-xl font-bold text-sm hover:bg-red-500/20 transition-all cursor-pointer shadow-md"
+              className="group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-red-500 to-rose-600 px-4 py-3 text-sm font-bold text-white shadow-lg shadow-red-500/25 transition-all duration-300 hover:scale-[1.02] hover:shadow-red-500/40 active:scale-95"
             >
-              <Trash2 size={16} /> Deactivate Account
+              <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/10 to-transparent transition-transform duration-700 group-hover:animate-[shimmer_1.5s_infinite]"></div>
+              <Trash2
+                size={16}
+                className="transition-transform duration-300 group-hover:rotate-12"
+              />
+              <span>Deactivate Account</span>
             </motion.button>
           </div>
         </div>
