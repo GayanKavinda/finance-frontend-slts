@@ -45,7 +45,9 @@ export default function InvoicePage() {
               <tr key={inv.id} className="border-t">
                 <td className="p-3">{inv.invoice_number}</td>
                 <td className="p-3">{inv.customer?.name}</td>
-                <td className="p-3">LKR {inv.invoice_amount.toFixed(2)}</td>
+                <td className="p-3">
+                  LKR {Number(inv.invoice_amount).toFixed(2)}
+                </td>
                 <td className="p-3">
                   <span className="px-2 py-1 rounded text-xs bg-primary/10 text-primary">
                     {inv.status}
@@ -80,7 +82,7 @@ export default function InvoicePage() {
           onClick={() => page < meta.last_page && setPage(page + 1)}
           disabled={page >= meta.last_page}
         >
-          Next
+          Next Page
         </button>
       </div>
     </div>
