@@ -250,8 +250,8 @@ export default function Signup() {
   ];
 
   return (
-    <div className="flex flex-col min-h-screen bg-white dark:bg-slate-950 transition-colors duration-500">
-      <div className="flex flex-col lg:flex-row flex-1 w-full relative">
+    <div className="flex flex-col bg-white dark:bg-slate-950 transition-colors duration-500">
+      <div className="flex flex-col lg:flex-row w-full relative min-h-screen">
         {/* Navigation Logo */}
         <div className="absolute top-0 left-0 right-0 z-50 pointer-events-none pl-4 pr-6">
           <div className="max-w-7xl mx-auto h-16 flex items-center">
@@ -303,7 +303,7 @@ export default function Signup() {
         </div>
 
         {/* Right Side: Centered Form */}
-        <div className="w-full lg:w-1/2 min-h-[calc(100vh-64px)] flex items-center justify-center p-6 lg:p-12 relative pt-20 pb-12 lg:py-0 overflow-y-auto">
+        <div className="w-full lg:w-1/2 min-h-screen flex items-center justify-center p-6 lg:p-12 relative pt-20 pb-12 lg:py-0">
           <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#00B4EB]/5 rounded-full blur-[100px] pointer-events-none" />
           <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-[#008001]/5 rounded-full blur-[100px] pointer-events-none" />
 

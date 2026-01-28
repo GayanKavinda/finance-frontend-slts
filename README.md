@@ -10,7 +10,7 @@
   <strong>A modern, secure financial dashboard built for performance and usability.</strong>
 </p>
 
-[Features](#-features) • [Tech Stack](#-tech-stack) • [Getting Started](#-getting-started) • [Folder Structure](#-folder-structure)
+[Features](#-features) • [Tech Stack](#-tech-stack) • [Getting Started](#-getting-started) • [Folder Structure](#-folder-structure) • [Main Project](../README.md)
 
 </div>
 
