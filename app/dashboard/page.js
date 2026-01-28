@@ -2,6 +2,7 @@
 
 "use client";
 
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import {
@@ -30,6 +31,7 @@ import { useTheme } from "next-themes";
 import StatCard from "@/components/StatCard";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Breadcrumb from "@/components/Breadcrumb";
+import { fetchInvoiceSummary } from "@/lib/invoiceSummary";
 
 const COLORS = {
   primary: "#14b8a6",
@@ -74,6 +76,23 @@ export default function Dashboard() {
   const { user, loading } = useAuth();
   const { theme } = useTheme();
 
+  const [summary, setSummary] = useState(null);
+
+  useEffect(() => {
+    const loadSummary = async () => {
+      try {
+        const data = await fetchInvoiceSummary();
+        setSummary(data);
+      } catch (err) {
+        console.error("Failed to load invoice summary", err);
+      }
+    };
+
+    if (user) {
+      loadSummary();
+    }
+  }, [user]);
+
   const getTimeGreeting = () => {
     const hour = new Date().getHours();
     if (hour < 12) return "Good Morning";
@@ -90,6 +109,13 @@ export default function Dashboard() {
 
   // Detect color for chart labels based on theme
   const chartLabelColor = theme === "dark" ? "#94a3b8" : "#64748b";
+
+  const invoiceChartData = summary
+    ? [
+        { name: "Paid", value: summary.paid_invoices },
+        { name: "Pending", value: summary.pending_invoices },
+      ]
+    : [];
 
   return (
     <ProtectedRoute>
@@ -152,17 +178,30 @@ export default function Dashboard() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <StatCard
               icon={<Wallet className="w-4 h-4 text-primary" />}
-              title="Balance"
-              value={12450.0}
-              change={5.2}
+              title="Total Invoices"
+              value={summary?.total_invoices ?? 0}
               delay={0.1}
             />
+
+            <StatCard
+              icon={<CheckCircle2 className="w-4 h-4 text-emerald-500" />}
+              title="Paid Invoices"
+              value={summary?.paid_invoices ?? 0}
+              delay={0.2}
+            />
+
+            <StatCard
+              icon={<AlertTriangle className="w-4 h-4 text-amber-500" />}
+              title="Pending Invoices"
+              value={summary?.pending_invoices ?? 0}
+              delay={0.3}
+            />
+
             <StatCard
               icon={<TrendingDown className="w-4 h-4 text-rose-500" />}
-              title="Expenses"
-              value={3210.0}
-              change={-2.4}
-              delay={0.2}
+              title="Paid Amount"
+              value={`LKR ${Number(summary?.paid_amount ?? 0).toLocaleString()}`}
+              delay={0.4}
             />
           </div>
 
@@ -171,69 +210,37 @@ export default function Dashboard() {
             {/* Reduced Chart size by making it col-span-8 */}
             <div className="lg:col-span-8">
               <ChartCard
-                title="Revenue Flow"
-                subtitle="Monthly performance metrics"
+                title="Invoice Status Overview"
+                subtitle="Paid vs pending invoices"
                 delay={0.3}
               >
                 <div className="h-full w-full">
                   <ResponsiveContainer width="100%" height={280}>
-                    <AreaChart
-                      data={monthlyExpenses}
-                      margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
-                    >
-                      <defs>
-                        <linearGradient
-                          id="colorIncome"
-                          x1="0"
-                          y1="0"
-                          x2="0"
-                          y2="1"
-                        >
-                          <stop
-                            offset="5%"
-                            stopColor={COLORS.primary}
-                            stopOpacity={0.1}
-                          />
-                          <stop
-                            offset="95%"
-                            stopColor={COLORS.primary}
-                            stopOpacity={0}
-                          />
-                        </linearGradient>
-                      </defs>
+                    <AreaChart data={invoiceChartData}>
                       <CartesianGrid
                         strokeDasharray="3 3"
-                        stroke="var(--border)"
                         vertical={false}
                         opacity={0.3}
                       />
                       <XAxis
-                        dataKey="month"
+                        dataKey="name"
                         axisLine={false}
                         tickLine={false}
                         tick={{ fill: chartLabelColor, fontSize: 11 }}
-                        dy={10}
                       />
                       <YAxis
+                        allowDecimals={false}
                         axisLine={false}
                         tickLine={false}
                         tick={{ fill: chartLabelColor, fontSize: 11 }}
-                        tickFormatter={(v) => `$${v}`}
                       />
-                      <Tooltip
-                        contentStyle={{
-                          borderRadius: "12px",
-                          border: "none",
-                          boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1)",
-                          backgroundColor: "hsl(var(--card))",
-                        }}
-                      />
+                      <Tooltip />
                       <Area
                         type="monotone"
-                        dataKey="income"
+                        dataKey="value"
                         stroke={COLORS.primary}
-                        fill="url(#colorIncome)"
-                        strokeWidth={2}
+                        fillOpacity={0.15}
+                        fill={COLORS.primary}
                       />
                     </AreaChart>
                   </ResponsiveContainer>

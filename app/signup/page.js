@@ -148,6 +148,8 @@ const InputField = ({
   </div>
 );
 
+import Footer from "@/components/Footer";
+
 export default function Signup() {
   const { enqueueSnackbar } = useSnackbar();
   const router = useRouter();
@@ -248,167 +250,176 @@ export default function Signup() {
   ];
 
   return (
-    <div className="flex flex-col lg:flex-row min-h-screen w-full overflow-y-auto transition-colors duration-500">
-      {/* Navigation Logo */}
-      <div className="absolute top-0 left-0 right-0 z-50 pointer-events-none pl-4 pr-6">
-        <div className="max-w-7xl mx-auto h-16 flex items-center">
-          <Link
-            href="/"
-            className="pointer-events-auto group flex items-center gap-2 transition-transform hover:scale-105 active:scale-95"
-          >
-            <div className="relative w-[120px] h-[40px] lg:w-[140px] lg:h-[45px]">
-              <Image
-                src="/icons/slt_digital_icon.png"
-                alt="SLT Digital Logo"
-                fill
-                className="object-contain dark:brightness-0 dark:invert transition-all duration-300"
-                priority
-              />
-            </div>
-          </Link>
+    <div className="flex flex-col min-h-screen bg-white dark:bg-slate-950 transition-colors duration-500">
+      <div className="flex flex-col lg:flex-row flex-1 w-full relative">
+        {/* Navigation Logo */}
+        <div className="absolute top-0 left-0 right-0 z-50 pointer-events-none pl-4 pr-6">
+          <div className="max-w-7xl mx-auto h-16 flex items-center">
+            <Link
+              href="/"
+              className="pointer-events-auto group flex items-center gap-2 transition-transform hover:scale-105 active:scale-95"
+            >
+              <div className="relative w-[120px] h-[40px] lg:w-[140px] lg:h-[45px]">
+                <Image
+                  src="/icons/slt_digital_icon.png"
+                  alt="SLT Digital Logo"
+                  fill
+                  className="object-contain dark:brightness-0 dark:invert transition-all duration-300"
+                  priority
+                />
+              </div>
+            </Link>
+          </div>
         </div>
-      </div>
 
-      {/* Left Side: Immersive Image */}
-      <div className="hidden lg:block w-1/2 relative bg-slate-900 overflow-hidden group">
-        <Image
-          src="/images/Signup.png"
-          alt="Signup Showcase"
-          fill
-          className="object-cover transition-all duration-[1000ms] ease-out group-hover:scale-110 group-hover:brightness-110 group-hover:saturate-[1.2]"
-          priority
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#020617]/40 to-transparent z-10" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#020617]/60 via-transparent to-transparent z-10" />
+        {/* Left Side: Immersive Image */}
+        <div className="hidden lg:block w-1/2 relative bg-slate-900 overflow-hidden group">
+          <Image
+            src="/images/Signup.png"
+            alt="Signup Showcase"
+            fill
+            className="object-cover transition-all duration-[1000ms] ease-out group-hover:scale-110 group-hover:brightness-110 group-hover:saturate-[1.2]"
+            priority
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#020617]/40 to-transparent z-10" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#020617]/60 via-transparent to-transparent z-10" />
 
-        <div className="absolute bottom-12 left-12 right-12 z-20 transition-transform duration-700 ease-out group-hover:-translate-y-3">
+          <div className="absolute bottom-12 left-12 right-12 z-20 transition-transform duration-700 ease-out group-hover:-translate-y-3">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5, duration: 0.8 }}
+            >
+              <h2 className="text-4xl font-bold text-white mb-4 tracking-tight leading-[1.2]">
+                Join the <br />
+                <span className="text-[#00B4EB]">Digital Ecosystem</span>
+              </h2>
+              <p className="text-slate-300 text-lg max-w-md leading-relaxed">
+                The future of corporate financial management is here. Simple,
+                powerful, and built for enterprise success.
+              </p>
+            </motion.div>
+          </div>
+        </div>
+
+        {/* Right Side: Centered Form */}
+        <div className="w-full lg:w-1/2 min-h-[calc(100vh-64px)] flex items-center justify-center p-6 lg:p-12 relative pt-20 pb-12 lg:py-0 overflow-y-auto">
+          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#00B4EB]/5 rounded-full blur-[100px] pointer-events-none" />
+          <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-[#008001]/5 rounded-full blur-[100px] pointer-events-none" />
+
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5, duration: 0.8 }}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+            className="w-full max-w-[420px] relative z-20 pb-12 lg:py-0"
           >
-            <h2 className="text-4xl font-bold text-white mb-4 tracking-tight leading-[1.2]">
-              Join the <br />
-              <span className="text-[#00B4EB]">Digital Ecosystem</span>
-            </h2>
-            <p className="text-slate-300 text-lg max-w-md leading-relaxed">
-              The future of corporate financial management is here. Simple,
-              powerful, and built for enterprise success.
-            </p>
+            <div className="mb-8 text-left">
+              <h1 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight mb-2">
+                Create Account
+              </h1>
+              <p className="text-slate-500 dark:text-slate-400 text-sm">
+                Empower your business with SLT Digital services
+              </p>
+            </div>
+
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              <InputField
+                label="Full Name"
+                icon={User}
+                placeholder="Your Name"
+                {...register("name")}
+                error={errors.name?.message}
+              />
+
+              <InputField
+                label="Work Email"
+                icon={Mail}
+                placeholder="name@company.com"
+                {...register("email")}
+                error={errors.email?.message}
+                isLoading={isCheckingEmail}
+              />
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <InputField
+                    label="Password"
+                    icon={Lock}
+                    type="password"
+                    placeholder="••••••••"
+                    {...register("password")}
+                    error={errors.password?.message}
+                  />
+                  {password && <PasswordStrengthMeter password={password} />}
+                </div>
+                <div className="space-y-1">
+                  <InputField
+                    label="Confirm"
+                    icon={ShieldCheck}
+                    type="password"
+                    placeholder="••••••••"
+                    {...register("password_confirmation")}
+                    error={errors.password_confirmation?.message}
+                  />
+                </div>
+              </div>
+
+              <div className="bg-slate-50 dark:bg-[#020617]/50 p-4 rounded-xl border border-slate-100 dark:border-slate-800/50 grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {reqs.map((req, i) => (
+                  <PasswordRequirement key={i} {...req} />
+                ))}
+              </div>
+
+              <div className="pt-4">
+                <button
+                  type="submit"
+                  disabled={isSubmitting || isCheckingEmail}
+                  className="w-full py-3.5 bg-gradient-to-r from-[#00B4EB] to-[#009bc9] hover:from-[#00A0D1] hover:to-[#0089b3] text-white font-bold rounded-xl shadow-[0_0_20px_rgba(0,180,235,0.15)] hover:shadow-[0_0_30px_rgba(0,180,235,0.3)] active:scale-[0.99] transition-all flex items-center justify-center gap-2 text-sm uppercase tracking-wider disabled:opacity-70 disabled:cursor-not-allowed"
+                >
+                  {isSubmitting ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <>
+                      Get Started <ArrowRight className="w-4 h-4" />
+                    </>
+                  )}
+                </button>
+              </div>
+
+              <p className="text-left text-[11px] text-slate-500 mt-4 leading-relaxed">
+                By signing up, you agree to our{" "}
+                <Link
+                  href="/terms"
+                  className="font-bold text-[#00B4EB] hover:underline"
+                >
+                  Terms of Service
+                </Link>{" "}
+                and{" "}
+                <Link
+                  href="/privacy"
+                  className="font-bold text-[#00B4EB] hover:underline"
+                >
+                  Privacy Policy
+                </Link>
+                .
+              </p>
+
+              <div className="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800 text-left">
+                <p className="text-slate-500 dark:text-slate-400 text-sm">
+                  Already have an account?{" "}
+                  <Link
+                    href="/signin"
+                    className="text-[#008001] font-bold hover:text-[#00B4EB] transition-colors uppercase text-xs tracking-widest ml-1"
+                  >
+                    Sign In
+                  </Link>
+                </p>
+              </div>
+            </form>
           </motion.div>
         </div>
       </div>
-
-      {/* Right Side: Centered Form */}
-      <div className="w-full lg:w-1/2 min-h-screen flex items-center justify-center p-6 lg:p-12 relative pt-16 pb-12 lg:py-0 overflow-y-auto">
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-[#00B4EB]/5 rounded-full blur-[100px] pointer-events-none" />
-        <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-[#008001]/5 rounded-full blur-[100px] pointer-events-none" />
-
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-          className="w-full max-w-[420px] relative z-20 pb-12 lg:py-0"
-        >
-          <div className="mb-8 text-left">
-            <h1 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight mb-2">
-              Create Account
-            </h1>
-            <p className="text-slate-500 dark:text-slate-400 text-sm">
-              Empower your business with SLT Digital services
-            </p>
-          </div>
-
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <InputField
-              label="Full Name"
-              icon={User}
-              placeholder="Your Name"
-              {...register("name")}
-              error={errors.name?.message}
-            />
-
-            <InputField
-              label="Work Email"
-              icon={Mail}
-              placeholder="name@company.com"
-              {...register("email")}
-              error={errors.email?.message}
-              isLoading={isCheckingEmail}
-            />
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <InputField
-                  label="Password"
-                  icon={Lock}
-                  type="password"
-                  placeholder="••••••••"
-                  {...register("password")}
-                  error={errors.password?.message}
-                />
-                {password && <PasswordStrengthMeter password={password} />}
-              </div>
-              <div className="space-y-1">
-                <InputField
-                  label="Confirm"
-                  icon={ShieldCheck}
-                  type="password"
-                  placeholder="••••••••"
-                  {...register("password_confirmation")}
-                  error={errors.password_confirmation?.message}
-                />
-              </div>
-            </div>
-
-            <div className="bg-slate-50 dark:bg-[#020617]/50 p-4 rounded-xl border border-slate-100 dark:border-slate-800/50 grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {reqs.map((req, i) => (
-                <PasswordRequirement key={i} {...req} />
-              ))}
-            </div>
-
-            <div className="pt-4">
-              <button
-                type="submit"
-                disabled={isSubmitting || isCheckingEmail}
-                className="w-full py-3.5 bg-gradient-to-r from-[#00B4EB] to-[#009bc9] hover:from-[#00A0D1] hover:to-[#0089b3] text-white font-bold rounded-xl shadow-[0_0_20px_rgba(0,180,235,0.15)] hover:shadow-[0_0_30px_rgba(0,180,235,0.3)] active:scale-[0.99] transition-all flex items-center justify-center gap-2 text-sm uppercase tracking-wider disabled:opacity-70 disabled:cursor-not-allowed"
-              >
-                {isSubmitting ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <>
-                    Get Started <ArrowRight className="w-4 h-4" />
-                  </>
-                )}
-              </button>
-            </div>
-
-            <p className="text-left text-[11px] text-slate-500 mt-4 leading-relaxed">
-              By signing up, you agree to our{" "}
-              <a href="#" className="font-bold text-[#00B4EB] hover:underline">
-                Terms of Service
-              </a>{" "}
-              and{" "}
-              <a href="#" className="font-bold text-[#00B4EB] hover:underline">
-                Privacy Policy
-              </a>
-              .
-            </p>
-
-            <div className="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800 text-left">
-              <p className="text-slate-500 dark:text-slate-400 text-sm">
-                Already have an account?{" "}
-                <Link
-                  href="/signin"
-                  className="text-[#008001] font-bold hover:text-[#00B4EB] transition-colors uppercase text-xs tracking-widest ml-1"
-                >
-                  Sign In
-                </Link>
-              </p>
-            </div>
-          </form>
-        </motion.div>
-      </div>
+      <Footer />
     </div>
   );
 }

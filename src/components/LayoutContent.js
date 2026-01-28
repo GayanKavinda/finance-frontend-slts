@@ -10,11 +10,13 @@ function ScrollableContent({ children }) {
   const { handleScroll } = useScroll();
 
   return (
-    <ThemeScrollArea className="h-full w-full bg-inherit" onScroll={handleScroll}>
+    <ThemeScrollArea
+      className="h-full w-full bg-inherit"
+      onScroll={handleScroll}
+    >
       <div className="flex flex-col min-h-screen">
         <Navbar />
         <MainContent>{children}</MainContent>
-        <Footer />
       </div>
     </ThemeScrollArea>
   );
