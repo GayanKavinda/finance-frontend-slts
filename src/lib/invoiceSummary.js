@@ -1,6 +1,11 @@
-import axios from "axios";
+import axios from "@/lib/axios";
 
 export const fetchInvoiceSummary = async () => {
   const res = await axios.get("/api/invoice-summary");
+  return res.data;
+};
+
+export const fetchRecentInvoices = async (limit = 5) => {
+  const res = await axios.get(`/api/invoices?page=1&limit=${limit}`);
   return res.data;
 };

@@ -4,30 +4,7 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "next-themes";
-import {
-  Menu,
-  X,
-  LogOut,
-  ChevronDown,
-  LayoutDashboard,
-  ReceiptText,
-  Target,
-  PieChart,
-  User as UserIcon,
-  HelpCircle,
-  Sun,
-  Moon,
-  Laptop,
-  ArrowRight,
-  Sparkles,
-  AlertTriangle,
-  Bell,
-  AlertCircle,
-  Database,
-  Server,
-  Cpu,
-  CheckCircle2,
-} from "lucide-react";
+import { Menu, X, LogOut, ChevronDown, LayoutDashboard, ReceiptText, Target, PieChart, User as UserIcon, HelpCircle, Sun, Moon, Laptop, ArrowRight, Sparkles, AlertTriangle, Bell, AlertCircle, Database, Server, Cpu, CheckCircle2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
