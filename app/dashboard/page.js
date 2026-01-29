@@ -8,14 +8,9 @@ import Image from "next/image";
 import {
   Wallet,
   TrendingDown,
-  Plus,
   MoreVertical,
-  Download,
   CheckCircle2,
   AlertTriangle,
-  Activity,
-  ShieldCheck,
-  Zap,
 } from "lucide-react";
 import {
   AreaChart,
@@ -69,18 +64,21 @@ export default function Dashboard() {
 
   const [summary, setSummary] = useState(null);
   const [recentInvoices, setRecentInvoices] = useState([]);
+  const [monthlyTrend, setMonthlyTrend] = useState([]);
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [summaryData, invoicesData] = await Promise.all([
+        const [summaryData, invoicesData, trendData] = await Promise.all([
           fetchInvoiceSummary(),
           fetchRecentInvoices(5),
+          fetchMonthlyInvoiceTrend(),
         ]);
         setSummary(summaryData);
         setRecentInvoices(
           Array.isArray(invoicesData?.data) ? invoicesData.data : [],
         );
+        setMonthlyTrend(Array.isArray(trendData) ? trendData : []);
       } catch (err) {
         console.error("Failed to load dashboard data", err);
       }
@@ -114,6 +112,13 @@ export default function Dashboard() {
         { name: "Pending", value: Number(summary.pending_invoices) },
       ]
     : [];
+
+  const monthlyChartData = monthlyTrend.map((item) => ({
+    month: item.month,
+    total: Number(item.total_amount),
+    paid: Number(item.paid_amount),
+    pending: Number(item.pending_amount),
+  }));
 
   return (
     <ProtectedRoute>
@@ -220,46 +225,99 @@ export default function Dashboard() {
           </div>
 
           {/* MAIN CONTENT GRID */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            <div className="lg:col-span-12">
-              <ChartCard
-                title="Invoice Status Overview"
-                subtitle="Paid vs pending invoices"
-                delay={0.6}
-              >
-                <div className="h-full w-full">
-                  <ResponsiveContainer width="100%" height={280}>
-                    <AreaChart data={invoiceChartData}>
-                      <CartesianGrid
-                        strokeDasharray="3 3"
-                        vertical={false}
-                        opacity={0.3}
-                      />
-                      <XAxis
-                        dataKey="name"
-                        axisLine={false}
-                        tickLine={false}
-                        tick={{ fill: chartLabelColor, fontSize: 11 }}
-                      />
-                      <YAxis
-                        allowDecimals={false}
-                        axisLine={false}
-                        tickLine={false}
-                        tick={{ fill: chartLabelColor, fontSize: 11 }}
-                      />
-                      <Tooltip />
-                      <Area
-                        type="monotone"
-                        dataKey="value"
-                        stroke={COLORS.primary}
-                        fillOpacity={0.15}
-                        fill={COLORS.primary}
-                      />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                </div>
-              </ChartCard>
-            </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <ChartCard
+              title="Invoice Status Overview"
+              subtitle="Paid vs pending invoices"
+              delay={0.6}
+            >
+              <div className="h-full w-full">
+                <ResponsiveContainer width="100%" height={280}>
+                  <AreaChart data={invoiceChartData}>
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      vertical={false}
+                      opacity={0.3}
+                    />
+                    <XAxis
+                      dataKey="name"
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fill: chartLabelColor, fontSize: 11 }}
+                    />
+                    <YAxis
+                      allowDecimals={false}
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fill: chartLabelColor, fontSize: 11 }}
+                    />
+                    <Tooltip />
+                    <Area
+                      type="monotone"
+                      dataKey="value"
+                      stroke={COLORS.primary}
+                      fillOpacity={0.15}
+                      fill={COLORS.primary}
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </ChartCard>
+
+            <ChartCard
+              title="Monthly Invoice Trend"
+              subtitle="Total vs paid vs pending"
+              delay={0.7}
+            >
+              <ResponsiveContainer width="100%" height={280}>
+                <AreaChart data={monthlyChartData}>
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    vertical={false}
+                    opacity={0.3}
+                  />
+                  <XAxis
+                    dataKey="month"
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fill: chartLabelColor, fontSize: 11 }}
+                  />
+                  <YAxis
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fill: chartLabelColor, fontSize: 11 }}
+                  />
+                  <Tooltip />
+
+                  <Area
+                    type="monotone"
+                    dataKey="total"
+                    stroke="#3b82f6"
+                    fillOpacity={0.15}
+                    fill="#3b82f6"
+                    name="Total"
+                  />
+
+                  <Area
+                    type="monotone"
+                    dataKey="paid"
+                    stroke="#22c55e"
+                    fillOpacity={0.15}
+                    fill="#22c55e"
+                    name="Paid"
+                  />
+
+                  <Area
+                    type="monotone"
+                    dataKey="pending"
+                    stroke="#f59e0b"
+                    fillOpacity={0.15}
+                    fill="#f59e0b"
+                    name="Pending"
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </ChartCard>
           </div>
 
           {/* RECENT INVOICES SECTION */}

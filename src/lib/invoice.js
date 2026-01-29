@@ -17,6 +17,6 @@ export const downloadInvoicePdf = async (invoiceId) => {
 };
 
 export const fetchMonthlyInvoiceTrend = async () => {
-  const res = await api.get("/invoices/monthly-trend");
+  const res = await axios.get("/api/invoices/monthly-trend");
   return res.data;
 };
