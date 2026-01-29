@@ -109,16 +109,16 @@ export default function Home() {
               initial={false}
               animate={{
                 opacity: idx === currentSlide ? 1 : 0,
-                scale: idx === currentSlide ? 1 : 1.05,
+                scale: idx === currentSlide ? 1.05 : 1, // Subtle continuous scale feel
               }}
               transition={{
-                opacity: { duration: 1, ease: "easeInOut" },
+                opacity: { duration: 1.2, ease: [0.4, 0, 0.2, 1] }, // Custom bezier for premium feel
                 scale: { duration: 1.2, ease: "easeOut" },
               }}
-              className="absolute inset-0"
+              className="absolute inset-0 will-change-[opacity,transform]"
               style={{ pointerEvents: idx === currentSlide ? "auto" : "none" }}
             >
-              {/* Background Asset with overlay */}
+              {/* Background Asset */}
               <div className="relative w-full h-full">
                 {slide.video ? (
                   <video
@@ -136,14 +136,21 @@ export default function Home() {
                     fill
                     className="object-cover"
                     priority={idx === 0}
-                    quality={100}
+                    quality={90}
                   />
                 )}
-                {/* Dark overlay for text readability with blur effect */}
-                <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" />
+                {/* Fixed Overlay for readability */}
+                <div className="absolute inset-0 bg-black/20" />
               </div>
             </motion.div>
           ))}
+        </div>
+
+        {/* Global Visual Layers (Static - Higher Performance) */}
+        <div className="absolute inset-0 pointer-events-none z-1">
+          <div className="absolute inset-0 bg-linear-to-b from-black/60 via-transparent to-black/80" />
+          <div className="absolute inset-0 bg-black/10 backdrop-blur-[0.5px]" />
+          <div className="absolute inset-0 opacity-[0.03] mix-blend-overlay bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
         </div>
 
         {/* Content Overlay */}
@@ -153,17 +160,35 @@ export default function Home() {
             <AnimatePresence mode="wait">
               <motion.div
                 key={currentSlide}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.6, ease: "easeOut" }}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+                variants={{
+                  hidden: { opacity: 0, y: 10 },
+                  visible: {
+                    opacity: 1,
+                    y: 0,
+                    transition: {
+                      duration: 0.5,
+                      staggerChildren: 0.08,
+                      delayChildren: 0.1,
+                      ease: [0.21, 1, 0.36, 1], // Apple-style easeOut
+                    },
+                  },
+                  exit: {
+                    opacity: 0,
+                    y: -10,
+                    transition: { duration: 0.3 },
+                  },
+                }}
                 className="text-center space-y-6"
               >
                 {/* Centered Logo */}
                 <motion.div
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.6, delay: 0.2 }}
+                  variants={{
+                    hidden: { opacity: 0, scale: 0.95 },
+                    visible: { opacity: 1, scale: 1 },
+                  }}
                   className="flex justify-center mb-4"
                 >
                   <div className="relative w-[160px] h-[50px] md:w-[180px] md:h-[55px]">
@@ -176,21 +201,44 @@ export default function Home() {
                     />
                   </div>
                 </motion.div>
-                {/* Title */}
-                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-medium tracking-normal leading-tight text-white">
+
+                {/* Title with reveal */}
+                <motion.h1
+                  variants={{
+                    hidden: { opacity: 0, y: 30 },
+                    visible: {
+                      opacity: 1,
+                      y: 0,
+                      transition: { duration: 0.8, ease: "easeOut" },
+                    },
+                  }}
+                  className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-medium tracking-normal leading-tight text-white"
+                >
                   {slides[currentSlide].title}
-                </h1>
+                </motion.h1>
 
                 {/* Subtitle */}
-                <p className="text-sm sm:text-base md:text-lg font-normal text-white/90 max-w-xl mx-auto leading-relaxed">
+                <motion.p
+                  variants={{
+                    hidden: { opacity: 0, y: 20 },
+                    visible: { opacity: 1, y: 0 },
+                  }}
+                  className="text-sm sm:text-base md:text-lg font-normal text-white/90 max-w-xl mx-auto leading-relaxed"
+                >
                   {slides[currentSlide].subtitle}
-                </p>
+                </motion.p>
 
                 {/* CTA Buttons */}
-                <div className="flex flex-col sm:flex-row gap-3 justify-center pt-6">
+                <motion.div
+                  variants={{
+                    hidden: { opacity: 0, scale: 0.95 },
+                    visible: { opacity: 1, scale: 1 },
+                  }}
+                  className="flex flex-col sm:flex-row gap-3 justify-center pt-6"
+                >
                   <Link href="/signup">
                     <motion.button
-                      whileHover={{ scale: 1.02 }}
+                      whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.98 }}
                       className="px-6 py-3 bg-white/10 hover:bg-white/20 text-white font-medium text-sm rounded-xl backdrop-blur-md border border-white/20 shadow-lg transition-all duration-300 flex items-center justify-center gap-2 w-full sm:w-auto cursor-pointer"
                     >
@@ -201,76 +249,94 @@ export default function Home() {
 
                   <Link href="/signin">
                     <motion.button
-                      whileHover={{ scale: 1.02 }}
+                      whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.98 }}
                       className="px-6 py-3 text-sm font-medium rounded-xl backdrop-blur-md bg-white/5 hover:bg-white/10 border border-white/30 text-white transition-all duration-300 w-full sm:w-auto cursor-pointer"
                     >
                       Sign In
                     </motion.button>
                   </Link>
-                </div>
+                </motion.div>
               </motion.div>
             </AnimatePresence>
 
-            {/* Progress Indicators */}
-            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex justify-center gap-3">
-              {slides.map((_, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => {
-                    setCurrentSlide(idx);
-                    setIsAutoPlaying(false);
-                  }}
-                  className="relative h-1.5 rounded-full bg-white/10 overflow-hidden transition-all duration-500"
-                  style={{
-                    width: idx === currentSlide ? "64px" : "32px",
-                  }}
-                >
-                  {/* Background Track for inactive */}
-                  <div className="absolute inset-0 bg-white/10" />
+            {/* Progress Indicators & Subtle Counter */}
+            <div className="absolute bottom-10 left-0 right-0 px-8 flex items-center justify-between">
+              <div className="hidden md:flex items-center gap-3 text-white/30 text-[10px] tracking-[0.2em] font-light">
+                <span className="text-white/60">0{currentSlide + 1}</span>
+                <div className="w-8 h-px bg-white/10" />
+                <span>0{slides.length}</span>
+              </div>
 
-                  {/* Active Progress Filling */}
-                  {idx === currentSlide && (
-                    <motion.div
-                      key={`progress-${idx}`}
-                      initial={{ width: "0%" }}
-                      animate={{ width: "100%" }}
-                      transition={{
-                        duration: isAutoPlaying ? SLIDE_DURATION / 1000 : 0.4,
-                        ease: "linear",
+              <div className="mx-auto flex justify-center gap-3">
+                {slides.map((_, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => {
+                      setCurrentSlide(idx);
+                      setIsAutoPlaying(false);
+                    }}
+                    className="relative py-2 focus:outline-none"
+                  >
+                    <div
+                      className="relative h-[2px] rounded-full bg-white/10 overflow-hidden transition-all duration-500"
+                      style={{
+                        width: idx === currentSlide ? "64px" : "32px",
                       }}
-                      className="absolute inset-y-0 left-0 bg-white"
-                    />
-                  )}
+                    >
+                      {idx === currentSlide && (
+                        <motion.div
+                          key={`progress-${idx}`}
+                          initial={{ width: "0%" }}
+                          animate={{ width: "100%" }}
+                          transition={{
+                            duration: isAutoPlaying
+                              ? SLIDE_DURATION / 1000
+                              : 0.4,
+                            ease: "linear",
+                          }}
+                          className="absolute inset-y-0 left-0 bg-white"
+                        />
+                      )}
+                      {idx < currentSlide && (
+                        <div className="absolute inset-0 bg-white/30" />
+                      )}
+                    </div>
+                  </button>
+                ))}
+              </div>
 
-                  {/* Completed slides (before current) */}
-                  {idx < currentSlide && (
-                    <div className="absolute inset-0 bg-white/40" />
-                  )}
-                </button>
-              ))}
+              <div className="hidden md:block text-white/30 text-[10px] tracking-[0.2em] font-light uppercase">
+                {slides[currentSlide].title.split(" ")[0]} / NEXT GEN
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Navigation Arrows */}
-        <div className="absolute left-4 right-4 md:left-6 md:right-6 top-1/2 -translate-y-1/2 flex justify-between pointer-events-none z-20">
+        {/* Refined Navigation Arrows */}
+        <div className="absolute left-6 right-6 top-1/2 -translate-y-1/2 flex justify-between pointer-events-none z-20">
           <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            whileHover={{
+              scale: 1.1,
+              backgroundColor: "rgba(255,255,255,0.15)",
+            }}
+            whileTap={{ scale: 0.9 }}
             onClick={prevSlide}
-            className="pointer-events-auto p-2.5 rounded-full backdrop-blur-md bg-white/10 hover:bg-white/20 border border-white/20 text-white transition-all"
+            className="pointer-events-auto p-3 rounded-full backdrop-blur-xl bg-white/5 border border-white/10 text-white transition-all duration-300"
           >
-            <ChevronLeft className="w-5 h-5 cursor-pointer" />
+            <ChevronLeft className="w-5 h-5" />
           </motion.button>
 
           <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            whileHover={{
+              scale: 1.1,
+              backgroundColor: "rgba(255,255,255,0.15)",
+            }}
+            whileTap={{ scale: 0.9 }}
             onClick={nextSlide}
-            className="pointer-events-auto p-2.5 rounded-full backdrop-blur-md bg-white/10 hover:bg-white/20 border border-white/20 text-white transition-all"
+            className="pointer-events-auto p-3 rounded-full backdrop-blur-xl bg-white/5 border border-white/10 text-white transition-all duration-300"
           >
-            <ChevronRight className="w-5 h-5 cursor-pointer" />
+            <ChevronRight className="w-5 h-5" />
           </motion.button>
         </div>
 
