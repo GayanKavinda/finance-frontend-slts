@@ -117,60 +117,61 @@ export default function Dashboard() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Breadcrumb items={[{ label: "Dashboard", href: "/dashboard" }]} />
         <div className="space-y-8">
-          {/* HEADER SECTION */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div className="flex items-center gap-4">
-              <motion.div
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="relative p-1 rounded-full border-2 border-primary/20 bg-background shadow-lg"
-              >
-                <div className="w-14 h-14 md:w-16 md:h-16 rounded-full overflow-hidden relative">
+          {/* HEADER SECTION - Modern Welcome Banner */}
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="premium-card flex flex-col sm:flex-row items-center gap-6 !p-6 border-l-4 border-l-primary relative overflow-hidden flex-1"
+            >
+              {/* Background Decoration */}
+              <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl pointer-events-none" />
+
+              <div className="relative flex-shrink-0">
+                <div className="w-20 h-20 rounded-2xl overflow-hidden border-2 border-primary/20 p-1.5 bg-card shadow-2xl transition-transform hover:scale-105 duration-500">
                   {user.avatar_url ? (
                     <Image
                       src={user.avatar_url}
                       alt={user.name}
                       fill
-                      className="object-cover"
+                      className="object-cover rounded-xl"
                     />
                   ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center text-white font-bold">
+                    <div className="w-full h-full bg-gradient-to-br from-primary to-blue-600 rounded-xl flex items-center justify-center text-white text-2xl font-black">
                       {user.name.charAt(0)}
                     </div>
                   )}
                 </div>
-                <div className="absolute bottom-0 right-0 w-4 h-4 bg-emerald-500 border-2 border-background rounded-full" />
-              </motion.div>
+                <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 border-4 border-card rounded-full shadow-lg" />
+              </div>
 
-              <div>
-                <h1 className="text-xl md:text-2xl font-bold text-foreground">
+              <div className="text-center sm:text-left relative z-10">
+                <h1 className="text-xl md:text-2xl font-black text-foreground tracking-tight">
                   {getTimeGreeting()},{" "}
                   <span className="gradient-text">
-                    {user.name.split(" ")[0]}
+                    {user.name}
                   </span>
                 </h1>
-                <div className="flex items-center gap-2 mt-1">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-widest">
-                    System Status:{" "}
-                    <span className="text-emerald-500">Operational</span>
+                <div className="flex flex-wrap justify-center sm:justify-start items-center gap-3 mt-2">
+                  <div className="flex items-center gap-2 px-2.5 py-1 bg-emerald-500/10 text-emerald-500 rounded-full border border-emerald-500/20">
+                    <CheckCircle2 className="w-3 h-3" />
+                    <span className="text-[10px] font-bold uppercase tracking-wider">Active Account</span>
+                  </div>
+                  <div className="h-4 w-px bg-border hidden sm:block" />
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">
+                    Finance Controller • SLT Digital
                   </p>
                 </div>
               </div>
-            </div>
+            </motion.div>
 
-            <div className="flex items-center gap-3">
-              <button className="px-4 py-2 text-xs font-bold bg-card border border-border rounded-lg hover:bg-muted transition-all flex items-center gap-2 cursor-pointer">
-                <Download className="w-4 h-4" /> Export
-              </button>
-              <button className="px-4 py-2 text-xs font-bold text-white bg-primary rounded-lg hover:opacity-90 transition-all flex items-center gap-2 shadow-lg shadow-primary/20 cursor-pointer">
-                <Plus className="w-4 h-4" /> Deposit
-              </button>
+            <div className="flex items-center gap-3 shrink-0">
+              {/* Removed Export and Deposit buttons as per user request */}
             </div>
           </div>
 
           {/* STATS */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4">
             <StatCard
               icon={<Wallet className="w-4 h-4 text-primary" />}
               title="Total Invoices"
@@ -180,19 +181,19 @@ export default function Dashboard() {
             />
 
             <StatCard
+              icon={<CheckCircle2 className="w-4 h-4 text-emerald-500" />}
+              title="Paid Invoices"
+              value={summary?.paid_invoices ?? 0}
+              decimals={0}
+              delay={0.2}
+            />
+
+            <StatCard
               icon={<TrendingDown className="w-4 h-4 text-blue-500" />}
               title="Gross Amount"
               value={summary?.gross_amount ?? 0}
               prefix="LKR "
               decimals={2}
-              delay={0.2}
-            />
-
-            <StatCard
-              icon={<AlertTriangle className="w-4 h-4 text-amber-500" />}
-              title="Pending Invoices"
-              value={summary?.pending_invoices ?? 0}
-              decimals={0}
               delay={0.3}
             />
 
@@ -204,15 +205,24 @@ export default function Dashboard() {
               decimals={2}
               delay={0.4}
             />
+
+            <StatCard
+              icon={<AlertTriangle className="w-4 h-4 text-amber-500" />}
+              title="Pending Amount"
+              value={summary?.pending_amount ?? 0}
+              prefix="LKR "
+              decimals={2}
+              delay={0.5}
+            />
           </div>
 
           {/* MAIN CONTENT GRID */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            <div className="lg:col-span-8">
+            <div className="lg:col-span-12">
               <ChartCard
                 title="Invoice Status Overview"
                 subtitle="Paid vs pending invoices"
-                delay={0.5}
+                delay={0.6}
               >
                 <div className="h-full w-full">
                   <ResponsiveContainer width="100%" height={280}>
@@ -246,69 +256,6 @@ export default function Dashboard() {
                   </ResponsiveContainer>
                 </div>
               </ChartCard>
-            </div>
-
-            <div className="lg:col-span-4 space-y-4">
-              <div className="premium-card p-6 h-full flex flex-col">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
-                    Live Health
-                  </h3>
-                  <div className="flex gap-1">
-                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500/30" />
-                  </div>
-                </div>
-
-                <div className="space-y-4 flex-1">
-                  {[
-                    {
-                      label: "Server Load",
-                      val: "18%",
-                      icon: Activity,
-                      color: "text-blue-500",
-                    },
-                    {
-                      label: "DB Latency",
-                      val: "08ms",
-                      icon: Zap,
-                      color: "text-amber-500",
-                    },
-                    {
-                      label: "Encryption",
-                      val: "AES-256",
-                      icon: ShieldCheck,
-                      color: "text-emerald-500",
-                    },
-                  ].map((item, i) => (
-                    <div
-                      key={i}
-                      className="flex items-center justify-between p-4 rounded-xl bg-muted/10 border border-border/50 group hover:border-primary/20 transition-all"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-lg bg-background shadow-sm group-hover:scale-110 transition-transform">
-                          <item.icon className={`w-4 h-4 ${item.color}`} />
-                        </div>
-                        <span className="text-xs font-bold text-foreground">
-                          {item.label}
-                        </span>
-                      </div>
-                      <span className="text-xs font-black text-muted-foreground">
-                        {item.val}
-                      </span>
-                    </div>
-                  ))}
-
-                  <div className="mt-8 p-4 rounded-xl bg-primary/5 border border-primary/10">
-                    <p className="text-[10px] font-bold text-primary uppercase tracking-widest mb-1">
-                      Last Update
-                    </p>
-                    <p className="text-[11px] text-muted-foreground">
-                      System check completed 2 mins ago. No issues detected.
-                    </p>
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
 
