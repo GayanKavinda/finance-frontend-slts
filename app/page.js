@@ -15,6 +15,13 @@ const slides = [
     cta: "View Dashboard",
   },
   {
+    title: "Maritime Finance Solutions",
+    subtitle:
+      "Managing port fees and shipping allowances with nautical precision",
+    video: "/slides/motorboat-in-harbor-with-sailboats-bequia.mp4",
+    cta: "Explore Portals",
+  },
+  {
     title: "Instant Salary Insights",
     subtitle:
       "View your monthly earnings, deductions, and net pay in real-time",
@@ -22,11 +29,23 @@ const slides = [
     cta: "Check Salary",
   },
   {
+    title: "Global Reach, Local Impact",
+    subtitle: "Supporting digital infrastructure across the island regions",
+    video: "/slides/raja-ampat-islands-17.mp4",
+    cta: "See Networks",
+  },
+  {
     title: "Digital Pay Sheets",
     subtitle:
       "Download and export your monthly payment slips as secure PDFs instantly",
     image: "/slides/5.uwp4831664.avif",
     cta: "Download PDF",
+  },
+  {
+    title: "Digital Transformation",
+    subtitle: "Navigating the future of telecommunications and finance",
+    video: "/slides/rocky-shore-coast.mp4",
+    cta: "Learn More",
   },
   {
     title: "Track Your Earnings",
@@ -57,12 +76,14 @@ export default function Home() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
 
+  const SLIDE_DURATION = 5000;
+
   useEffect(() => {
     if (!isAutoPlaying) return;
 
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % slides.length);
-    }, 5000);
+    }, SLIDE_DURATION);
 
     return () => clearInterval(timer);
   }, [isAutoPlaying]);
@@ -97,16 +118,27 @@ export default function Home() {
               className="absolute inset-0"
               style={{ pointerEvents: idx === currentSlide ? "auto" : "none" }}
             >
-              {/* Image with overlay */}
+              {/* Background Asset with overlay */}
               <div className="relative w-full h-full">
-                <Image
-                  src={slide.image}
-                  alt={slide.title}
-                  fill
-                  className="object-cover"
-                  priority={idx === 0}
-                  quality={100}
-                />
+                {slide.video ? (
+                  <video
+                    src={slide.video}
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    className="absolute inset-0 w-full h-full object-cover"
+                  />
+                ) : (
+                  <Image
+                    src={slide.image}
+                    alt={slide.title}
+                    fill
+                    className="object-cover"
+                    priority={idx === 0}
+                    quality={100}
+                  />
+                )}
                 {/* Dark overlay for text readability with blur effect */}
                 <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" />
               </div>
@@ -181,7 +213,7 @@ export default function Home() {
             </AnimatePresence>
 
             {/* Progress Indicators */}
-            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex justify-center gap-2">
+            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex justify-center gap-3">
               {slides.map((_, idx) => (
                 <button
                   key={idx}
@@ -189,15 +221,33 @@ export default function Home() {
                     setCurrentSlide(idx);
                     setIsAutoPlaying(false);
                   }}
-                  className={`
-                    h-1 rounded-full transition-all duration-300
-                    ${
-                      idx === currentSlide
-                        ? "w-8 bg-white"
-                        : "w-6 bg-white/30 hover:bg-white/50"
-                    }
-                  `}
-                />
+                  className="relative h-1.5 rounded-full bg-white/10 overflow-hidden transition-all duration-500"
+                  style={{
+                    width: idx === currentSlide ? "64px" : "32px",
+                  }}
+                >
+                  {/* Background Track for inactive */}
+                  <div className="absolute inset-0 bg-white/10" />
+
+                  {/* Active Progress Filling */}
+                  {idx === currentSlide && (
+                    <motion.div
+                      key={`progress-${idx}`}
+                      initial={{ width: "0%" }}
+                      animate={{ width: "100%" }}
+                      transition={{
+                        duration: isAutoPlaying ? SLIDE_DURATION / 1000 : 0.4,
+                        ease: "linear",
+                      }}
+                      className="absolute inset-y-0 left-0 bg-white"
+                    />
+                  )}
+
+                  {/* Completed slides (before current) */}
+                  {idx < currentSlide && (
+                    <div className="absolute inset-0 bg-white/40" />
+                  )}
+                </button>
               ))}
             </div>
           </div>
