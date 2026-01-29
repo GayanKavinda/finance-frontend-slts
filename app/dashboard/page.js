@@ -31,6 +31,7 @@ import { useTheme } from "next-themes";
 import StatCard from "@/components/StatCard";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Breadcrumb from "@/components/Breadcrumb";
+import { fetchMonthlyInvoiceTrend } from "@/lib/invoice";
 import { fetchInvoiceSummary, fetchRecentInvoices } from "@/lib/invoiceSummary";
 
 const COLORS = {
@@ -77,7 +78,9 @@ export default function Dashboard() {
           fetchRecentInvoices(5),
         ]);
         setSummary(summaryData);
-        setRecentInvoices(invoicesData.data || []);
+        setRecentInvoices(
+          Array.isArray(invoicesData?.data) ? invoicesData.data : [],
+        );
       } catch (err) {
         console.error("Failed to load dashboard data", err);
       }
@@ -107,8 +110,8 @@ export default function Dashboard() {
 
   const invoiceChartData = summary
     ? [
-        { name: "Paid", value: summary.paid_invoices },
-        { name: "Pending", value: summary.pending_invoices },
+        { name: "Paid", value: Number(summary.paid_invoices) },
+        { name: "Pending", value: Number(summary.pending_invoices) },
       ]
     : [];
 
@@ -148,14 +151,14 @@ export default function Dashboard() {
               <div className="text-center sm:text-left relative z-10">
                 <h1 className="text-xl md:text-2xl font-black text-foreground tracking-tight">
                   {getTimeGreeting()},{" "}
-                  <span className="gradient-text">
-                    {user.name}
-                  </span>
+                  <span className="gradient-text">{user.name}</span>
                 </h1>
                 <div className="flex flex-wrap justify-center sm:justify-start items-center gap-3 mt-2">
                   <div className="flex items-center gap-2 px-2.5 py-1 bg-emerald-500/10 text-emerald-500 rounded-full border border-emerald-500/20">
                     <CheckCircle2 className="w-3 h-3" />
-                    <span className="text-[10px] font-bold uppercase tracking-wider">Active Account</span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider">
+                      Active Account
+                    </span>
                   </div>
                   <div className="h-4 w-px bg-border hidden sm:block" />
                   <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em]">

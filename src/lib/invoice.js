@@ -15,3 +15,8 @@ export const downloadInvoicePdf = async (invoiceId) => {
   link.click();
   link.remove();
 };
+
+export const fetchMonthlyInvoiceTrend = async () => {
+  const res = await api.get("/invoices/monthly-trend");
+  return res.data;
+};
