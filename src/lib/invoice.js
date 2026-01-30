@@ -20,3 +20,18 @@ export const fetchMonthlyInvoiceTrend = async () => {
   const res = await axios.get("/api/invoices/monthly-trend");
   return res.data;
 };
+
+export const fetchInvoiceSubmit = async (invoiceId) => {
+  const res = await axios.post(`/api/invoices/${invoiceId}/submit-to-finance`);
+  return res.data;
+};
+
+export const fetchInvoices = async ({ page = 1, status = "", search = "" }) => {
+  const params = new URLSearchParams();
+  params.append("page", page);
+  if (status) params.append("status", status);
+  if (search) params.append("search", search);
+
+  const res = await axios.get(`/api/invoices?${params.toString()}`);
+  return res.data;
+};
