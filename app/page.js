@@ -5,6 +5,10 @@ import Link from "next/link";
 import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import Footer from "@/components/Footer";
+import FeaturesSection from "@/components/landing/FeaturesSection";
+import StatsSection from "@/components/landing/StatsSection";
+import CTASection from "@/components/landing/CTASection";
 
 const slides = [
   {
@@ -70,8 +74,6 @@ const slides = [
   },
 ];
 
-import Footer from "@/components/Footer";
-
 export default function Home() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
@@ -99,8 +101,8 @@ export default function Home() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-black">
-      <div className="relative w-full h-screen overflow-hidden shrink-0">
+    <div className="flex flex-col min-h-screen bg-[hsl(var(--background))] text-[hsl(var(--foreground))] transition-colors duration-500">
+      <div className="relative w-full h-screen overflow-hidden shrink-0 bg-black">
         {/* Background Slideshow with Crossfade */}
         <div className="absolute inset-0">
           {slides.map((slide, idx) => (
@@ -109,11 +111,11 @@ export default function Home() {
               initial={false}
               animate={{
                 opacity: idx === currentSlide ? 1 : 0,
-                scale: idx === currentSlide ? 1.05 : 1, // Subtle continuous scale feel
+                scale: idx === currentSlide ? 1.15 : 1,
               }}
               transition={{
-                opacity: { duration: 1.2, ease: [0.4, 0, 0.2, 1] }, // Custom bezier for premium feel
-                scale: { duration: 1.2, ease: "easeOut" },
+                opacity: { duration: 1.2, ease: [0.4, 0, 0.2, 1] },
+                scale: { duration: 7, ease: "linear" }, // Slow cinematic zoom
               }}
               className="absolute inset-0 will-change-[opacity,transform]"
               style={{ pointerEvents: idx === currentSlide ? "auto" : "none" }}
@@ -362,6 +364,11 @@ export default function Home() {
           </motion.div>
         </motion.div>
       </div>
+
+      <FeaturesSection />
+      <StatsSection />
+      <CTASection />
+
       <Footer />
     </div>
   );
