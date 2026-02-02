@@ -3,7 +3,6 @@
 import { ScrollProvider, useScroll } from "@/contexts/ScrollContext";
 import Navbar from "@/components/Navbar";
 import MainContent from "@/components/MainContent";
-import Footer from "@/components/Footer";
 import ThemeScrollArea from "@/components/ThemeScrollArea";
 
 function ScrollableContent({ children }) {

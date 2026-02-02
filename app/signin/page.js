@@ -58,7 +58,6 @@ const InputField = ({ label, icon: Icon, error, type = "text", ...props }) => (
   </div>
 );
 
-import Footer from "@/components/Footer";
 
 export default function Signin() {
   const { enqueueSnackbar } = useSnackbar();
@@ -242,7 +241,6 @@ export default function Signin() {
           </div>
         </div>
       </div>
-      <Footer />
     </div>
   );
 }

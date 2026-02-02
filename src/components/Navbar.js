@@ -4,7 +4,30 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "next-themes";
-import { Menu, X, LogOut, ChevronDown, LayoutDashboard, ReceiptText, Target, PieChart, User as UserIcon, HelpCircle, Sun, Moon, Laptop, ArrowRight, Sparkles, AlertTriangle, Bell, AlertCircle, Database, Server, Cpu, CheckCircle2 } from "lucide-react";
+import {
+  Menu,
+  X,
+  LogOut,
+  ChevronDown,
+  LayoutDashboard,
+  ReceiptText,
+  Target,
+  PieChart,
+  User as UserIcon,
+  HelpCircle,
+  Sun,
+  Moon,
+  Laptop,
+  ArrowRight,
+  Sparkles,
+  AlertTriangle,
+  Bell,
+  AlertCircle,
+  Database,
+  Server,
+  Cpu,
+  CheckCircle2,
+} from "lucide-react";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
@@ -29,6 +52,14 @@ export default function Navbar() {
   const router = useRouter();
   const pathname = usePathname();
   const isHomePage = pathname === "/";
+  const isAuthPage = [
+    "/signup",
+    "/signin",
+    "/forgot-password",
+    "/reset-password",
+  ].includes(pathname);
+  const isTransparentPage = isHomePage || isAuthPage;
+
   const { theme, setTheme } = useTheme();
   const { scrollY } = useScroll();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -69,13 +100,6 @@ export default function Navbar() {
     }
   };
 
-  if (
-    ["/signup", "/signin", "/forgot-password", "/reset-password"].includes(
-      pathname
-    )
-  )
-    return null;
-
   /* Removed static systemAlerts */
 
   const renderUserActions = () => {
@@ -104,7 +128,7 @@ export default function Navbar() {
             <button
               onClick={() => setProfileMenuOpen(!profileMenuOpen)}
               className={`flex items-center gap-3 pl-2 pr-1 py-1.5 rounded-full transition-all border cursor-pointer ${
-                isHomePage
+                isTransparentPage
                   ? "hover:bg-white/20 border-white/30"
                   : "hover:bg-slate-50 dark:hover:bg-slate-800 border-transparent"
               }`}
@@ -126,7 +150,7 @@ export default function Navbar() {
               <ChevronDown
                 className={`w-4 h-4 transition-transform duration-200 ${
                   profileMenuOpen ? "rotate-180" : ""
-                } ${isHomePage ? "text-white" : "text-slate-400"}`}
+                } ${isTransparentPage ? "text-white" : "text-slate-400"}`}
               />
             </button>
 
@@ -208,7 +232,7 @@ export default function Navbar() {
         <Link
           href="/signin"
           className={`text-sm font-bold transition-colors ${
-            isHomePage
+            isTransparentPage
               ? "text-white hover:text-white/80"
               : "text-slate-600 dark:text-slate-300 hover:text-primary"
           }`}
@@ -230,7 +254,7 @@ export default function Navbar() {
       <div className="w-full flex justify-center fixed top-0 z-50">
         <nav
           className={`w-full transition-all duration-500 ${
-            isHomePage
+            isTransparentPage
               ? scrolled
                 ? "bg-[#0F172A]/90 backdrop-blur-xl border-b border-slate-800/30"
                 : "bg-transparent border-transparent"
@@ -246,7 +270,7 @@ export default function Navbar() {
                   alt="SLT Digital Logo"
                   fill
                   className={`object-contain transition-all duration-300 ${
-                    isHomePage
+                    isTransparentPage
                       ? "brightness-0 invert"
                       : "dark:brightness-0 dark:invert"
                   }`}
@@ -255,20 +279,22 @@ export default function Navbar() {
               </div>
               <div
                 className={`h-8 w-px self-center hidden md:block transition-colors ${
-                  isHomePage ? "bg-white/30" : "bg-slate-200 dark:bg-slate-800"
+                  isTransparentPage
+                    ? "bg-white/30"
+                    : "bg-slate-200 dark:bg-slate-800"
                 }`}
               />
               <div className="hidden md:flex flex-col justify-center">
                 <span
                   className={`text-[9px] font-extrabold uppercase tracking-wider leading-none mb-0.5 transition-colors ${
-                    isHomePage ? "text-white" : "text-[#00B4EB]"
+                    isTransparentPage ? "text-white" : "text-[#00B4EB]"
                   }`}
                 >
                   Sri Lanka Telecom Services
                 </span>
                 <span
                   className={`text-[11px] font-bold uppercase tracking-widest leading-none transition-colors ${
-                    isHomePage
+                    isTransparentPage
                       ? "text-white/80"
                       : "text-slate-500 dark:text-slate-400"
                   }`}
@@ -328,7 +354,7 @@ export default function Navbar() {
                     <button
                       onClick={() => setThemeMenuOpen(!themeMenuOpen)}
                       className={`p-2 rounded-full transition-colors cursor-pointer ${
-                        isHomePage
+                        isTransparentPage
                           ? "text-white hover:bg-white/20"
                           : "text-slate-500 hover:text-[#00B4EB] hover:bg-slate-100 dark:hover:bg-slate-800"
                       }`}
@@ -379,155 +405,162 @@ export default function Navbar() {
                 )}
               </div>
 
-              <div className="relative">
-                <button
-                  onClick={() => setNotificationsOpen(!notificationsOpen)}
-                  className={`p-2 rounded-full transition-all relative cursor-pointer ${
-                    isHomePage
-                      ? "text-white hover:bg-white/20"
-                      : "text-slate-500 hover:text-primary hover:bg-slate-100 dark:hover:bg-slate-800"
-                  }`}
-                >
-                  <Bell size={20} />
-                  <span className="absolute top-2 right-2 flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
-                  </span>
-                </button>
+              {user && (
+                <div className="relative">
+                  <button
+                    onClick={() => setNotificationsOpen(!notificationsOpen)}
+                    className={`p-2 rounded-full transition-all relative cursor-pointer ${
+                      isTransparentPage
+                        ? "text-white hover:bg-white/20"
+                        : "text-slate-500 hover:text-primary hover:bg-slate-100 dark:hover:bg-slate-800"
+                    }`}
+                  >
+                    <Bell size={20} />
+                    <span className="absolute top-2 right-2 flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                    </span>
+                  </button>
 
-                <AnimatePresence>
-                  {notificationsOpen && (
-                    <>
-                      <div
-                        className="fixed inset-0 z-40"
-                        onClick={() => setNotificationsOpen(false)}
-                      />
-                      <motion.div
-                        initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                        className="absolute right-0 top-full mt-4 w-[360px] rounded-2xl bg-white/80 dark:bg-slate-900/90 backdrop-blur-xl border border-slate-200 dark:border-slate-800 shadow-2xl z-50 overflow-hidden"
-                      >
-                        <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
-                          <div>
-                            <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-                              System Notifications
-                            </h3>
-                            <p className="text-[10px] text-slate-500 uppercase tracking-tighter">
-                              Status:{" "}
-                              <span
-                                className={
-                                  metrics.status === "operational"
-                                    ? "text-emerald-500"
-                                    : "text-amber-500"
-                                }
-                              >
-                                {metrics.status}
-                              </span>
-                            </p>
-                          </div>
-                          <span className="bg-primary/10 text-primary text-[10px] px-2 py-0.5 rounded-full font-bold">
-                            {systemAlerts.length} Active
-                          </span>
-                        </div>
-
-                        <div className="bg-slate-50 dark:bg-slate-800/30 px-5 py-3 border-b border-slate-100 dark:border-slate-800 grid grid-cols-2 gap-2">
-                          <div className="flex flex-col">
-                            <span className="text-[10px] text-slate-400 uppercase font-bold">
-                              Load
-                            </span>
-                            <span
-                              className={`text-xs font-bold ${
-                                metrics.serverLoad > 80
-                                  ? "text-red-500"
-                                  : "text-slate-700 dark:text-slate-200"
-                              }`}
-                            >
-                              {metrics.serverLoad}%
-                            </span>
-                          </div>
-                          <div className="flex flex-col">
-                            <span className="text-[10px] text-slate-400 uppercase font-bold">
-                              Latency
-                            </span>
-                            <span
-                              className={`text-xs font-bold ${
-                                metrics.dbLatency > 100
-                                  ? "text-amber-500"
-                                  : "text-slate-700 dark:text-slate-200"
-                              }`}
-                            >
-                              {metrics.dbLatency}ms
-                            </span>
-                          </div>
-                        </div>
-
-                        <div className="max-h-[350px] overflow-y-auto">
-                          {systemAlerts.length === 0 ? (
-                            <div className="p-8 text-center">
-                              <CheckCircle2 className="w-8 h-8 text-emerald-500 mx-auto mb-2 opacity-50" />
-                              <p className="text-xs text-slate-400">
-                                All systems operational
+                  <AnimatePresence>
+                    {notificationsOpen && (
+                      <>
+                        <div
+                          className="fixed inset-0 z-40"
+                          onClick={() => setNotificationsOpen(false)}
+                        />
+                        <motion.div
+                          initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                          animate={{ opacity: 1, scale: 1, y: 0 }}
+                          exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                          className="absolute right-0 top-full mt-4 w-[360px] rounded-2xl bg-white/80 dark:bg-slate-900/90 backdrop-blur-xl border border-slate-200 dark:border-slate-800 shadow-2xl z-50 overflow-hidden"
+                        >
+                          <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                            <div>
+                              <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                                System Notifications
+                              </h3>
+                              <p className="text-[10px] text-slate-500 uppercase tracking-tighter">
+                                Status:{" "}
+                                <span
+                                  className={
+                                    metrics.status === "operational"
+                                      ? "text-emerald-500"
+                                      : "text-amber-500"
+                                  }
+                                >
+                                  {metrics.status}
+                                </span>
                               </p>
                             </div>
-                          ) : (
-                            systemAlerts.map((alert) => (
-                              <div
-                                key={alert.id}
-                                className="px-5 py-4 border-b border-slate-50 dark:border-slate-800/40 hover:bg-slate-100/50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer group"
+                            <span className="bg-primary/10 text-primary text-[10px] px-2 py-0.5 rounded-full font-bold">
+                              {systemAlerts.length} Active
+                            </span>
+                          </div>
+
+                          <div className="bg-slate-50 dark:bg-slate-800/30 px-5 py-3 border-b border-slate-100 dark:border-slate-800 grid grid-cols-2 gap-2">
+                            <div className="flex flex-col">
+                              <span className="text-[10px] text-slate-400 uppercase font-bold">
+                                Load
+                              </span>
+                              <span
+                                className={`text-xs font-bold ${
+                                  metrics.serverLoad > 80
+                                    ? "text-red-500"
+                                    : "text-slate-700 dark:text-slate-200"
+                                }`}
                               >
-                                <div className="flex gap-3">
-                                  <div
-                                    className={`p-2 rounded-lg ${
-                                      alert.type === "error"
-                                        ? "bg-red-500/10 text-red-500"
-                                        : alert.type === "warning"
-                                        ? "bg-amber-500/10 text-amber-500"
-                                        : "bg-blue-500/10 text-blue-500"
-                                    } h-fit`}
-                                  >
-                                    {alert.type === "error" ? (
-                                      <AlertCircle size={16} />
-                                    ) : alert.type === "warning" ? (
-                                      <AlertTriangle size={16} />
-                                    ) : (
-                                      <CheckCircle2 size={16} />
-                                    )}
-                                  </div>
-                                  <div className="flex-1">
-                                    <div className="flex justify-between items-start">
-                                      <h4 className="text-xs font-bold text-slate-900 dark:text-white leading-none">
-                                        {alert.title}
-                                      </h4>
-                                      <span className="text-[9px] text-slate-400 font-medium">
-                                        {alert.time}
-                                      </span>
+                                {metrics.serverLoad}%
+                              </span>
+                            </div>
+                            <div className="flex flex-col">
+                              <span className="text-[10px] text-slate-400 uppercase font-bold">
+                                Latency
+                              </span>
+                              <span
+                                className={`text-xs font-bold ${
+                                  metrics.dbLatency > 100
+                                    ? "text-amber-500"
+                                    : "text-slate-700 dark:text-slate-200"
+                                }`}
+                              >
+                                {metrics.dbLatency}ms
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="max-h-[350px] overflow-y-auto">
+                            {systemAlerts.length === 0 ? (
+                              <div className="p-8 text-center">
+                                <CheckCircle2 className="w-8 h-8 text-emerald-500 mx-auto mb-2 opacity-50" />
+                                <p className="text-xs text-slate-400">
+                                  All systems operational
+                                </p>
+                              </div>
+                            ) : (
+                              systemAlerts.map((alert) => (
+                                <div
+                                  key={alert.id}
+                                  className="px-5 py-4 border-b border-slate-50 dark:border-slate-800/40 hover:bg-slate-100/50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer group"
+                                >
+                                  <div className="flex gap-3">
+                                    <div
+                                      className={`p-2 rounded-lg ${
+                                        alert.type === "error"
+                                          ? "bg-red-500/10 text-red-500"
+                                          : alert.type === "warning"
+                                            ? "bg-amber-500/10 text-amber-500"
+                                            : "bg-blue-500/10 text-blue-500"
+                                      } h-fit`}
+                                    >
+                                      {alert.type === "error" ? (
+                                        <AlertCircle size={16} />
+                                      ) : alert.type === "warning" ? (
+                                        <AlertTriangle size={16} />
+                                      ) : (
+                                        <CheckCircle2 size={16} />
+                                      )}
                                     </div>
-                                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">
-                                      {alert.description}
-                                    </p>
+                                    <div className="flex-1">
+                                      <div className="flex justify-between items-start">
+                                        <h4 className="text-xs font-bold text-slate-900 dark:text-white leading-none">
+                                          {alert.title}
+                                        </h4>
+                                        <span className="text-[9px] text-slate-400 font-medium">
+                                          {alert.time}
+                                        </span>
+                                      </div>
+                                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">
+                                        {alert.description}
+                                      </p>
+                                    </div>
                                   </div>
                                 </div>
-                              </div>
-                            ))
-                          )}
-                        </div>
+                              ))
+                            )}
+                          </div>
 
-                        <Link
-                          href="/system-logs"
-                          onClick={() => setNotificationsOpen(false)}
-                          className="block w-full py-3 text-center text-[11px] font-bold text-primary hover:bg-primary/5 transition-colors uppercase tracking-widest"
-                        >
-                          Open System Monitor
-                        </Link>
-                      </motion.div>
-                    </>
-                  )}
-                </AnimatePresence>
-              </div>
+                          <Link
+                            href="/system-logs"
+                            onClick={() => setNotificationsOpen(false)}
+                            className="block w-full py-3 text-center text-[11px] font-bold text-primary hover:bg-primary/5 transition-colors uppercase tracking-widest"
+                          >
+                            Open System Monitor
+                          </Link>
+                        </motion.div>
+                      </>
+                    )}
+                  </AnimatePresence>
+                </div>
+              )}
 
               {/* User Actions */}
-              {renderUserActions()}
+              {![
+                "/signup",
+                "/signin",
+                "/forgot-password",
+                "/reset-password",
+              ].includes(pathname) && renderUserActions()}
             </div>
 
             {/* Mobile Menu Toggle */}
@@ -535,7 +568,7 @@ export default function Navbar() {
               <button
                 onClick={() => setMobileMenuOpen(true)}
                 className={`p-2 ${
-                  isHomePage
+                  isTransparentPage
                     ? "text-white"
                     : "text-slate-600 dark:text-slate-300"
                 }`}

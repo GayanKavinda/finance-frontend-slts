@@ -5,10 +5,6 @@ import Link from "next/link";
 import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import Footer from "@/components/Footer";
-import FeaturesSection from "@/components/landing/FeaturesSection";
-import StatsSection from "@/components/landing/StatsSection";
-import CTASection from "@/components/landing/CTASection";
 
 const slides = [
   {
@@ -341,35 +337,7 @@ export default function Home() {
             <ChevronRight className="w-5 h-5" />
           </motion.button>
         </div>
-
-        {/* Scroll Indicator */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1 }}
-          className="absolute bottom-16 left-1/2 -translate-x-1/2 text-white/60 text-xs font-medium hidden md:block"
-        >
-          <motion.div
-            animate={{ y: [0, 6, 0] }}
-            transition={{ duration: 2, repeat: Infinity }}
-            className="flex flex-col items-center gap-2"
-          >
-            <div className="w-4 h-6 border-2 border-white/30 rounded-full flex items-start justify-center p-1">
-              <motion.div
-                animate={{ y: [0, 8, 0] }}
-                transition={{ duration: 1.5, repeat: Infinity }}
-                className="w-1 h-1 bg-white/50 rounded-full"
-              />
-            </div>
-          </motion.div>
-        </motion.div>
       </div>
-
-      <FeaturesSection />
-      <StatsSection />
-      <CTASection />
-
-      <Footer />
     </div>
   );
 }

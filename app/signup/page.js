@@ -148,8 +148,6 @@ const InputField = ({
   </div>
 );
 
-import Footer from "@/components/Footer";
-
 export default function Signup() {
   const { enqueueSnackbar } = useSnackbar();
   const router = useRouter();
@@ -419,7 +417,6 @@ export default function Signup() {
           </motion.div>
         </div>
       </div>
-      <Footer />
     </div>
   );
 }
