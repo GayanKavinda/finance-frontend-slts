@@ -60,7 +60,7 @@ export default function InvoicePage() {
           <option value="">All Status</option>
           <option value="Draft">Draft</option>
           <option value="Tax Generated">Tax Generated</option>
-          <option value="Submitted to Finance">Submitted</option>
+          <option value="Submitted">Submitted</option>
           <option value="Paid">Paid</option>
         </select>
 
