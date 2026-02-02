@@ -1,3 +1,5 @@
+// app/invoices/[id]/edit/page.js
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -19,7 +21,7 @@ export default function EditInvoicePage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.put(`/api/invoice/${id}`, invoice);
+      await axios.put(`/api/invoices/${id}`, invoice);
       toast.success("Invoice updated successfully");
       router.push("/invoices");
     } catch {
