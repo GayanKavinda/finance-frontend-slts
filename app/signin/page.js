@@ -58,7 +58,6 @@ const InputField = ({ label, icon: Icon, error, type = "text", ...props }) => (
   </div>
 );
 
-
 export default function Signin() {
   const { enqueueSnackbar } = useSnackbar();
   const router = useRouter();
@@ -102,26 +101,6 @@ export default function Signin() {
   return (
     <div className="flex flex-col bg-white dark:bg-slate-950 transition-colors duration-500">
       <div className="flex flex-col lg:flex-row w-full relative min-h-screen">
-        {/* Navigation Logo */}
-        <div className="absolute top-0 left-0 right-0 z-50 pointer-events-none pl-4 pr-6">
-          <div className="max-w-7xl mx-auto h-16 flex items-center">
-            <Link
-              href="/"
-              className="pointer-events-auto group flex items-center gap-2 transition-transform hover:scale-105 active:scale-95"
-            >
-              <div className="relative w-[120px] h-[40px] lg:w-[140px] lg:h-[45px]">
-                <Image
-                  src="/icons/slt_digital_icon.png"
-                  alt="SLT Digital Logo"
-                  fill
-                  className="object-contain dark:brightness-0 dark:invert transition-all duration-300"
-                  priority
-                />
-              </div>
-            </Link>
-          </div>
-        </div>
-
         {/* Left Side: Centered Form */}
         <div className="w-full lg:w-1/2 min-h-screen flex items-center justify-center p-6 lg:p-12 relative pt-20 pb-12 lg:py-0">
           {/* Ambient Glows for the form side */}
@@ -203,7 +182,7 @@ export default function Signin() {
 
             <div className="mt-12 text-left opacity-30">
               <p className="text-[10px] text-slate-500 dark:text-slate-600 font-bold uppercase tracking-[0.3em]">
-                Enterprise Secured by SLT Digital
+                Secured by Sri Lanka Telecom Services
               </p>
             </div>
           </motion.div>

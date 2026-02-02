@@ -57,15 +57,8 @@ const slides = [
   {
     title: "Streamlined Allowances",
     subtitle:
-      "Review and manage your financial benefits and operational claims efficiently",
-    image: "/slides/9.wp15425485-nasa-earth-wallpapers.avif",
-    cta: "Manage Claims",
-  },
-  {
-    title: "Secure Financial Access",
-    subtitle:
       "Your financial data, protected by enterprise-grade security protocols",
-    image: "/slides/7.wp10965088-modified-lamborghini-wallpapers.avif",
+    image: "/slides/9.wp15425485-nasa-earth-wallpapers.avif",
     cta: "Login Now",
   },
 ];
@@ -305,7 +298,7 @@ export default function Home() {
               </div>
 
               <div className="hidden md:block text-white/30 text-[10px] tracking-[0.2em] font-light uppercase">
-                {slides[currentSlide].title.split(" ")[0]} / NEXT GEN
+                {slides[currentSlide].title.split(" ")[0]} SERVICES
               </div>
             </div>
           </div>
