@@ -10,7 +10,7 @@ export const fetchRecentInvoices = async (limit = 5) => {
   return res.data;
 };
 
-export const getInvoiceSummary = async () => {
-  const response = await axios.get("/api/invoice-summary");
-  return response.data;
-};
+// export const getInvoiceSummary = async () => {
+//   const response = await axios.get("/api/invoice-summary");
+//   return response.data;
+// };

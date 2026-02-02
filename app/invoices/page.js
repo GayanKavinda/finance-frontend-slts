@@ -122,7 +122,7 @@ export default function InvoicePage() {
                     {inv.status === "Tax Generated" && (
                       <SubmitToFinanceButton
                         invoiceId={inv.id}
-                        onSuccess={loadInvoices}
+                        onSuccess={() => window.location.reload()}
                       />
                     )}
 
