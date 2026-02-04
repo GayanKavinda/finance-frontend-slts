@@ -60,7 +60,7 @@ export default function Navbar() {
   ].includes(pathname);
   const isTransparentPage = isHomePage || isAuthPage;
 
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme, resolvedTheme } = useTheme();
   const { scrollY } = useScroll();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
@@ -90,6 +90,12 @@ export default function Navbar() {
   useEffect(() => {
     setScrolled(scrollY > 50);
   }, [scrollY]);
+
+  const isLightContent = mounted && (
+    (isHomePage && !scrolled) || 
+    (resolvedTheme === "dark")
+  );
+
 
   const handleLogout = async () => {
     try {
@@ -128,7 +134,7 @@ export default function Navbar() {
             <button
               onClick={() => setProfileMenuOpen(!profileMenuOpen)}
               className={`flex items-center gap-3 pl-2 pr-1 py-1.5 rounded-full transition-all border cursor-pointer ${
-                isTransparentPage
+                isLightContent
                   ? "hover:bg-white/20 border-white/30"
                   : "hover:bg-slate-50 dark:hover:bg-slate-800 border-transparent"
               }`}
@@ -150,7 +156,7 @@ export default function Navbar() {
               <ChevronDown
                 className={`w-4 h-4 transition-transform duration-200 ${
                   profileMenuOpen ? "rotate-180" : ""
-                } ${isTransparentPage ? "text-white" : "text-slate-400"}`}
+                } ${isLightContent ? "text-white" : "text-slate-400"}`}
               />
             </button>
 
@@ -232,7 +238,7 @@ export default function Navbar() {
         <Link
           href="/signin"
           className={`text-sm font-bold transition-colors ${
-            isTransparentPage
+            isLightContent
               ? "text-white hover:text-white/80"
               : "text-slate-600 dark:text-slate-300 hover:text-primary"
           }`}
@@ -256,7 +262,7 @@ export default function Navbar() {
           className={`w-full transition-all duration-500 ${
             isTransparentPage
               ? scrolled
-                ? "bg-[#0F172A]/90 backdrop-blur-xl border-b border-slate-800/30"
+                ? "bg-white/90 dark:bg-[#0F172A]/90 backdrop-blur-xl border-b border-slate-200/30 dark:border-slate-800/30"
                 : "bg-transparent border-transparent"
               : "bg-white/80 dark:bg-[#0F172A]/80 backdrop-blur-xl border-b border-slate-200/30 dark:border-slate-800/30"
           } px-4 md:px-6`}
@@ -270,7 +276,7 @@ export default function Navbar() {
                   alt="SLT Digital Logo"
                   fill
                   className={`object-contain transition-all duration-300 ${
-                    isTransparentPage
+                    isLightContent
                       ? "brightness-0 invert"
                       : "dark:brightness-0 dark:invert"
                   }`}
@@ -279,22 +285,23 @@ export default function Navbar() {
               </div>
               <div
                 className={`h-8 w-px self-center hidden md:block transition-colors ${
-                  isTransparentPage
+                  isLightContent
                     ? "bg-white/30"
                     : "bg-slate-200 dark:bg-slate-800"
                 }`}
               />
+
               <div className="hidden md:flex flex-col justify-center">
                 <span
                   className={`text-[9px] font-extrabold uppercase tracking-wider leading-none mb-0.5 transition-colors ${
-                    isTransparentPage ? "text-white" : "text-[#00B4EB]"
+                    isLightContent ? "text-white" : "text-[#00B4EB]"
                   }`}
                 >
                   Sri Lanka Telecom Services
                 </span>
                 <span
                   className={`text-[11px] font-bold uppercase tracking-widest leading-none transition-colors ${
-                    isTransparentPage
+                    isLightContent
                       ? "text-white/80"
                       : "text-slate-500 dark:text-slate-400"
                   }`}
@@ -354,7 +361,7 @@ export default function Navbar() {
                     <button
                       onClick={() => setThemeMenuOpen(!themeMenuOpen)}
                       className={`p-2 rounded-full transition-colors cursor-pointer ${
-                        isTransparentPage
+                        isLightContent
                           ? "text-white hover:bg-white/20"
                           : "text-slate-500 hover:text-[#00B4EB] hover:bg-slate-100 dark:hover:bg-slate-800"
                       }`}
@@ -410,7 +417,7 @@ export default function Navbar() {
                   <button
                     onClick={() => setNotificationsOpen(!notificationsOpen)}
                     className={`p-2 rounded-full transition-all relative cursor-pointer ${
-                      isTransparentPage
+                      isLightContent
                         ? "text-white hover:bg-white/20"
                         : "text-slate-500 hover:text-primary hover:bg-slate-100 dark:hover:bg-slate-800"
                     }`}
@@ -568,7 +575,7 @@ export default function Navbar() {
               <button
                 onClick={() => setMobileMenuOpen(true)}
                 className={`p-2 ${
-                  isTransparentPage
+                  isLightContent
                     ? "text-white"
                     : "text-slate-600 dark:text-slate-300"
                 }`}
