@@ -1,19 +1,19 @@
 // src/components/Providers.js
 
-'use client';
+"use client";
 
-import { AuthProvider } from '@/context/AuthContext';
-import { SnackbarProvider } from 'notistack';
-import { ThemeProvider } from 'next-themes';
-import CustomToast from './Notifications';
+import { AuthProvider } from "@/contexts/AuthContext";
+import { SnackbarProvider } from "notistack";
+import { ThemeProvider } from "next-themes";
+import CustomToast from "./Notifications";
 
 export default function Providers({ children }) {
   return (
-    <SnackbarProvider 
+    <SnackbarProvider
       maxSnack={3}
       anchorOrigin={{
-        vertical: 'top',
-        horizontal: 'right',
+        vertical: "top",
+        horizontal: "right",
       }}
       Components={{
         success: CustomToast,
@@ -25,9 +25,7 @@ export default function Providers({ children }) {
       autoHideDuration={4000}
     >
       <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-        <AuthProvider>
-          {children}
-        </AuthProvider>
+        <AuthProvider>{children}</AuthProvider>
       </ThemeProvider>
     </SnackbarProvider>
   );

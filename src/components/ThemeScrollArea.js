@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { ScrollArea } from "@/components/ui/ScrollArea";
 import { useEffect, useRef } from "react";
 
 export default function ThemeScrollArea({ children, className, onScroll }) {
@@ -12,7 +12,9 @@ export default function ThemeScrollArea({ children, className, onScroll }) {
   useEffect(() => {
     if (!onScroll || !scrollAreaRef.current) return;
 
-    const viewport = scrollAreaRef.current.querySelector('[data-slot="scroll-area-viewport"]');
+    const viewport = scrollAreaRef.current.querySelector(
+      '[data-slot="scroll-area-viewport"]',
+    );
     if (!viewport) return;
 
     const handleScroll = () => {
@@ -26,7 +28,11 @@ export default function ThemeScrollArea({ children, className, onScroll }) {
   // Disable the gradient mask on the homepage to prevent white lines in light mode
   // appearing over the dark landing page design.
   return (
-    <ScrollArea ref={scrollAreaRef} className={className} maskHeight={isHomePage ? 0 : 30}>
+    <ScrollArea
+      ref={scrollAreaRef}
+      className={className}
+      maskHeight={isHomePage ? 0 : 30}
+    >
       {children}
     </ScrollArea>
   );

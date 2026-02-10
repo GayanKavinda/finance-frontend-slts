@@ -20,7 +20,7 @@ import { useSnackbar } from "notistack";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { fetchCsrf } from "@/lib/auth";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/contexts/AuthContext";
 import Image from "next/image";
 
 const schema = yup.object({

@@ -21,7 +21,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "next-themes";
 import StatCard from "@/components/StatCard";
 import ProtectedRoute from "@/components/ProtectedRoute";

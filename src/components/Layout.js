@@ -1,11 +1,11 @@
 // src/components/Layout.js
 
-'use client';
+"use client";
 
-import Navbar from './Navbar';
-import { useAuth } from '@/context/AuthContext';
-import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import Navbar from "./Navbar";
+import { useAuth } from "@/contexts/AuthContext";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 export default function Layout({ children }) {
   const { user, loading } = useAuth();
@@ -13,7 +13,7 @@ export default function Layout({ children }) {
 
   useEffect(() => {
     if (!loading && !user) {
-      router.push('/signin');
+      router.push("/signin");
     }
   }, [user, loading, router]);
 
@@ -32,9 +32,7 @@ export default function Layout({ children }) {
   return (
     <div className="min-h-screen bg-background selection:bg-primary/20">
       <Navbar />
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {children}
-      </main>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">{children}</main>
     </div>
   );
 }
