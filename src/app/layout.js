@@ -10,7 +10,7 @@ import Image from "next/image";
 
 import LayoutContent from "@/components/LayoutContent";
 
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { ScrollArea } from "@/components/ui/ScrollArea";
 
 export const metadata = {
   title: "FinancePro - Personal Finance Manager",

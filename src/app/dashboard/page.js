@@ -23,7 +23,7 @@ import {
   ResponsiveContainer,
   Legend,
 } from "recharts";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "next-themes";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Breadcrumb from "@/components/Breadcrumb";

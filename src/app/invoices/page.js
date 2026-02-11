@@ -4,8 +4,8 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { fetchInvoices, downloadInvoicePdf } from "@/lib/invoice";
-import StatusBadge from "@/src/components/ui/StatusBadge";
-import SubmitToFinanceButton from "@/src/components/ui/SubmitToFinanceButton";
+import StatusBadge from "@/components/ui/StatusBadge";
+import SubmitToFinanceButton from "@/components/ui/SubmitToFinanceButton";
 
 export default function InvoicePage() {
   const [invoices, setInvoices] = useState([]);

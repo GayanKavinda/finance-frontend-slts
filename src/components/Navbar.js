@@ -30,7 +30,7 @@ import {
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { useRouter, usePathname } from "next/navigation";
 import Image from "next/image";
 import useAutoLogout from "@/hooks/useAutoLogout";
@@ -91,11 +91,8 @@ export default function Navbar() {
     setScrolled(scrollY > 50);
   }, [scrollY]);
 
-  const isLightContent = mounted && (
-    (isHomePage && !scrolled) || 
-    (resolvedTheme === "dark")
-  );
-
+  const isLightContent =
+    mounted && ((isHomePage && !scrolled) || resolvedTheme === "dark");
 
   const handleLogout = async () => {
     try {
