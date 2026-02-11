@@ -95,8 +95,8 @@
     min-height: 100vh;
     @apply bg-background text-foreground;
     cursor: default;
-    user-select: none;
-    -webkit-user-select: none;
+    /* user-select: none; */
+    /* -webkit-user-select: none; */
   }
   
   input, textarea, [contenteditable="true"] {
