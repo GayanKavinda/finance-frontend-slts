@@ -352,34 +352,35 @@ export default function Navbar() {
               {/* Theme Toggle */}
               <div className="relative">
                 {!mounted ? (
-                  <div className="w-9 h-9 bg-slate-200/50 dark:bg-slate-800/50 rounded-full" />
+                  <div className="w-9 h-9 bg-white/5 dark:bg-white/5 rounded-full animate-pulse border border-white/10" />
                 ) : (
-                  <>
-                    <div
-                      onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
-                      className={`relative w-14 h-7 rounded-full cursor-pointer transition-colors duration-300 p-1 flex items-center ${
-                        resolvedTheme === "dark" 
-                          ? "bg-slate-700 hover:bg-slate-600" 
-                          : "bg-sky-200 hover:bg-sky-300"
+                  <div
+                    onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+                    className={`relative w-14 h-7 rounded-full cursor-pointer transition-all duration-500 p-1 flex items-center border group overflow-hidden ${
+                      resolvedTheme === "dark"
+                        ? "bg-white/5 border-white/10 hover:bg-white/10"
+                        : "bg-white/20 border-white/30 hover:bg-white/30"
+                    } backdrop-blur-xl shadow-lg ring-1 ring-black/5`}
+                  >
+                    {/* Glass Shine Effect */}
+                    <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent pointer-events-none" />
+                    
+                    <motion.div
+                      layout
+                      transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                      className={`w-5 h-5 rounded-full shadow-[0_0_15px_rgba(0,180,235,0.4)] flex items-center justify-center transition-all duration-500 relative z-10 ${
+                        resolvedTheme === "dark"
+                          ? "bg-[#00B4EB] text-white translate-x-7"
+                          : "bg-white text-[#00B4EB] translate-x-0"
                       }`}
                     >
-                      <motion.div
-                        layout
-                        transition={{ type: "spring", stiffness: 700, damping: 30 }}
-                        className={`w-5 h-5 rounded-full shadow-md flex items-center justify-center text-xs ${
-                          resolvedTheme === "dark"
-                            ? "bg-slate-900 text-sky-200 translate-x-7"
-                            : "bg-white text-orange-500 translate-x-0"
-                        }`}
-                      >
-                        {resolvedTheme === "dark" ? (
-                          <Moon size={12} fill="currentColor" />
-                        ) : (
-                          <Sun size={12} fill="currentColor" />
-                        )}
-                      </motion.div>
-                    </div>
-                  </>
+                      {resolvedTheme === "dark" ? (
+                        <Moon size={11} fill="currentColor" />
+                      ) : (
+                        <Sun size={11} fill="currentColor" />
+                      )}
+                    </motion.div>
+                  </div>
                 )}
               </div>
 
@@ -704,24 +705,22 @@ export default function Navbar() {
               )}
               <div className="mt-auto pt-6 border-t border-slate-200 dark:border-slate-800 shrink-0">
                 <div className="grid grid-cols-3 gap-2">
-                  {["light", "dark", "system"].map((mode) => (
+                  {[
+                    { id: "light", icon: Sun, label: "Light" },
+                    { id: "dark", icon: Moon, label: "Dark" },
+                    { id: "system", icon: Laptop, label: "System" },
+                  ].map((mode) => (
                     <button
-                      key={mode}
-                      onClick={() => setTheme(mode)}
-                      className={`p-3 rounded-lg flex flex-col items-center justify-center gap-2 text-xs font-bold uppercase transition-all active:scale-95 ${
-                        theme === mode
-                          ? "bg-primary/10 text-primary ring-2 ring-primary/20"
-                          : "bg-slate-100 dark:bg-slate-800 text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-700"
+                      key={mode.id}
+                      onClick={() => setTheme(mode.id)}
+                      className={`p-3 rounded-xl flex flex-col items-center justify-center gap-2 text-[10px] font-bold uppercase tracking-wider transition-all active:scale-95 border ${
+                        theme === mode.id
+                          ? "bg-primary/10 text-primary border-primary/20 shadow-sm"
+                          : "bg-slate-50 dark:bg-slate-900/50 text-slate-500 border-transparent hover:bg-slate-100 dark:hover:bg-slate-800"
                       }`}
                     >
-                      {mode === "light" ? (
-                        <Sun size={16} />
-                      ) : mode === "dark" ? (
-                        <Moon size={16} />
-                      ) : (
-                        <Laptop size={16} />
-                      )}
-                      {mode}
+                      <mode.icon size={18} />
+                      {mode.label}
                     </button>
                   ))}
                 </div>

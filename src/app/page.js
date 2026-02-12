@@ -48,13 +48,6 @@ const slides = [
     cta: "Learn More",
   },
   {
-    title: "Track Your Earnings",
-    subtitle:
-      "Analyze your financial growth with detailed monthly earning histories",
-    image: "/slides/8.wp11893992-anime-technology-wallpapers.avif",
-    cta: "View History",
-  },
-  {
     title: "Streamlined Allowances",
     subtitle:
       "Your financial data, protected by enterprise-grade security protocols",
@@ -251,14 +244,7 @@ export default function Home() {
               </motion.div>
             </AnimatePresence>
 
-            {/* Progress Indicators & Subtle Counter */}
-            <div className="absolute bottom-10 left-0 right-0 px-8 flex items-center justify-between">
-              <div className="hidden md:flex items-center gap-3 text-white/30 text-[10px] tracking-[0.2em] font-light">
-                <span className="text-white/60">0{currentSlide + 1}</span>
-                <div className="w-8 h-px bg-white/10" />
-                <span>0{slides.length}</span>
-              </div>
-
+            <div className="absolute bottom-10 left-0 right-0 px-8 flex items-center justify-center">
               <div className="mx-auto flex justify-center gap-3">
                 {slides.map((_, idx) => (
                   <button
@@ -295,10 +281,6 @@ export default function Home() {
                     </div>
                   </button>
                 ))}
-              </div>
-
-              <div className="hidden md:block text-white/30 text-[10px] tracking-[0.2em] font-light uppercase">
-                {slides[currentSlide].title.split(" ")[0]} SERVICES
               </div>
             </div>
           </div>
