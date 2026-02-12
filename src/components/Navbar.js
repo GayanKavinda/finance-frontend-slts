@@ -37,27 +37,18 @@ import useAutoLogout from "@/hooks/useAutoLogout";
 import useSystemStatus from "@/hooks/useSystemStatus";
 import { useScroll } from "@/contexts/ScrollContext";
 
-const navLinks = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/transactions", label: "Transactions", icon: ReceiptText },
-  { href: "/budgets", label: "Budgets", icon: Target },
-  { href: "/reports", label: "Reports", icon: PieChart },
-];
+import { navLinks, AUTH_PATHS } from "@/constants/navigation";
+
 
 export default function Navbar() {
   const { user, loading, logout } = useAuth();
   const { metrics, alerts: systemAlerts } = useSystemStatus();
-  useAutoLogout(30 * 60 * 1000);
+  useAutoLogout();
 
   const router = useRouter();
   const pathname = usePathname();
   const isHomePage = pathname === "/";
-  const isAuthPage = [
-    "/signup",
-    "/signin",
-    "/forgot-password",
-    "/reset-password",
-  ].includes(pathname);
+  const isAuthPage = AUTH_PATHS.includes(pathname);
   const isTransparentPage = isHomePage || isAuthPage;
 
   const { theme, setTheme, resolvedTheme } = useTheme();
