@@ -165,7 +165,7 @@ export default function Dashboard() {
   return (
     <ProtectedRoute>
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        <div className="max-w-[1400px] mx-auto px-6 py-8">
+        <div className="px-8 lg:px-12 py-8 max-w-[1600px] mx-auto">
           <Breadcrumb items={[{ label: "Dashboard", href: "/dashboard" }]} />
 
           {/* Header */}

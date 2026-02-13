@@ -2,22 +2,69 @@
 
 import { ScrollProvider, useScroll } from "@/contexts/ScrollContext";
 import Navbar from "@/components/Navbar";
+import Sidebar from "@/components/Sidebar";
 import MainContent from "@/components/MainContent";
 import ThemeScrollArea from "@/components/ThemeScrollArea";
+import { useState, createContext, useContext } from "react";
+import { usePathname } from "next/navigation";
+import { useAuth } from "@/contexts/AuthContext";
+
+const SidebarContext = createContext();
+
+export const useSidebarContext = () => useContext(SidebarContext);
 
 function ScrollableContent({ children }) {
   const { handleScroll } = useScroll();
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const pathname = usePathname();
+  const { user } = useAuth();
+
+  // Show sidebar on authenticated pages (not auth pages or home page)
+  const isAuthPage = [
+    "/signup",
+    "/signin",
+    "/forgot-password",
+    "/reset-password",
+  ].includes(pathname);
+  const isHomePage = pathname === "/";
+  const showSidebar = user && !isAuthPage && !isHomePage;
 
   return (
-    <ThemeScrollArea
-      className="h-full w-full bg-inherit"
-      onScroll={handleScroll}
+    <SidebarContext.Provider
+      value={{ isSidebarCollapsed, setIsSidebarCollapsed }}
     >
-      <div className="flex flex-col min-h-screen">
-        <Navbar />
-        <MainContent>{children}</MainContent>
-      </div>
-    </ThemeScrollArea>
+      <ThemeScrollArea
+        className="h-full w-full bg-inherit"
+        onScroll={handleScroll}
+      >
+        <div className="flex flex-col min-h-screen">
+          <Navbar
+            isMobileSidebarOpen={isMobileSidebarOpen}
+            setIsMobileSidebarOpen={setIsMobileSidebarOpen}
+          />
+          {showSidebar ? (
+            <div className="flex flex-1">
+              <Sidebar
+                isMobileOpen={isMobileSidebarOpen}
+                setIsMobileOpen={setIsMobileSidebarOpen}
+                isCollapsed={isSidebarCollapsed}
+                setIsCollapsed={setIsSidebarCollapsed}
+              />
+              <main
+                className={`flex-1 pt-16 transition-all duration-300 ${
+                  isSidebarCollapsed ? "lg:ml-[80px]" : "lg:ml-[280px]"
+                }`}
+              >
+                {children}
+              </main>
+            </div>
+          ) : (
+            <MainContent>{children}</MainContent>
+          )}
+        </div>
+      </ThemeScrollArea>
+    </SidebarContext.Provider>
   );
 }
 

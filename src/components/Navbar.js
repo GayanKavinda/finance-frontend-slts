@@ -39,8 +39,10 @@ import { useScroll } from "@/contexts/ScrollContext";
 
 import { navLinks, AUTH_PATHS } from "@/constants/navigation";
 
-
-export default function Navbar() {
+export default function Navbar({
+  isMobileSidebarOpen,
+  setIsMobileSidebarOpen,
+}) {
   const { user, loading, logout } = useAuth();
   const { metrics, alerts: systemAlerts } = useSystemStatus();
   useAutoLogout();
@@ -255,10 +257,10 @@ export default function Navbar() {
               : "bg-white/70 dark:bg-[#0F172A]/70 backdrop-blur-md border-b border-white/20 dark:border-white/10 shadow-lg"
           } px-4 md:px-6`}
         >
-          <div className="max-w-7xl mx-auto h-16 flex items-center justify-between">
+          <div className="w-full mx-auto h-16 flex items-center justify-between px-2">
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-4 group">
-              <div className="relative w-[120px] h-[40px]">
+            <Link href="/" className="flex items-center gap-2 group">
+              <div className="relative w-[100px] h-[36px]">
                 <Image
                   src="/icons/slt_digital_icon.png"
                   alt="SLT Digital Logo"
@@ -300,53 +302,16 @@ export default function Navbar() {
             </Link>
 
             {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center gap-6">
-              {loading ? (
-                <div className="flex items-center gap-4 mr-4">
-                  {[1, 2, 3, 4].map((i) => (
-                    <div
-                      key={i}
-                      className="w-24 h-8 bg-slate-200/50 dark:bg-slate-800/50 rounded-md"
-                    />
-                  ))}
-                </div>
-              ) : (
-                user &&
-                pathname !== "/" && (
-                  <div className="flex items-center gap-1 mr-4">
-                    {navLinks.map((link) => {
-                      const isActive = pathname === link.href;
-                      const Icon = link.icon;
-                      return (
-                        <Link
-                          key={link.href}
-                          href={link.href}
-                          className={`px-3 py-2 text-sm font-medium transition-all flex items-center gap-2 rounded-md ${
-                            isActive
-                              ? "text-primary bg-primary/5"
-                              : "text-slate-600 dark:text-slate-400 hover:text-primary dark:hover:text-primary hover:bg-slate-50 dark:hover:bg-slate-800"
-                          }`}
-                        >
-                          <Icon
-                            className={`w-4 h-4 ${
-                              isActive ? "text-primary" : "text-slate-400"
-                            }`}
-                          />
-                          <span>{link.label}</span>
-                        </Link>
-                      );
-                    })}
-                  </div>
-                )
-              )}
-
+            <div className="hidden md:flex items-center gap-3">
               {/* Theme Toggle */}
               <div className="relative">
                 {!mounted ? (
                   <div className="w-9 h-9 bg-white/5 dark:bg-white/5 rounded-full animate-pulse border border-white/10" />
                 ) : (
                   <div
-                    onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+                    onClick={() =>
+                      setTheme(resolvedTheme === "dark" ? "light" : "dark")
+                    }
                     className={`relative w-14 h-7 rounded-full cursor-pointer transition-all duration-500 p-1 flex items-center border group overflow-hidden ${
                       resolvedTheme === "dark"
                         ? "bg-white/5 border-white/10 hover:bg-white/10"
@@ -355,10 +320,14 @@ export default function Navbar() {
                   >
                     {/* Glass Shine Effect */}
                     <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent pointer-events-none" />
-                    
+
                     <motion.div
                       layout
-                      transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                      transition={{
+                        type: "spring",
+                        stiffness: 400,
+                        damping: 25,
+                      }}
                       className={`w-5 h-5 rounded-full shadow-[0_0_15px_rgba(0,180,235,0.4)] flex items-center justify-center transition-all duration-500 relative z-10 ${
                         resolvedTheme === "dark"
                           ? "bg-[#00B4EB] text-white translate-x-7"
@@ -532,16 +501,18 @@ export default function Navbar() {
 
             {/* Mobile Menu Toggle */}
             <div className="md:hidden flex items-center gap-4">
-              <button
-                onClick={() => setMobileMenuOpen(true)}
-                className={`p-2 ${
-                  isLightContent
-                    ? "text-white"
-                    : "text-slate-600 dark:text-slate-300"
-                }`}
-              >
-                <Menu size={24} />
-              </button>
+              {user && pathname !== "/" && (
+                <button
+                  onClick={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
+                  className={`p-2 ${
+                    isLightContent
+                      ? "text-white"
+                      : "text-slate-600 dark:text-slate-300"
+                  }`}
+                >
+                  <Menu size={24} />
+                </button>
+              )}
             </div>
           </div>
         </nav>
