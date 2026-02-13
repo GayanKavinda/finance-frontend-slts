@@ -29,12 +29,16 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import Breadcrumb from "@/components/Breadcrumb";
 import { fetchMonthlyInvoiceTrend } from "@/lib/invoice";
 import { fetchInvoiceSummary, fetchRecentInvoices } from "@/lib/invoiceSummary";
+import { fetchStatusBreakdown } from "@/lib/invoiceSummary";
 
 const MetricCard = ({ icon: Icon, label, value, trend, color, delay }) => {
   const [count, setCount] = useState(0);
 
   useEffect(() => {
-    const numValue = typeof value === "number" ? value : parseFloat(value?.toString().replace(/[^0-9.-]+/g, "")) || 0;
+    const numValue =
+      typeof value === "number"
+        ? value
+        : parseFloat(value?.toString().replace(/[^0-9.-]+/g, "")) || 0;
     const duration = 1500;
     const steps = 60;
     const increment = numValue / steps;
@@ -54,10 +58,10 @@ const MetricCard = ({ icon: Icon, label, value, trend, color, delay }) => {
   }, [value]);
 
   const formatDisplayValue = () => {
-    if (typeof value === 'string' && value.includes('LKR')) {
-      return `LKR ${count.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    if (typeof value === "string" && value.includes("LKR")) {
+      return `LKR ${count.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
     }
-    return count.toLocaleString('en-US', { maximumFractionDigits: 0 });
+    return count.toLocaleString("en-US", { maximumFractionDigits: 0 });
   };
 
   return (
@@ -91,7 +95,9 @@ const MetricCard = ({ icon: Icon, label, value, trend, color, delay }) => {
                   <span className="text-red-500 font-medium">{trend}%</span>
                 </>
               )}
-              <span className="text-gray-500 dark:text-gray-400 ml-1">vs last month</span>
+              <span className="text-gray-500 dark:text-gray-400 ml-1">
+                vs last month
+              </span>
             </div>
           )}
         </div>
@@ -107,20 +113,25 @@ export default function Dashboard() {
   const [summary, setSummary] = useState(null);
   const [recentInvoices, setRecentInvoices] = useState([]);
   const [monthlyTrend, setMonthlyTrend] = useState([]);
+  const [statusBreakdown, setStatusBreakdown] = useState([]);
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [summaryData, invoicesData, trendData] = await Promise.all([
-          fetchInvoiceSummary(),
-          fetchRecentInvoices(5),
-          fetchMonthlyInvoiceTrend(),
-        ]);
+        const [summaryData, invoicesData, trendData, breakdownData] =
+          await Promise.all([
+            fetchInvoiceSummary(),
+            fetchRecentInvoices(5),
+            fetchMonthlyInvoiceTrend(),
+            fetchStatusBreakdown(),
+          ]);
+
         setSummary(summaryData);
         setRecentInvoices(
-          Array.isArray(invoicesData?.data) ? invoicesData.data : []
+          Array.isArray(invoicesData?.data) ? invoicesData.data : [],
         );
         setMonthlyTrend(Array.isArray(trendData) ? trendData : []);
+        setStatusBreakdown(Array.isArray(breakdownData) ? breakdownData : []);
       } catch (err) {
         console.error("Failed to load dashboard data", err);
       }
@@ -148,7 +159,7 @@ export default function Dashboard() {
   }));
 
   const formatCurrency = (value) => {
-    return `LKR ${Number(value).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    return `LKR ${Number(value).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
 
   return (
@@ -163,7 +174,10 @@ export default function Dashboard() {
               Dashboard Overview
             </h1>
             <p className="text-gray-600 dark:text-gray-400">
-              Welcome back, <span className="font-semibold text-blue-600 dark:text-blue-400">{user.name}</span>
+              Welcome back,{" "}
+              <span className="font-semibold text-blue-600 dark:text-blue-400">
+                {user.name}
+              </span>
             </p>
           </div>
 
@@ -234,19 +248,29 @@ export default function Dashboard() {
                 <AreaChart data={monthlyChartData}>
                   <defs>
                     <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="#3B82F6" stopOpacity={0}/>
+                      <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="#3B82F6" stopOpacity={0} />
                     </linearGradient>
                     <linearGradient id="colorPaid" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#10B981" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="#10B981" stopOpacity={0}/>
+                      <stop offset="5%" stopColor="#10B981" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="#10B981" stopOpacity={0} />
                     </linearGradient>
-                    <linearGradient id="colorPending" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#F59E0B" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="#F59E0B" stopOpacity={0}/>
+                    <linearGradient
+                      id="colorPending"
+                      x1="0"
+                      y1="0"
+                      x2="0"
+                      y2="1"
+                    >
+                      <stop offset="5%" stopColor="#F59E0B" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="#F59E0B" stopOpacity={0} />
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke={chartLabelColor} opacity={0.1} />
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke={chartLabelColor}
+                    opacity={0.1}
+                  />
                   <XAxis
                     dataKey="month"
                     tick={{ fill: chartLabelColor, fontSize: 12 }}
@@ -314,18 +338,16 @@ export default function Dashboard() {
               </div>
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart
-                  data={[
-                    {
-                      name: "Paid",
-                      count: Number(summary?.paid_invoices ?? 0),
-                    },
-                    {
-                      name: "Pending",
-                      count: Number(summary?.pending_invoices ?? 0),
-                    },
-                  ]}
+                  data={statusBreakdown.map((item) => ({
+                    name: item.status,
+                    count: Number(item.count),
+                  }))}
                 >
-                  <CartesianGrid strokeDasharray="3 3" stroke={chartLabelColor} opacity={0.1} />
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke={chartLabelColor}
+                    opacity={0.1}
+                  />
                   <XAxis
                     dataKey="name"
                     tick={{ fill: chartLabelColor, fontSize: 12 }}
@@ -350,7 +372,11 @@ export default function Dashboard() {
                       { name: "Paid", fill: "#10B981" },
                       { name: "Pending", fill: "#F59E0B" },
                     ].map((entry, index) => (
-                      <Bar key={`bar-${index}`} dataKey="count" fill={entry.fill} />
+                      <Bar
+                        key={`bar-${index}`}
+                        dataKey="count"
+                        fill={entry.fill}
+                      />
                     ))}
                   </Bar>
                 </BarChart>
