@@ -1,10 +1,10 @@
-import { 
-  LayoutDashboard, 
-  FileText, 
-  UserCircle, 
+import {
+  LayoutDashboard,
+  FileText,
+  UserCircle,
   HelpCircle,
   Activity,
-  Settings
+  Settings,
 } from "lucide-react";
 
 export const navLinks = [
@@ -20,4 +20,5 @@ export const AUTH_PATHS = [
   "/signin",
   "/forgot-password",
   "/reset-password",
+  "/account-success",
 ];

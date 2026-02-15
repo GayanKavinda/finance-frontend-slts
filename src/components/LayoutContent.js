@@ -8,6 +8,7 @@ import ThemeScrollArea from "@/components/ThemeScrollArea";
 import { useState, createContext, useContext } from "react";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
+import { AUTH_PATHS } from "@/constants/navigation";
 
 const SidebarContext = createContext();
 
@@ -21,12 +22,7 @@ function ScrollableContent({ children }) {
   const { user } = useAuth();
 
   // Show sidebar on authenticated pages (not auth pages or home page)
-  const isAuthPage = [
-    "/signup",
-    "/signin",
-    "/forgot-password",
-    "/reset-password",
-  ].includes(pathname);
+  const isAuthPage = AUTH_PATHS.includes(pathname);
   const isHomePage = pathname === "/";
   const showSidebar = user && !isAuthPage && !isHomePage;
 
