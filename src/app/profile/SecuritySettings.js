@@ -6,7 +6,61 @@ import axios from "@/lib/axios";
 import { fetchCsrf } from "@/lib/auth";
 import { useSnackbar } from "notistack";
 import { motion } from "framer-motion";
-import { Loader2, Lock, Save, Trash2 } from "lucide-react";
+import {
+  Loader2,
+  Lock,
+  Save,
+  Trash2,
+  KeyRound,
+  ShieldAlert,
+  ShieldCheck,
+} from "lucide-react";
+
+function SectionHeader({ icon: Icon, title, iconColor = "text-primary" }) {
+  return (
+    <div className="mb-6">
+      <div className="flex items-center gap-2.5 mb-2">
+        {Icon && (
+          <div
+            className={`p-1.5 rounded-lg ${iconColor.replace("text-", "bg-")}/10`}
+          >
+            <Icon size={18} className={iconColor} />
+          </div>
+        )}
+        <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+          {title}
+        </h3>
+      </div>
+      <div
+        className={`h-0.5 w-16 bg-gradient-to-r ${iconColor.replace("text-", "from-").split(" ")[0]} to-transparent rounded-full`}
+      ></div>
+    </div>
+  );
+}
+
+function Field({
+  label,
+  error,
+  icon: Icon,
+  iconColor = "text-slate-400",
+  children,
+  optional = false,
+}) {
+  return (
+    <div className="flex flex-col gap-2">
+      <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 flex items-center gap-2 uppercase tracking-wider">
+        {Icon && <Icon size={12} className={iconColor} />} {label}{" "}
+        {optional && (
+          <span className="opacity-50 lowercase font-normal">(optional)</span>
+        )}
+      </label>
+      {children}
+      {error && (
+        <p className="text-[10px] text-red-500 mt-1 font-medium">{error}</p>
+      )}
+    </div>
+  );
+}
 
 // Validation Schema
 const passwordSchema = yup.object({
@@ -131,32 +185,35 @@ export default function SecuritySettings() {
             {/* Glow effect for dark mode */}
             <div className="absolute inset-0 -z-10 rounded-2xl bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 blur-2xl opacity-0 dark:opacity-60"></div>
 
-            <h3 className="text-sm font-bold text-slate-600 dark:text-slate-400 mb-4">
-              Update Password
-            </h3>
+            <SectionHeader
+              icon={KeyRound}
+              title="Update Password"
+              iconColor="text-primary"
+            />
             <form onSubmit={passwordForm.handleSubmit(onUpdatePassword)}>
               <div className="space-y-4">
-                <div className="space-y-4">
-                  <label className="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
-                    Current Password
-                  </label>
+                <Field
+                  label="Current Password"
+                  icon={Lock}
+                  iconColor="text-slate-400"
+                  error={
+                    passwordForm.formState.errors.current_password?.message
+                  }
+                >
                   <input
                     type="password"
                     {...passwordForm.register("current_password")}
                     className="w-full h-11 px-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm"
                     placeholder="••••••••"
                   />
-                  {passwordForm.formState.errors.current_password && (
-                    <p className="text-xs text-red-500 mt-1">
-                      {passwordForm.formState.errors.current_password.message}
-                    </p>
-                  )}
-                </div>
+                </Field>
 
-                <div className="space-y-4">
-                  <label className="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
-                    New Password
-                  </label>
+                <Field
+                  label="New Password"
+                  icon={KeyRound}
+                  iconColor="text-blue-500"
+                  error={passwordForm.formState.errors.password?.message}
+                >
                   <div className="relative">
                     <input
                       type="password"
@@ -175,7 +232,7 @@ export default function SecuritySettings() {
                     </div>
                   </div>
                   {passwordForm.watch("password") && (
-                    <div className="space-y-1.5">
+                    <div className="space-y-1.5 mt-2">
                       <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-wider">
                         <span className="text-slate-500">Strength</span>
                         <span
@@ -197,32 +254,23 @@ export default function SecuritySettings() {
                       </div>
                     </div>
                   )}
-                  {passwordForm.formState.errors.password && (
-                    <p className="text-xs text-red-500 mt-1">
-                      {passwordForm.formState.errors.password.message}
-                    </p>
-                  )}
-                </div>
+                </Field>
 
-                <div className="space-y-4">
-                  <label className="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
-                    Confirm New Password
-                  </label>
+                <Field
+                  label="Confirm New Password"
+                  icon={ShieldCheck}
+                  iconColor="text-emerald-500"
+                  error={
+                    passwordForm.formState.errors.password_confirmation?.message
+                  }
+                >
                   <input
                     type="password"
                     {...passwordForm.register("password_confirmation")}
                     className="w-full h-11 px-4 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm"
                     placeholder="Repeat new password"
                   />
-                  {passwordForm.formState.errors.password_confirmation && (
-                    <p className="text-xs text-red-500 mt-1">
-                      {
-                        passwordForm.formState.errors.password_confirmation
-                          .message
-                      }
-                    </p>
-                  )}
-                </div>
+                </Field>
               </div>
 
               <div className="mt-6">
@@ -231,7 +279,7 @@ export default function SecuritySettings() {
                   whileTap={{ scale: 0.95 }}
                   type="submit"
                   disabled={passwordForm.formState.isSubmitting}
-                  className="group relative flex items-center gap-2 overflow-hidden rounded-xl bg-primary px-6 py-2.5 text-sm font-bold text-primary-foreground shadow-lg shadow-primary/25 transition-all duration-300 hover:shadow-primary/40 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="group relative flex items-center gap-2 overflow-hidden rounded-xl bg-primary px-5 py-2.5 text-xs font-bold text-primary-foreground shadow-lg shadow-primary/25 transition-all duration-300 hover:shadow-primary/40 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 group-hover:animate-[shimmer_1.5s_infinite]"></div>
                   <span className="relative flex items-center gap-2">
@@ -260,9 +308,11 @@ export default function SecuritySettings() {
           <div className="relative rounded-2xl border border-slate-200 dark:border-slate-800 p-6 bg-white/60 dark:bg-slate-950/40 dark:shadow-[0_0_80px_-12px_rgba(239,68,68,0.1)]">
             <div className="absolute inset-0 -z-10 rounded-2xl bg-gradient-to-br from-red-500/5 via-transparent to-red-500/5 blur-2xl opacity-0 dark:opacity-40"></div>
 
-            <h3 className="text-sm font-bold text-red-600 dark:text-red-400 mb-4">
-              Danger Zone
-            </h3>
+            <SectionHeader
+              icon={ShieldAlert}
+              title="Danger Zone"
+              iconColor="text-red-500"
+            />
             <p className="text-xs text-slate-500 dark:text-slate-400 mb-6">
               Once you deactivate your account, you will have 30 days to request
               restoration.
@@ -271,7 +321,7 @@ export default function SecuritySettings() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={onDeactivate}
-              className="group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-red-500 to-rose-600 px-4 py-2.5 text-sm font-bold text-white shadow-lg shadow-red-500/25 transition-all duration-300 hover:scale-[1.02] hover:shadow-red-500/40 active:scale-95"
+              className="group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-red-500 to-rose-600 px-4 py-2 text-xs font-bold text-white shadow-lg shadow-red-500/25 transition-all duration-300 hover:scale-[1.02] hover:shadow-red-500/40 active:scale-95"
             >
               <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/10 to-transparent transition-transform duration-700 group-hover:animate-[shimmer_1.5s_infinite]"></div>
               <Trash2

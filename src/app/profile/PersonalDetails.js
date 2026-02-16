@@ -37,14 +37,44 @@ const emailChangeSchema = yup.object({
   otp: yup.string().length(6, "Code must be 6 digits").optional(),
 });
 
-function Field({ label, error, icon: Icon, children }) {
+function SectionHeader({ icon: Icon, title, iconColor = "text-primary" }) {
   return (
-    <div className="flex flex-col gap-4">
-      <label className="text-xs font-bold text-slate-600 dark:text-slate-300 flex items-center gap-2 uppercase tracking-wider">
-        {Icon && <Icon size={14} className="text-slate-400" />} {label}
+    <div className="mb-6">
+      <div className="flex items-center gap-2.5 mb-2">
+        {Icon && (
+          <div
+            className={`p-1.5 rounded-lg ${iconColor.replace("text-", "bg-")}/10`}
+          >
+            <Icon size={18} className={iconColor} />
+          </div>
+        )}
+        <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+          {title}
+        </h3>
+      </div>
+      <div
+        className={`h-0.5 w-16 bg-gradient-to-r ${iconColor.replace("text-", "from-").split(" ")[0]} to-transparent rounded-full`}
+      ></div>
+    </div>
+  );
+}
+
+function Field({
+  label,
+  error,
+  icon: Icon,
+  iconColor = "text-slate-400",
+  children,
+}) {
+  return (
+    <div className="flex flex-col gap-2">
+      <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 flex items-center gap-2 uppercase tracking-wider">
+        {Icon && <Icon size={12} className={iconColor} />} {label}
       </label>
       {children}
-      {error && <p className="text-xs text-red-500 mt-1.5">{error}</p>}
+      {error && (
+        <p className="text-[10px] text-red-500 mt-1 font-medium">{error}</p>
+      )}
     </div>
   );
 }
@@ -289,9 +319,11 @@ export default function PersonalDetails({ user, refetch }) {
           {/* Glow effect for dark mode */}
           <div className="absolute inset-0 -z-10 rounded-2xl bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 blur-2xl opacity-0 dark:opacity-60"></div>
 
-          <h3 className="text-sm font-bold text-slate-600 dark:text-slate-400 mb-4">
-            Profile Photo
-          </h3>
+          <SectionHeader
+            icon={Camera}
+            title="Profile Photo"
+            iconColor="text-sky-500"
+          />
           <div className="flex items-center gap-4">
             <div className="relative w-20 h-20 shrink-0">
               {avatarPreview ? (
@@ -368,7 +400,7 @@ export default function PersonalDetails({ user, refetch }) {
                   type="button"
                   disabled={!avatarFile || isUploadingAvatar}
                   onClick={onUploadAvatar}
-                  className="group relative flex items-center gap-2 overflow-hidden rounded-xl bg-primary px-4 py-2 text-sm font-bold text-primary-foreground shadow-lg shadow-primary/25 transition-all duration-300 hover:scale-105 hover:shadow-primary/40 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="group relative flex items-center gap-2 overflow-hidden rounded-xl bg-primary px-4 py-2 text-xs font-bold text-primary-foreground shadow-lg shadow-primary/25 transition-all duration-300 hover:scale-105 hover:shadow-primary/40 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 group-hover:animate-[shimmer_1.5s_infinite]"></div>
                   <span className="relative flex items-center gap-2">
@@ -424,9 +456,11 @@ export default function PersonalDetails({ user, refetch }) {
           {/* Glow effect for dark mode */}
           <div className="absolute inset-0 -z-10 rounded-2xl bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 blur-2xl opacity-0 dark:opacity-60"></div>
 
-          <h3 className="text-sm font-bold text-slate-600 dark:text-slate-400 mb-4">
-            Personal Info
-          </h3>
+          <SectionHeader
+            icon={User}
+            title="Personal Info"
+            iconColor="text-blue-500"
+          />
           <form
             onSubmit={profileForm.handleSubmit(onUpdateProfile)}
             className="grid grid-cols-1 sm:grid-cols-2 gap-4"
@@ -434,6 +468,7 @@ export default function PersonalDetails({ user, refetch }) {
             <Field
               label="Full name"
               icon={User}
+              iconColor="text-blue-500"
               error={profileForm.formState.errors.name?.message}
             >
               <input
@@ -442,7 +477,11 @@ export default function PersonalDetails({ user, refetch }) {
                 placeholder="Your name"
               />
             </Field>
-            <Field label="Email (read-only)" icon={Mail}>
+            <Field
+              label="Email (read-only)"
+              icon={Mail}
+              iconColor="text-amber-500"
+            >
               <input
                 value={user?.email || ""}
                 disabled
@@ -455,7 +494,7 @@ export default function PersonalDetails({ user, refetch }) {
                 whileTap={{ scale: 0.98 }}
                 type="submit"
                 disabled={profileForm.formState.isSubmitting}
-                className="group relative inline-flex w-full sm:w-auto items-center justify-center gap-2 overflow-hidden rounded-xl bg-primary px-6 py-2.5 text-sm font-bold text-primary-foreground shadow-lg shadow-primary/25 transition-all duration-300 hover:shadow-primary/40 disabled:cursor-not-allowed disabled:opacity-50"
+                className="group relative inline-flex w-auto items-center justify-center gap-2 overflow-hidden rounded-xl bg-primary px-5 py-2.5 text-xs font-bold text-primary-foreground shadow-lg shadow-primary/25 transition-all duration-300 hover:shadow-primary/40 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 group-hover:animate-[shimmer_1.5s_infinite]"></div>
                 <span className="relative flex items-center gap-2">
@@ -483,9 +522,11 @@ export default function PersonalDetails({ user, refetch }) {
           {/* Glow effect for dark mode */}
           <div className="absolute inset-0 -z-10 rounded-2xl bg-gradient-to-br from-secondary/5 via-transparent to-primary/5 blur-2xl opacity-0 dark:opacity-60"></div>
 
-          <h3 className="text-sm font-bold text-slate-600 dark:text-slate-400 mb-4">
-            Change Email
-          </h3>
+          <SectionHeader
+            icon={Mail}
+            title="Change Email"
+            iconColor="text-amber-500"
+          />
           <form
             onSubmit={emailForm.handleSubmit(onConfirmEmailChange)}
             className="grid grid-cols-1 gap-5"
@@ -493,6 +534,7 @@ export default function PersonalDetails({ user, refetch }) {
             <Field
               label="New Email Address"
               icon={Mail}
+              iconColor="text-amber-500"
               error={emailForm.formState.errors.new_email?.message}
             >
               <input
@@ -507,6 +549,7 @@ export default function PersonalDetails({ user, refetch }) {
               <Field
                 label="Current Password"
                 icon={Lock}
+                iconColor="text-indigo-500"
                 error={emailForm.formState.errors.current_password?.message}
               >
                 <input
@@ -523,7 +566,7 @@ export default function PersonalDetails({ user, refetch }) {
                   type="button"
                   onClick={onRequestEmailOtp}
                   disabled={emailForm.formState.isSubmitting}
-                  className="group flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-primary/20 bg-primary/5 px-4 py-2 text-sm font-bold text-primary transition-all duration-300 hover:border-primary/50 hover:bg-primary/10 hover:shadow-lg hover:shadow-primary/10 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="group flex w-auto cursor-pointer items-center justify-center gap-2 rounded-xl border border-primary/20 bg-primary/5 px-4 py-2 text-xs font-bold text-primary transition-all duration-300 hover:border-primary/50 hover:bg-primary/10 hover:shadow-lg hover:shadow-primary/10 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <Mail className="w-4 h-4 transition-transform duration-300 group-hover:scale-110" />
                   <span>Send Code</span>
@@ -535,6 +578,7 @@ export default function PersonalDetails({ user, refetch }) {
               <Field
                 label="Verification Code"
                 icon={ShieldCheck}
+                iconColor="text-emerald-500"
                 error={emailForm.formState.errors.otp?.message}
               >
                 <input
@@ -551,7 +595,7 @@ export default function PersonalDetails({ user, refetch }) {
                 whileTap={{ scale: 0.98 }}
                 type="submit"
                 disabled={emailForm.formState.isSubmitting}
-                className="group relative inline-flex w-full sm:w-auto items-center justify-center gap-2 overflow-hidden rounded-xl bg-secondary px-6 py-2.5 text-sm font-bold text-secondary-foreground shadow-lg shadow-secondary/25 transition-all duration-300 hover:shadow-secondary/40 disabled:cursor-not-allowed disabled:opacity-50"
+                className="group relative inline-flex w-auto items-center justify-center gap-2 overflow-hidden rounded-xl bg-secondary px-5 py-2.5 text-xs font-bold text-secondary-foreground shadow-lg shadow-secondary/25 transition-all duration-300 hover:shadow-secondary/40 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 group-hover:animate-[shimmer_1.5s_infinite]"></div>
                 <span className="relative flex items-center gap-2">

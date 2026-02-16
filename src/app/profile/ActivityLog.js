@@ -2,7 +2,29 @@ import { useState, useEffect, useCallback } from "react";
 import axios from "@/lib/axios";
 import { useSnackbar } from "notistack";
 import { motion } from "framer-motion";
-import { ShieldCheck, XCircle, Trash2 } from "lucide-react";
+import { ShieldCheck, XCircle, Trash2, Activity, History } from "lucide-react";
+
+function SectionHeader({ icon: Icon, title, iconColor = "text-primary" }) {
+  return (
+    <div className="mb-6">
+      <div className="flex items-center gap-2.5 mb-2">
+        {Icon && (
+          <div
+            className={`p-1.5 rounded-lg ${iconColor.replace("text-", "bg-")}/10`}
+          >
+            <Icon size={18} className={iconColor} />
+          </div>
+        )}
+        <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+          {title}
+        </h3>
+      </div>
+      <div
+        className={`h-0.5 w-16 bg-gradient-to-r ${iconColor.replace("text-", "from-").split(" ")[0]} to-transparent rounded-full`}
+      ></div>
+    </div>
+  );
+}
 
 export default function ActivityLog() {
   const { enqueueSnackbar } = useSnackbar();
@@ -148,11 +170,13 @@ export default function ActivityLog() {
         {/* Glow effect for dark mode */}
         <div className="absolute inset-0 -z-10 rounded-2xl bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 blur-2xl opacity-0 dark:opacity-60"></div>
 
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-base font-bold text-slate-600 dark:text-slate-400">
-            Active Sessions
-          </h3>
-          <span className="text-[10px] bg-primary/10 text-primary px-2 py-1 rounded-md font-medium">
+        <div className="flex items-center justify-between mb-2">
+          <SectionHeader
+            icon={Activity}
+            title="Active Sessions"
+            iconColor="text-primary"
+          />
+          <span className="text-[10px] bg-primary/10 text-primary px-2 py-1 rounded-md font-bold uppercase tracking-wider -mt-6">
             {activeSessions.length} active
           </span>
         </div>
@@ -165,8 +189,11 @@ export default function ActivityLog() {
                 className="flex items-center justify-between p-4 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/20 hover:border-slate-200 dark:hover:border-slate-700 transition-colors"
               >
                 <div className="flex items-center gap-4">
-                  <div className="p-2.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm">
-                    <ShieldCheck size={18} className="text-primary" />
+                  <div className="p-2.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm group">
+                    <ShieldCheck
+                      size={18}
+                      className="text-emerald-500 transition-transform duration-300 group-hover:scale-110"
+                    />
                   </div>
                   <div>
                     <div className="flex items-center gap-2 text-sm font-bold text-slate-900 dark:text-slate-200">
@@ -212,10 +239,12 @@ export default function ActivityLog() {
 
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <div className="flex flex-col gap-1">
-            <h3 className="text-base font-bold text-slate-600 dark:text-slate-400">
-              Login History
-            </h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
+            <SectionHeader
+              icon={History}
+              title="Login History"
+              iconColor="text-blue-500"
+            />
+            <p className="text-xs text-slate-500 dark:text-slate-400 -mt-4 mb-4">
               {getActivityStatusMessage()}
             </p>
           </div>
@@ -429,7 +458,7 @@ export default function ActivityLog() {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={loadMoreHistory}
-                className="group px-6 py-3 text-sm font-bold text-slate-600 dark:text-slate-400 bg-white/10 dark:bg-white/5 backdrop-blur-md border border-slate-200 dark:border-slate-800 rounded-xl hover:bg-white/20 transition-all uppercase tracking-wider cursor-pointer active:shadow-inner"
+                className="group px-6 py-2.5 text-xs font-bold text-slate-600 dark:text-slate-400 bg-white/10 dark:bg-white/5 backdrop-blur-md border border-slate-200 dark:border-slate-800 rounded-xl hover:bg-white/20 transition-all uppercase tracking-wider cursor-pointer active:shadow-inner"
               >
                 <span className="flex items-center gap-2">
                   Load More History
