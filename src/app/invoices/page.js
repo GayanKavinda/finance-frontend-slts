@@ -3,11 +3,18 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { fetchInvoices, downloadInvoicePdf } from "@/lib/invoice";
+import {
+  fetchInvoices,
+  downloadInvoicePdf,
+  approveInvoice,
+} from "@/lib/invoice";
 import StatusBadge from "@/components/ui/StatusBadge";
 import SubmitToFinanceButton from "@/components/ui/SubmitToFinanceButton";
+import { hasPermission } from "@/lib/permissions";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function InvoicePage() {
+  const { user } = useAuth();
   const [invoices, setInvoices] = useState([]);
   const [meta, setMeta] = useState({});
   const [page, setPage] = useState(1);
@@ -23,6 +30,18 @@ export default function InvoicePage() {
       console.error("Failed to fetch invoices:", error);
     }
   }, [page, status, search]);
+
+  const handleApprove = async (id) => {
+    if (!confirm("Are you sure you want to approve this invoice for payment?"))
+      return;
+    try {
+      await approveInvoice(id);
+      loadInvoices();
+    } catch (error) {
+      console.error("Approval failed:", error);
+      alert("Failed to approve invoice.");
+    }
+  };
 
   useEffect(() => {
     let isMounted = true;
@@ -109,22 +128,38 @@ export default function InvoicePage() {
                     </button>
 
                     {/* Edit - Procurement only, Draft only */}
-                    {inv.status === "Draft" && (
-                      <a
-                        href={`/invoices/${inv.id}/edit`}
-                        className="text-xs font-bold text-blue-600"
-                      >
-                        Edit
-                      </a>
-                    )}
+                    {inv.status === "Draft" &&
+                      hasPermission(user, "edit-invoice") && (
+                        <a
+                          href={`/invoices/${inv.id}/edit`}
+                          className="text-xs font-bold text-blue-600"
+                        >
+                          Edit
+                        </a>
+                      )}
 
                     {/* Submit to Finance - only after tax generation */}
-                    {inv.status === "Tax Generated" && (
-                      <SubmitToFinanceButton
-                        invoiceId={inv.id}
-                        onSuccess={() => window.location.reload()}
-                      />
-                    )}
+                    {inv.status === "Tax Generated" &&
+                      hasPermission(user, "submit-to-finance") && (
+                        <SubmitToFinanceButton
+                          invoiceId={inv.id}
+                          onSuccess={() => loadInvoices()}
+                        />
+                      )}
+
+                    {/* Approve - Finance only, Submitted only */}
+                    {inv.status === "Submitted" &&
+                      hasPermission(user, "approve-payment") && (
+                        <button
+                          className="text-green-600 text-xs font-bold"
+                          onClick={async () => {
+                            await approveInvoice(inv.id);
+                            loadInvoices();
+                          }}
+                        >
+                          Approve
+                        </button>
+                      )}
 
                     {/* Locked state */}
                     {inv.status === "Paid" && (

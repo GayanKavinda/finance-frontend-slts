@@ -3,7 +3,9 @@
 import { useEffect, useRef, useCallback } from "react";
 import axios from "@/lib/axios";
 
-const useAutoLogout = (timeout = 30 * 60 * 1000) => {
+import { AUTO_LOGOUT_TIMEOUT } from "@/constants/config";
+
+const useAutoLogout = (timeout = AUTO_LOGOUT_TIMEOUT) => {
   // Default 30 minutes
   const timerRef = useRef(null);
 

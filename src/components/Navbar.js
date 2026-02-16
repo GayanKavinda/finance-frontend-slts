@@ -37,34 +37,27 @@ import useAutoLogout from "@/hooks/useAutoLogout";
 import useSystemStatus from "@/hooks/useSystemStatus";
 import { useScroll } from "@/contexts/ScrollContext";
 
-const navLinks = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/transactions", label: "Transactions", icon: ReceiptText },
-  { href: "/budgets", label: "Budgets", icon: Target },
-  { href: "/reports", label: "Reports", icon: PieChart },
-];
+import { navLinks, AUTH_PATHS } from "@/constants/navigation";
 
-export default function Navbar() {
+export default function Navbar({
+  isMobileSidebarOpen,
+  setIsMobileSidebarOpen,
+}) {
   const { user, loading, logout } = useAuth();
   const { metrics, alerts: systemAlerts } = useSystemStatus();
-  useAutoLogout(30 * 60 * 1000);
+  useAutoLogout();
 
   const router = useRouter();
   const pathname = usePathname();
   const isHomePage = pathname === "/";
-  const isAuthPage = [
-    "/signup",
-    "/signin",
-    "/forgot-password",
-    "/reset-password",
-  ].includes(pathname);
+  const isAuthPage = AUTH_PATHS.includes(pathname);
   const isTransparentPage = isHomePage || isAuthPage;
 
   const { theme, setTheme, resolvedTheme } = useTheme();
   const { scrollY } = useScroll();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
-  const [themeMenuOpen, setThemeMenuOpen] = useState(false);
+  // const [themeMenuOpen, setThemeMenuOpen] = useState(false); // Removed
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -76,7 +69,7 @@ export default function Navbar() {
   useEffect(() => {
     setMobileMenuOpen(false);
     setProfileMenuOpen(false);
-    setThemeMenuOpen(false);
+    // setThemeMenuOpen(false); // Removed
   }, [pathname]);
 
   useEffect(() => {
@@ -109,8 +102,8 @@ export default function Navbar() {
     if (loading) {
       return (
         <div className="flex items-center gap-4">
-          <div className="w-24 h-10 bg-slate-200/50 dark:bg-slate-800/50 animate-pulse rounded-lg" />
-          <div className="w-10 h-10 bg-slate-200/50 dark:bg-slate-800/50 animate-pulse rounded-full" />
+          <div className="w-24 h-10 bg-slate-200/50 dark:bg-slate-800/50 rounded-lg" />
+          <div className="w-10 h-10 bg-slate-200/50 dark:bg-slate-800/50 rounded-full" />
         </div>
       );
     }
@@ -163,7 +156,7 @@ export default function Navbar() {
                   initial={{ opacity: 0, scale: 0.95, y: 10 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                  className="absolute right-0 top-full mt-4 w-60 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-2xl p-2 z-60"
+                  className="absolute right-0 top-full mt-4 w-60 rounded-xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl border border-white/20 dark:border-white/10 shadow-2xl p-2 z-60"
                 >
                   <div className="px-4 py-3 mb-2 border-b border-slate-100 dark:border-slate-800 flex items-center gap-3">
                     {user.avatar_url ? (
@@ -259,15 +252,15 @@ export default function Navbar() {
           className={`w-full transition-all duration-500 ${
             isTransparentPage
               ? scrolled
-                ? "bg-white/90 dark:bg-[#0F172A]/90 backdrop-blur-xl border-b border-slate-200/30 dark:border-slate-800/30"
+                ? "bg-white/70 dark:bg-[#0F172A]/70 backdrop-blur-md border-b border-white/20 dark:border-white/10 shadow-lg"
                 : "bg-transparent border-transparent"
-              : "bg-white/80 dark:bg-[#0F172A]/80 backdrop-blur-xl border-b border-slate-200/30 dark:border-slate-800/30"
+              : "bg-white/70 dark:bg-[#0F172A]/70 backdrop-blur-md border-b border-white/20 dark:border-white/10 shadow-lg"
           } px-4 md:px-6`}
         >
-          <div className="max-w-7xl mx-auto h-16 flex items-center justify-between">
+          <div className="w-full mx-auto h-16 flex items-center justify-between px-2">
             {/* Logo */}
-            <Link href="/" className="flex items-center gap-4 group">
-              <div className="relative w-[120px] h-[40px]">
+            <Link href="/" className="flex items-center gap-2 group">
+              <div className="relative w-[100px] h-[36px]">
                 <Image
                   src="/icons/slt_digital_icon.png"
                   alt="SLT Digital Logo"
@@ -309,103 +302,45 @@ export default function Navbar() {
             </Link>
 
             {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center gap-6">
-              {loading ? (
-                <div className="flex items-center gap-4 mr-4">
-                  {[1, 2, 3, 4].map((i) => (
-                    <div
-                      key={i}
-                      className="w-24 h-8 bg-slate-200/50 dark:bg-slate-800/50 animate-pulse rounded-md"
-                    />
-                  ))}
-                </div>
-              ) : (
-                user &&
-                pathname !== "/" && (
-                  <div className="flex items-center gap-1 mr-4">
-                    {navLinks.map((link) => {
-                      const isActive = pathname === link.href;
-                      const Icon = link.icon;
-                      return (
-                        <Link
-                          key={link.href}
-                          href={link.href}
-                          className={`px-3 py-2 text-sm font-medium transition-all flex items-center gap-2 rounded-md ${
-                            isActive
-                              ? "text-primary bg-primary/5"
-                              : "text-slate-600 dark:text-slate-400 hover:text-primary dark:hover:text-primary hover:bg-slate-50 dark:hover:bg-slate-800"
-                          }`}
-                        >
-                          <Icon
-                            className={`w-4 h-4 ${
-                              isActive ? "text-primary" : "text-slate-400"
-                            }`}
-                          />
-                          <span>{link.label}</span>
-                        </Link>
-                      );
-                    })}
-                  </div>
-                )
-              )}
-
+            <div className="hidden md:flex items-center gap-3">
               {/* Theme Toggle */}
               <div className="relative">
                 {!mounted ? (
-                  <div className="w-9 h-9 bg-slate-200/50 dark:bg-slate-800/50 animate-pulse rounded-full" />
+                  <div className="w-9 h-9 bg-white/5 dark:bg-white/5 rounded-full animate-pulse border border-white/10" />
                 ) : (
-                  <>
-                    <button
-                      onClick={() => setThemeMenuOpen(!themeMenuOpen)}
-                      className={`p-2 rounded-full transition-colors cursor-pointer ${
-                        isLightContent
-                          ? "text-white hover:bg-white/20"
-                          : "text-slate-500 hover:text-[#00B4EB] hover:bg-slate-100 dark:hover:bg-slate-800"
-                      }`}
-                      aria-label="Toggle Theme"
-                    >
-                      {theme === "dark" ? (
-                        <Moon size={20} />
-                      ) : theme === "light" ? (
-                        <Sun size={20} />
-                      ) : (
-                        <Laptop size={20} />
-                      )}
-                    </button>
+                  <div
+                    onClick={() =>
+                      setTheme(resolvedTheme === "dark" ? "light" : "dark")
+                    }
+                    className={`relative w-14 h-7 rounded-full cursor-pointer transition-all duration-500 p-1 flex items-center border group overflow-hidden ${
+                      resolvedTheme === "dark"
+                        ? "bg-white/5 border-white/10 hover:bg-white/10"
+                        : "bg-white/20 border-white/30 hover:bg-white/30"
+                    } backdrop-blur-xl shadow-lg ring-1 ring-black/5`}
+                  >
+                    {/* Glass Shine Effect */}
+                    <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent pointer-events-none" />
 
-                    <AnimatePresence>
-                      {themeMenuOpen && (
-                        <motion.div
-                          initial={{ opacity: 0, scale: 0.95, y: 5 }}
-                          animate={{ opacity: 1, scale: 1, y: 0 }}
-                          exit={{ opacity: 0, scale: 0.95, y: 5 }}
-                          className="absolute right-0 top-full mt-2 w-36 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 shadow-xl p-1 z-50 overflow-hidden"
-                        >
-                          {[
-                            { name: "light", icon: Sun, label: "Light" },
-                            { name: "dark", icon: Moon, label: "Dark" },
-                            { name: "system", icon: Laptop, label: "System" },
-                          ].map((t) => (
-                            <button
-                              key={t.name}
-                              onClick={() => {
-                                setTheme(t.name);
-                                setThemeMenuOpen(false);
-                              }}
-                              className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-semibold uppercase tracking-wide transition-colors ${
-                                theme === t.name
-                                  ? "bg-[#00B4EB]/10 text-[#00B4EB]"
-                                  : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800"
-                              }`}
-                            >
-                              <t.icon size={14} />
-                              {t.label}
-                            </button>
-                          ))}
-                        </motion.div>
+                    <motion.div
+                      layout
+                      transition={{
+                        type: "spring",
+                        stiffness: 400,
+                        damping: 25,
+                      }}
+                      className={`w-5 h-5 rounded-full shadow-[0_0_15px_rgba(0,180,235,0.4)] flex items-center justify-center transition-all duration-500 relative z-10 ${
+                        resolvedTheme === "dark"
+                          ? "bg-[#00B4EB] text-white translate-x-7"
+                          : "bg-white text-[#00B4EB] translate-x-0"
+                      }`}
+                    >
+                      {resolvedTheme === "dark" ? (
+                        <Moon size={11} fill="currentColor" />
+                      ) : (
+                        <Sun size={11} fill="currentColor" />
                       )}
-                    </AnimatePresence>
-                  </>
+                    </motion.div>
+                  </div>
                 )}
               </div>
 
@@ -420,10 +355,7 @@ export default function Navbar() {
                     }`}
                   >
                     <Bell size={20} />
-                    <span className="absolute top-2 right-2 flex h-2 w-2">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
-                    </span>
+                    <span className="absolute top-2 right-2 flex h-2 w-2 rounded-full bg-red-500"></span>
                   </button>
 
                   <AnimatePresence>
@@ -437,7 +369,7 @@ export default function Navbar() {
                           initial={{ opacity: 0, scale: 0.95, y: 10 }}
                           animate={{ opacity: 1, scale: 1, y: 0 }}
                           exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                          className="absolute right-0 top-full mt-4 w-[360px] rounded-2xl bg-white/80 dark:bg-slate-900/90 backdrop-blur-xl border border-slate-200 dark:border-slate-800 shadow-2xl z-50 overflow-hidden"
+                          className="absolute right-0 top-full mt-4 w-[360px] rounded-2xl bg-white/80 dark:bg-slate-900/90 backdrop-blur-xl border border-white/20 dark:border-white/10 shadow-2xl z-50 overflow-hidden"
                         >
                           <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
                             <div>
@@ -569,16 +501,18 @@ export default function Navbar() {
 
             {/* Mobile Menu Toggle */}
             <div className="md:hidden flex items-center gap-4">
-              <button
-                onClick={() => setMobileMenuOpen(true)}
-                className={`p-2 ${
-                  isLightContent
-                    ? "text-white"
-                    : "text-slate-600 dark:text-slate-300"
-                }`}
-              >
-                <Menu size={24} />
-              </button>
+              {user && pathname !== "/" && (
+                <button
+                  onClick={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
+                  className={`p-2 ${
+                    isLightContent
+                      ? "text-white"
+                      : "text-slate-600 dark:text-slate-300"
+                  }`}
+                >
+                  <Menu size={24} />
+                </button>
+              )}
             </div>
           </div>
         </nav>
@@ -733,24 +667,22 @@ export default function Navbar() {
               )}
               <div className="mt-auto pt-6 border-t border-slate-200 dark:border-slate-800 shrink-0">
                 <div className="grid grid-cols-3 gap-2">
-                  {["light", "dark", "system"].map((mode) => (
+                  {[
+                    { id: "light", icon: Sun, label: "Light" },
+                    { id: "dark", icon: Moon, label: "Dark" },
+                    { id: "system", icon: Laptop, label: "System" },
+                  ].map((mode) => (
                     <button
-                      key={mode}
-                      onClick={() => setTheme(mode)}
-                      className={`p-3 rounded-lg flex flex-col items-center justify-center gap-2 text-xs font-bold uppercase transition-all active:scale-95 ${
-                        theme === mode
-                          ? "bg-primary/10 text-primary ring-2 ring-primary/20"
-                          : "bg-slate-100 dark:bg-slate-800 text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-700"
+                      key={mode.id}
+                      onClick={() => setTheme(mode.id)}
+                      className={`p-3 rounded-xl flex flex-col items-center justify-center gap-2 text-[10px] font-bold uppercase tracking-wider transition-all active:scale-95 border ${
+                        theme === mode.id
+                          ? "bg-primary/10 text-primary border-primary/20 shadow-sm"
+                          : "bg-slate-50 dark:bg-slate-900/50 text-slate-500 border-transparent hover:bg-slate-100 dark:hover:bg-slate-800"
                       }`}
                     >
-                      {mode === "light" ? (
-                        <Sun size={16} />
-                      ) : mode === "dark" ? (
-                        <Moon size={16} />
-                      ) : (
-                        <Laptop size={16} />
-                      )}
-                      {mode}
+                      <mode.icon size={18} />
+                      {mode.label}
                     </button>
                   ))}
                 </div>

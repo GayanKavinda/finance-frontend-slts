@@ -214,9 +214,9 @@ export default function Signup() {
       console.log("[Signup] CSRF fetched, attempting registration...");
       const response = await axios.post("/api/register", data);
       console.log("[Signup] Registration successful:", response.data);
+      router.push("/account-success");
       await refetch();
       enqueueSnackbar("Account created successfully!", { variant: "success" });
-      router.push("/dashboard");
     } catch (error) {
       console.error("[Signup] Registration failed:", {
         status: error.response?.status,

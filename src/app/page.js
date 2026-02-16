@@ -6,68 +6,12 @@ import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 import { useState, useEffect } from "react";
 import Image from "next/image";
 
-const slides = [
-  {
-    title: "SLT Finance Division",
-    subtitle:
-      "Empowering employees with comprehensive salary and payment management",
-    image: "/slides/2.santa-claus-chariot-3840x2160-24949.avif",
-    cta: "View Dashboard",
-  },
-  {
-    title: "Maritime Finance Solutions",
-    subtitle:
-      "Managing port fees and shipping allowances with nautical precision",
-    video: "/slides/motorboat-in-harbor-with-sailboats-bequia.mp4",
-    cta: "Explore Portals",
-  },
-  {
-    title: "Instant Salary Insights",
-    subtitle:
-      "View your monthly earnings, deductions, and net pay in real-time",
-    image: "/slides/6.wp9223826-finance-4k-wallpapers.avif",
-    cta: "Check Salary",
-  },
-  {
-    title: "Global Reach, Local Impact",
-    subtitle: "Supporting digital infrastructure across the island regions",
-    video: "/slides/raja-ampat-islands-17.mp4",
-    cta: "See Networks",
-  },
-  {
-    title: "Digital Pay Sheets",
-    subtitle:
-      "Download and export your monthly payment slips as secure PDFs instantly",
-    image: "/slides/5.uwp4831664.avif",
-    cta: "Download PDF",
-  },
-  {
-    title: "Digital Transformation",
-    subtitle: "Navigating the future of telecommunications and finance",
-    video: "/slides/rocky-shore-coast.mp4",
-    cta: "Learn More",
-  },
-  {
-    title: "Track Your Earnings",
-    subtitle:
-      "Analyze your financial growth with detailed monthly earning histories",
-    image: "/slides/8.wp11893992-anime-technology-wallpapers.avif",
-    cta: "View History",
-  },
-  {
-    title: "Streamlined Allowances",
-    subtitle:
-      "Your financial data, protected by enterprise-grade security protocols",
-    image: "/slides/9.wp15425485-nasa-earth-wallpapers.avif",
-    cta: "Login Now",
-  },
-];
+import { slides, SLIDE_DURATION } from "@/constants/slides";
 
 export default function Home() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
 
-  const SLIDE_DURATION = 5000;
 
   useEffect(() => {
     if (!isAutoPlaying) return;
@@ -251,14 +195,7 @@ export default function Home() {
               </motion.div>
             </AnimatePresence>
 
-            {/* Progress Indicators & Subtle Counter */}
-            <div className="absolute bottom-10 left-0 right-0 px-8 flex items-center justify-between">
-              <div className="hidden md:flex items-center gap-3 text-white/30 text-[10px] tracking-[0.2em] font-light">
-                <span className="text-white/60">0{currentSlide + 1}</span>
-                <div className="w-8 h-px bg-white/10" />
-                <span>0{slides.length}</span>
-              </div>
-
+            <div className="absolute bottom-10 left-0 right-0 px-8 flex items-center justify-center">
               <div className="mx-auto flex justify-center gap-3">
                 {slides.map((_, idx) => (
                   <button
@@ -295,10 +232,6 @@ export default function Home() {
                     </div>
                   </button>
                 ))}
-              </div>
-
-              <div className="hidden md:block text-white/30 text-[10px] tracking-[0.2em] font-light uppercase">
-                {slides[currentSlide].title.split(" ")[0]} SERVICES
               </div>
             </div>
           </div>
