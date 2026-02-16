@@ -136,7 +136,7 @@ export default function SecuritySettings() {
             </h3>
             <form onSubmit={passwordForm.handleSubmit(onUpdatePassword)}>
               <div className="space-y-4">
-                <div className="space-y-2">
+                <div className="space-y-4">
                   <label className="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
                     Current Password
                   </label>
@@ -153,7 +153,7 @@ export default function SecuritySettings() {
                   )}
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-4">
                   <label className="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
                     New Password
                   </label>
@@ -204,7 +204,7 @@ export default function SecuritySettings() {
                   )}
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-4">
                   <label className="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider">
                     Confirm New Password
                   </label>
@@ -231,7 +231,7 @@ export default function SecuritySettings() {
                   whileTap={{ scale: 0.95 }}
                   type="submit"
                   disabled={passwordForm.formState.isSubmitting}
-                  className="group relative flex items-center gap-2 overflow-hidden rounded-xl bg-gradient-to-br from-primary to-blue-600 px-8 py-3 text-sm font-bold text-white shadow-lg shadow-primary/25 transition-all duration-300 hover:shadow-primary/40 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="group relative flex items-center gap-2 overflow-hidden rounded-xl bg-primary px-6 py-2.5 text-sm font-bold text-primary-foreground shadow-lg shadow-primary/25 transition-all duration-300 hover:shadow-primary/40 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 group-hover:animate-[shimmer_1.5s_infinite]"></div>
                   <span className="relative flex items-center gap-2">
@@ -271,7 +271,7 @@ export default function SecuritySettings() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={onDeactivate}
-              className="group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-red-500 to-rose-600 px-4 py-3 text-sm font-bold text-white shadow-lg shadow-red-500/25 transition-all duration-300 hover:scale-[1.02] hover:shadow-red-500/40 active:scale-95"
+              className="group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-red-500 to-rose-600 px-4 py-2.5 text-sm font-bold text-white shadow-lg shadow-red-500/25 transition-all duration-300 hover:scale-[1.02] hover:shadow-red-500/40 active:scale-95"
             >
               <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/10 to-transparent transition-transform duration-700 group-hover:animate-[shimmer_1.5s_infinite]"></div>
               <Trash2

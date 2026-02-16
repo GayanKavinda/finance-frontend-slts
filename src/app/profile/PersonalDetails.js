@@ -39,7 +39,7 @@ const emailChangeSchema = yup.object({
 
 function Field({ label, error, icon: Icon, children }) {
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-4">
       <label className="text-xs font-bold text-slate-600 dark:text-slate-300 flex items-center gap-2 uppercase tracking-wider">
         {Icon && <Icon size={14} className="text-slate-400" />} {label}
       </label>
@@ -368,7 +368,7 @@ export default function PersonalDetails({ user, refetch }) {
                   type="button"
                   disabled={!avatarFile || isUploadingAvatar}
                   onClick={onUploadAvatar}
-                  className="group relative flex items-center gap-2 overflow-hidden rounded-xl bg-gradient-to-br from-primary to-blue-600 px-4 py-2 text-xs font-bold text-white shadow-lg shadow-primary/25 transition-all duration-300 hover:scale-105 hover:shadow-primary/40 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="group relative flex items-center gap-2 overflow-hidden rounded-xl bg-primary px-4 py-2 text-sm font-bold text-primary-foreground shadow-lg shadow-primary/25 transition-all duration-300 hover:scale-105 hover:shadow-primary/40 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 group-hover:animate-[shimmer_1.5s_infinite]"></div>
                   <span className="relative flex items-center gap-2">
@@ -455,7 +455,7 @@ export default function PersonalDetails({ user, refetch }) {
                 whileTap={{ scale: 0.98 }}
                 type="submit"
                 disabled={profileForm.formState.isSubmitting}
-                className="group relative inline-flex w-full sm:w-auto items-center justify-center gap-2 overflow-hidden rounded-xl bg-gradient-to-br from-primary to-blue-600 px-8 py-3 text-sm font-bold text-white shadow-lg shadow-primary/25 transition-all duration-300 hover:shadow-primary/40 disabled:cursor-not-allowed disabled:opacity-50"
+                className="group relative inline-flex w-full sm:w-auto items-center justify-center gap-2 overflow-hidden rounded-xl bg-primary px-6 py-2.5 text-sm font-bold text-primary-foreground shadow-lg shadow-primary/25 transition-all duration-300 hover:shadow-primary/40 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 group-hover:animate-[shimmer_1.5s_infinite]"></div>
                 <span className="relative flex items-center gap-2">
@@ -523,7 +523,7 @@ export default function PersonalDetails({ user, refetch }) {
                   type="button"
                   onClick={onRequestEmailOtp}
                   disabled={emailForm.formState.isSubmitting}
-                  className="group flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-primary/20 bg-primary/5 px-4 py-2.5 text-sm font-bold text-primary transition-all duration-300 hover:border-primary/50 hover:bg-primary/10 hover:shadow-lg hover:shadow-primary/10 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="group flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-primary/20 bg-primary/5 px-4 py-2 text-sm font-bold text-primary transition-all duration-300 hover:border-primary/50 hover:bg-primary/10 hover:shadow-lg hover:shadow-primary/10 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <Mail className="w-4 h-4 transition-transform duration-300 group-hover:scale-110" />
                   <span>Send Code</span>
@@ -551,7 +551,7 @@ export default function PersonalDetails({ user, refetch }) {
                 whileTap={{ scale: 0.98 }}
                 type="submit"
                 disabled={emailForm.formState.isSubmitting}
-                className="group relative inline-flex w-full sm:w-auto items-center justify-center gap-2 overflow-hidden rounded-xl bg-gradient-to-br from-secondary to-orange-600 px-8 py-3 text-sm font-bold text-white shadow-lg shadow-secondary/25 transition-all duration-300 hover:shadow-secondary/40 disabled:cursor-not-allowed disabled:opacity-50"
+                className="group relative inline-flex w-full sm:w-auto items-center justify-center gap-2 overflow-hidden rounded-xl bg-secondary px-6 py-2.5 text-sm font-bold text-secondary-foreground shadow-lg shadow-secondary/25 transition-all duration-300 hover:shadow-secondary/40 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 group-hover:animate-[shimmer_1.5s_infinite]"></div>
                 <span className="relative flex items-center gap-2">

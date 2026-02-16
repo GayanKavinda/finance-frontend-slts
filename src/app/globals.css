@@ -42,6 +42,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
     --primary: 217 91% 60%; /* Modern blue */
+    --primary-darker: 217 91% 50%; /* Darker modern blue for gradients */
     --primary-foreground: 0 0% 100%;
     --secondary: 210 40% 96%;
     --secondary-foreground: 222 47% 11%;
@@ -65,7 +66,8 @@
     --popover: 222 47% 10%;
     --popover-foreground: 210 40% 98%;
     --primary: 217 91% 60%;
-    --primary-foreground: 222 47% 11%;
+    --primary-darker: 217 91% 50%; /* Darker modern blue for gradients */
+    --primary-foreground: 0 0% 100%;
     --secondary: 217 33% 17%;
     --secondary-foreground: 210 40% 98%;
     --muted: 217 33% 17%;
