@@ -4,7 +4,7 @@ import axios from "@/lib/axios";
 
 export const downloadInvoicePdf = async (invoiceId) => {
   try {
-    const response = await axios.get(`/api/invoices/${invoiceId}/pdf`, {
+    const response = await axios.get(`/invoices/${invoiceId}/pdf`, {
       responseType: "blob",
     });
 
@@ -25,17 +25,17 @@ export const downloadInvoicePdf = async (invoiceId) => {
 };
 
 export const fetchMonthlyInvoiceTrend = async () => {
-  const res = await axios.get("/api/invoices/monthly-trend");
+  const res = await axios.get("/invoices/monthly-trend");
   return res.data;
 };
 
 export const fetchInvoiceSubmit = async (invoiceId) => {
-  const res = await axios.post(`/api/invoices/${invoiceId}/submit-to-finance`);
+  const res = await axios.post(`/invoices/${invoiceId}/submit-to-finance`);
   return res.data;
 };
 
 export const approveInvoice = async (invoiceId) => {
-  const res = await axios.post(`/api/invoices/${invoiceId}/approve`);
+  const res = await axios.post(`/invoices/${invoiceId}/approve`);
   return res.data;
 };
 
@@ -45,11 +45,11 @@ export const fetchInvoices = async ({ page = 1, status = "", search = "" }) => {
   if (status) params.append("status", status);
   if (search) params.append("search", search);
 
-  const res = await axios.get(`/api/invoices?${params.toString()}`);
+  const res = await axios.get(`/invoices?${params.toString()}`);
   return res.data;
 };
 
 export const getInvoiceById = async (id) => {
-  const { data } = await axios.get(`/api/invoices/${id}`);
+  const { data } = await axios.get(`/invoices/${id}`);
   return data;
 };

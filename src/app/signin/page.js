@@ -1,3 +1,4 @@
+// src/app/signin/page.js
 "use client";
 
 import { useForm } from "react-hook-form";
@@ -77,7 +78,7 @@ export default function Signin() {
       console.log("[Signin] Fetching CSRF cookie...");
       await fetchCsrf();
       console.log("[Signin] CSRF fetched, attempting login...");
-      const response = await axios.post("/api/login", data);
+      const response = await axios.post("/login", data);
       console.log("[Signin] Login successful:", response.data);
       await refetch();
       enqueueSnackbar("Welcome back!", { variant: "success" });

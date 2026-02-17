@@ -1,3 +1,4 @@
+// src/app/signup/page.js
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
@@ -176,7 +177,7 @@ export default function Signup() {
         console.log("[Signup] Real-time email validation for:", email);
         setIsCheckingEmail(true);
         try {
-          const response = await axios.post("/api/check-email-exists", {
+          const response = await axios.post("/check-email-exists", {
             email,
           });
           console.log("[Signup] Email check result:", response.data);
@@ -212,7 +213,7 @@ export default function Signup() {
       console.log("[Signup] Fetching CSRF cookie...");
       await fetchCsrf();
       console.log("[Signup] CSRF fetched, attempting registration...");
-      const response = await axios.post("/api/register", data);
+      const response = await axios.post("/register", data);
       console.log("[Signup] Registration successful:", response.data);
       router.push("/account-success");
       await refetch();

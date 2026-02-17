@@ -1,3 +1,4 @@
+// src/app/reset-password/page.js
 "use client";
 
 import { Suspense } from "react";
@@ -84,7 +85,7 @@ function ResetPasswordForm() {
 
     try {
       await fetchCsrf();
-      await axios.post("/api/reset-password", { ...data, token, email });
+      await axios.post("/reset-password", { ...data, token, email });
       enqueueSnackbar("Password reset successfully! Please sign in.", {
         variant: "success",
       });

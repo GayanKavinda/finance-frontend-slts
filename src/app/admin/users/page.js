@@ -6,13 +6,11 @@ import api from "@/lib/axios";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 
-// ─── RoleBadge ──────────────────────────────────────────────────
-
 const ROLE_COLORS = {
   Admin: "bg-purple-100 text-purple-700 border-purple-200",
-  Procurement: "bg-blue-100 text-blue-700 border-blue-200",
-  Finance: "bg-amber-100 text-amber-700 border-amber-200",
-  Viewer: "bg-gray-100 text-gray-700 border-gray-200",
+  Procurement: "bg-blue-100   text-blue-700   border-blue-200",
+  Finance: "bg-amber-100  text-amber-700  border-amber-200",
+  Viewer: "bg-gray-100   text-gray-700   border-gray-200",
 };
 
 function RoleBadge({ role }) {
@@ -21,22 +19,20 @@ function RoleBadge({ role }) {
     <span
       className={`inline-flex items-center px-2.5 py-0.5 rounded-full border text-xs font-semibold ${cls}`}
     >
-      {role}
+      {role ?? "No role"}
     </span>
   );
 }
 
-// ─── UserRow ────────────────────────────────────────────────────
-
 function UserRow({
   user,
   currentUser,
+  allRoles,
   onAssignRole,
   onToggleStatus,
-  allRoles,
 }) {
   const [editingRole, setEditingRole] = useState(false);
-  const [selectedRole, setSelectedRole] = useState(user.roles?.[0]?.name || "");
+  const [selectedRole, setSelectedRole] = useState(user.roles?.[0]?.name ?? "");
   const [loading, setLoading] = useState(false);
 
   const isSelf = user.id === currentUser?.id;
@@ -54,15 +50,10 @@ function UserRow({
   };
 
   const handleStatusToggle = async () => {
-    if (
-      !confirm(
-        isDeactivated
-          ? `Reactivate ${user.name}? They will be able to log in again.`
-          : `Deactivate ${user.name}? They will be logged out immediately.`,
-      )
-    )
-      return;
-
+    const msg = isDeactivated
+      ? `Reactivate ${user.name}? They will be able to log in again.`
+      : `Deactivate ${user.name}? They will be logged out immediately.`;
+    if (!confirm(msg)) return;
     setLoading(true);
     await onToggleStatus(user.id, isDeactivated);
     setLoading(false);
@@ -70,9 +61,9 @@ function UserRow({
 
   return (
     <tr
-      className={`border-b border-gray-50 last:border-0 hover:bg-gray-50/50 transition ${isDeactivated ? "bg-gray-50/50 opacity-70" : ""}`}
+      className={`border-b border-gray-50 last:border-0 hover:bg-gray-50/50 transition ${isDeactivated ? "opacity-60" : ""}`}
     >
-      {/* User Info */}
+      {/* User */}
       <td className="p-4">
         <div className="flex items-center gap-3">
           <div
@@ -82,8 +73,8 @@ function UserRow({
             {user.avatar_path ? (
               <img
                 src={`/storage/${user.avatar_path}`}
-                alt=""
                 className="w-full h-full rounded-full object-cover"
+                alt=""
               />
             ) : (
               user.name.charAt(0)
@@ -91,9 +82,11 @@ function UserRow({
           </div>
           <div>
             <p className="font-medium text-sm text-gray-900">
-              {user.name}{" "}
+              {user.name}
               {isSelf && (
-                <span className="text-xs text-gray-400 font-normal">(You)</span>
+                <span className="ml-1.5 text-xs text-gray-400 font-normal">
+                  (You)
+                </span>
               )}
             </p>
             <p className="text-xs text-gray-500">{user.email}</p>
@@ -197,15 +190,11 @@ function UserRow({
         )}
       </td>
 
-      {/* Last Login */}
+      {/* Activity */}
       <td className="p-4 text-xs text-gray-500">
-        {user.login_activities_count > 0 ? (
-          // Placeholder since we don't have the last login date on the list API yet
-          // We could add it, but for now just showing activity count or 'Recently'
-          <span title="Login Count">{user.login_activities_count} logins</span>
-        ) : (
-          "Never"
-        )}
+        {user.login_activities_count > 0
+          ? `${user.login_activities_count} logins`
+          : "Never"}
       </td>
 
       {/* Actions */}
@@ -229,75 +218,78 @@ function UserRow({
   );
 }
 
-// ─── Main Page ───────────────────────────────────────────────────
-
 export default function UserManagementPage() {
   const { user: currentUser } = useAuth();
   const router = useRouter();
 
   const [users, setUsers] = useState([]);
-  const [allRoles, setAllRoles] = useState([]);
+  const [allRoles, setAllRoles] = useState([]); // ✅ separate state, loaded once
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("");
   const [page, setPage] = useState(1);
   const [meta, setMeta] = useState({});
 
+  // Load roles once on mount — not in the fetchUsers dependency array
+  useEffect(() => {
+    api
+      .get("/admin/roles")
+      .then((r) => setAllRoles(r.data))
+      .catch((e) => {
+        if (e.response?.status === 403) router.push("/dashboard");
+      });
+  }, [router]);
+
+  // ✅ fetchUsers only depends on search/roleFilter/page — no allRoles
   const fetchUsers = useCallback(async () => {
     try {
       setLoading(true);
-      const params = new URLSearchParams({ page });
+      const params = new URLSearchParams({ page: String(page) });
       if (search) params.append("search", search);
       if (roleFilter) params.append("role", roleFilter);
 
-      const [usersRes, rolesRes] = await Promise.all([
-        api.get(`/admin/users?${params}`),
-        allRoles.length === 0
-          ? api.get("/admin/roles")
-          : Promise.resolve({ data: allRoles }),
-      ]);
-
-      setUsers(usersRes.data.data);
-      setMeta(usersRes.data); // Pagination meta is likely at root or meta key depending on Laravel
-      if (allRoles.length === 0) setAllRoles(rolesRes.data);
+      const res = await api.get(`/admin/users?${params}`);
+      setUsers(res.data.data ?? []);
+      setMeta({
+        current_page: res.data.current_page,
+        last_page: res.data.last_page,
+        total: res.data.total,
+      });
     } catch (e) {
       console.error(e);
-      // If forbidden, redirect
       if (e.response?.status === 403) router.push("/dashboard");
     } finally {
       setLoading(false);
     }
-  }, [page, search, roleFilter, allRoles, router]);
+  }, [page, search, roleFilter, router]);
 
   useEffect(() => {
     fetchUsers();
   }, [fetchUsers]);
 
-  // Handler: Assign Role
   const handleAssignRole = async (userId, newRole) => {
     try {
       await api.post(`/admin/users/${userId}/assign-role`, { role: newRole });
-      // Update local state to reflect change immediately
       setUsers((prev) =>
         prev.map((u) =>
           u.id === userId ? { ...u, roles: [{ name: newRole }] } : u,
         ),
       );
     } catch (e) {
-      alert(e.response?.data?.message || "Failed to assign role");
+      alert(e.response?.data?.message ?? "Failed to assign role");
     }
   };
 
-  // Handler: Deactivate/Reactivate
   const handleToggleStatus = async (userId, isDeactivated) => {
     try {
-      const endpoint = isDeactivated ? "reactivate" : "deactivate";
-      await api[isDeactivated ? "post" : "delete"](
-        `/admin/users/${userId}/${endpoint}`,
-      );
-      fetchUsers(); // Refresh to get exact state
+      if (isDeactivated) {
+        await api.post(`/admin/users/${userId}/reactivate`);
+      } else {
+        await api.delete(`/admin/users/${userId}/deactivate`);
+      }
+      fetchUsers();
     } catch (e) {
-      alert(e.response?.data?.message || "Action failed");
+      alert(e.response?.data?.message ?? "Action failed");
     }
   };
 
@@ -310,19 +302,23 @@ export default function UserManagementPage() {
             Manage system access and roles.
           </p>
         </div>
-
-        {/* Filters */}
         <div className="flex gap-3">
           <input
             type="text"
             placeholder="Search users..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
             className="border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition w-full md:w-64"
           />
           <select
             value={roleFilter}
-            onChange={(e) => setRoleFilter(e.target.value)}
+            onChange={(e) => {
+              setRoleFilter(e.target.value);
+              setPage(1);
+            }}
             className="border border-gray-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 bg-white"
           >
             <option value="">All Roles</option>
@@ -334,6 +330,12 @@ export default function UserManagementPage() {
           </select>
         </div>
       </div>
+
+      {meta.total != null && (
+        <p className="text-xs text-gray-400 mb-3">
+          {meta.total} user{meta.total !== 1 ? "s" : ""}
+        </p>
+      )}
 
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
@@ -347,8 +349,8 @@ export default function UserManagementPage() {
                 <th className="p-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-50">
-              {loading && users.length === 0 ? (
+            <tbody>
+              {loading ? (
                 <tr>
                   <td colSpan="5" className="p-8 text-center text-gray-400">
                     Loading users...
@@ -357,7 +359,7 @@ export default function UserManagementPage() {
               ) : users.length === 0 ? (
                 <tr>
                   <td colSpan="5" className="p-8 text-center text-gray-400">
-                    No users found matching your filters.
+                    No users found.
                   </td>
                 </tr>
               ) : (
@@ -376,7 +378,6 @@ export default function UserManagementPage() {
           </table>
         </div>
 
-        {/* Pagination Footer */}
         {meta.last_page > 1 && (
           <div className="p-4 border-t border-gray-100 flex items-center justify-between">
             <button

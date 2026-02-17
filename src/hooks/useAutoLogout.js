@@ -1,3 +1,4 @@
+// src/hooks/useAutoLogout.js
 "use client";
 
 import { useEffect, useRef, useCallback } from "react";
@@ -12,7 +13,7 @@ const useAutoLogout = (timeout = AUTO_LOGOUT_TIMEOUT) => {
   const logoutUser = useCallback(async () => {
     console.warn("[AutoLogout] Inactivity detected, logging out user...");
     try {
-      await axios.post("/api/logout");
+      await axios.post("/logout");
       console.log("[AutoLogout] Remote logout successful");
       window.location.href = "/signin?reason=inactivity";
     } catch (err) {

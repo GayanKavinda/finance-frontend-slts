@@ -19,13 +19,13 @@ export default function CreateInvoicePage() {
   });
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value }); 
+    setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post("/api/invoices", form);
+      await axios.post("/invoices", form);
       toast.success("Invoice created as draft successfully");
       router.push("/invoices");
     } catch {

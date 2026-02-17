@@ -1,3 +1,5 @@
+// src/app/profile/PersonalDetails.js
+
 import { useState, useRef, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -116,7 +118,7 @@ export default function PersonalDetails({ user, refetch }) {
     console.log("[Profile] Update profile initiated:", data);
     try {
       await fetchCsrf();
-      const res = await axios.post("/api/update-profile", data);
+      const res = await axios.post("/update-profile", data);
       console.log("[Profile] Update profile successful:", res.data);
       await refetch();
       enqueueSnackbar(res.data.message || "Profile updated", {
@@ -146,7 +148,7 @@ export default function PersonalDetails({ user, refetch }) {
 
     try {
       await fetchCsrf();
-      const res = await axios.post("/api/upload-avatar", form, {
+      const res = await axios.post("/upload-avatar", form, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       console.log("[Profile] Avatar upload successful:", res.data);
@@ -177,7 +179,7 @@ export default function PersonalDetails({ user, refetch }) {
     console.log("[Profile] Requesting email OTP for:", values.new_email);
     try {
       await fetchCsrf();
-      await axios.post("/api/request-email-change", {
+      await axios.post("/request-email-change", {
         new_email: values.new_email,
         current_password: values.current_password,
       });
@@ -203,7 +205,7 @@ export default function PersonalDetails({ user, refetch }) {
     console.log("[Profile] Confirming email change to:", data.new_email);
     try {
       await fetchCsrf();
-      const res = await axios.post("/api/confirm-email-change", {
+      const res = await axios.post("/confirm-email-change", {
         new_email: data.new_email,
         otp: data.otp,
       });

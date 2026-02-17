@@ -1,3 +1,5 @@
+// src/app/profile/ActivityLog.js
+
 import { useState, useEffect, useCallback } from "react";
 import axios from "@/lib/axios";
 import { useSnackbar } from "notistack";
@@ -43,8 +45,8 @@ export default function ActivityLog() {
   const fetchSecurityData = useCallback(async (page = 1) => {
     try {
       const [historyRes, sessionsRes] = await Promise.all([
-        axios.get(`/api/login-history?page=${page}`),
-        axios.get("/api/active-sessions"),
+        axios.get(`/login-history?page=${page}`),
+        axios.get("/active-sessions"),
       ]);
 
       if (page === 1) {
@@ -110,7 +112,7 @@ export default function ActivityLog() {
 
   const onDeleteHistoryEntry = async (id) => {
     try {
-      await axios.delete(`/api/login-history/${id}`);
+      await axios.delete(`/login-history/${id}`);
       enqueueSnackbar("History entry removed", { variant: "success" });
       setLoginHistory((prev) => prev.filter((item) => item.id !== id));
     } catch (err) {
@@ -120,7 +122,7 @@ export default function ActivityLog() {
 
   const onRevokeSession = async (id) => {
     try {
-      await axios.delete(`/api/revoke-session/${id}`);
+      await axios.delete(`/revoke-session/${id}`);
       enqueueSnackbar("Session revoked successfully", { variant: "success" });
       fetchSecurityData();
     } catch (err) {

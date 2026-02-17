@@ -121,7 +121,7 @@ export default function SecuritySettings() {
     console.log("[Profile] Password update initiated");
     try {
       await fetchCsrf();
-      const res = await axios.post("/api/update-password", data);
+      const res = await axios.post("/update-password", data);
       console.log("[Profile] Password update successful");
       enqueueSnackbar(res.data.message || "Password updated", {
         variant: "success",
@@ -151,14 +151,14 @@ export default function SecuritySettings() {
     console.warn("[Profile] Deactivating account...");
     try {
       await fetchCsrf();
-      const res = await axios.post("/api/deactivate-account");
+      const res = await axios.post("/deactivate-account");
       console.log("[Profile] Account deactivated successfully");
       enqueueSnackbar(res.data.message || "Account deactivated", {
         variant: "success",
       });
       try {
         console.log("[Profile] Logging out after deactivation...");
-        await axios.post("/api/logout");
+        await axios.post("/logout");
       } catch {}
       window.location.href = "/signin";
     } catch (e) {

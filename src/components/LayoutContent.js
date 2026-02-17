@@ -1,3 +1,5 @@
+// src/components/LayoutContent.js
+
 "use client";
 
 import { ScrollProvider, useScroll } from "@/contexts/ScrollContext";
@@ -9,6 +11,8 @@ import { useState, createContext, useContext } from "react";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { AUTH_PATHS } from "@/constants/navigation";
+import ProtectedRoute from "@/components/ProtectedRoute";
+import PublicRoute from "@/components/PublicRoute";
 
 const SidebarContext = createContext();
 
@@ -25,6 +29,16 @@ function ScrollableContent({ children }) {
   const isAuthPage = AUTH_PATHS.includes(pathname);
   const isHomePage = pathname === "/";
   const showSidebar = user && !isAuthPage && !isHomePage;
+
+  const renderContent = () => {
+    if (isAuthPage) {
+      return <PublicRoute>{children}</PublicRoute>;
+    }
+    if (isHomePage) {
+      return children;
+    }
+    return <ProtectedRoute>{children}</ProtectedRoute>;
+  };
 
   return (
     <SidebarContext.Provider
@@ -52,11 +66,11 @@ function ScrollableContent({ children }) {
                   isSidebarCollapsed ? "lg:ml-[80px]" : "lg:ml-[280px]"
                 }`}
               >
-                {children}
+                {renderContent()}
               </main>
             </div>
           ) : (
-            <MainContent>{children}</MainContent>
+            <MainContent>{renderContent()}</MainContent>
           )}
         </div>
       </ThemeScrollArea>

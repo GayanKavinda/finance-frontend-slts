@@ -14,7 +14,7 @@ export function AuthProvider({ children }) {
   const fetchUser = async () => {
     console.log("[AuthContext] Fetching user...");
     try {
-      const response = await axios.get("/api/user");
+      const response = await axios.get("/user");
       console.log("[AuthContext] User fetched successfully:", response.data);
       setUser(response.data);
     } catch (error) {
@@ -22,7 +22,7 @@ export function AuthProvider({ children }) {
         console.error(
           "[AuthContext] fetchUser failed:",
           error.response?.status,
-          error.message
+          error.message,
         );
       } else {
         console.log("[AuthContext] User not logged in (401)");
@@ -49,7 +49,7 @@ export function AuthProvider({ children }) {
   const logout = async () => {
     console.log("[AuthContext] Logout initiation started");
     try {
-      await axios.post("/api/logout");
+      await axios.post("/logout");
       console.log("[AuthContext] Logout successful");
     } catch (e) {
       console.error("[AuthContext] Logout API call failed:", e);

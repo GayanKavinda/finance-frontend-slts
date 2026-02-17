@@ -1,3 +1,4 @@
+// src/app/forgot-password/page.js
 "use client";
 
 import { useState, useRef, useEffect } from "react";
@@ -108,7 +109,7 @@ export default function ForgotPassword() {
   const onSubmitEmail = async (data) => {
     try {
       setIsLoading(true);
-      await axios.post("/api/forgot-password-otp", { email: data.email });
+      await axios.post("/forgot-password-otp", { email: data.email });
       setEmail(data.email);
       setStep(2);
       setResendTimer(60); // Start 60s countdown
@@ -126,7 +127,7 @@ export default function ForgotPassword() {
     if (resendTimer > 0) return;
     try {
       setIsLoading(true);
-      await axios.post("/api/forgot-password-otp", { email });
+      await axios.post("/forgot-password-otp", { email });
       setResendTimer(60);
       enqueueSnackbar("New code sent successfully!", { variant: "success" });
     } catch (error) {
@@ -182,7 +183,7 @@ export default function ForgotPassword() {
   const onSubmitOtp = async (data) => {
     try {
       setIsLoading(true);
-      await axios.post("/api/verify-otp", { email, otp: data.otp });
+      await axios.post("/verify-otp", { email, otp: data.otp });
       // otp is stored in 'data.otp' from react-hook-form
       setStep(3);
       enqueueSnackbar("Code verified!", { variant: "success" });
@@ -204,7 +205,7 @@ export default function ForgotPassword() {
   const onSubmitPassword = async (data) => {
     try {
       setIsLoading(true);
-      await axios.post("/api/reset-password-otp", {
+      await axios.post("/reset-password-otp", {
         email,
         otp: otpValues.join(""),
         password: data.password,
