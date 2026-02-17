@@ -3,18 +3,21 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import {
-  fetchInvoices,
-  downloadInvoicePdf,
-  approveInvoice,
-} from "@/lib/invoice";
+import { useRouter } from "next/navigation";
+import { fetchInvoices, downloadInvoicePdf } from "@/lib/invoice";
 import StatusBadge from "@/components/ui/StatusBadge";
-import SubmitToFinanceButton from "@/components/ui/SubmitToFinanceButton";
-import { hasPermission } from "@/lib/permissions";
+import {
+  canEditInvoice,
+  canSubmitInvoice,
+  canApproveInvoice,
+  canRejectInvoice, // Added canRejectInvoice
+} from "@/lib/permissions";
+
 import { useAuth } from "@/contexts/AuthContext";
 
 export default function InvoicePage() {
   const { user } = useAuth();
+  const router = useRouter();
   const [invoices, setInvoices] = useState([]);
   const [meta, setMeta] = useState({});
   const [page, setPage] = useState(1);
@@ -30,18 +33,6 @@ export default function InvoicePage() {
       console.error("Failed to fetch invoices:", error);
     }
   }, [page, status, search]);
-
-  const handleApprove = async (id) => {
-    if (!confirm("Are you sure you want to approve this invoice for payment?"))
-      return;
-    try {
-      await approveInvoice(id);
-      loadInvoices();
-    } catch (error) {
-      console.error("Approval failed:", error);
-      alert("Failed to approve invoice.");
-    }
-  };
 
   useEffect(() => {
     let isMounted = true;
@@ -76,10 +67,12 @@ export default function InvoicePage() {
           }}
           className="border px-3 py-2 rounded text-sm"
         >
-          <option value="">All Status</option>
+          <option value="">All Statuses</option>
           <option value="Draft">Draft</option>
           <option value="Tax Generated">Tax Generated</option>
           <option value="Submitted">Submitted</option>
+          <option value="Approved">Approved</option>
+          <option value="Rejected">Rejected</option>
           <option value="Paid">Paid</option>
         </select>
 
@@ -109,7 +102,11 @@ export default function InvoicePage() {
           <tbody>
             {invoices.length > 0 ? (
               invoices.map((inv) => (
-                <tr key={inv.id} className="border-t hover:bg-muted/20">
+                <tr
+                  key={inv.id}
+                  onClick={() => router.push(`/invoices/${inv.id}`)}
+                  className="border-t hover:bg-muted/50 cursor-pointer transition-colors"
+                >
                   <td className="p-3 font-medium">{inv.invoice_number}</td>
                   <td className="p-3">{inv.customer?.name}</td>
                   <td className="p-3 font-bold">
@@ -118,10 +115,13 @@ export default function InvoicePage() {
                   <td className="p-3">
                     <StatusBadge status={inv.status} />
                   </td>
-                  <td className="p-3 flex gap-2 items-center">
+                  <td
+                    className="p-3 flex gap-2 items-center"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     {/* Download PDF - always allowed */}
                     <button
-                      className="text-primary text-xs font-bold"
+                      className="text-primary text-xs font-bold hover:underline"
                       onClick={() => downloadInvoicePdf(inv.id)}
                     >
                       PDF
@@ -129,44 +129,14 @@ export default function InvoicePage() {
 
                     {/* Edit - Procurement only, Draft only */}
                     {inv.status === "Draft" &&
-                      hasPermission(user, "edit-invoice") && (
+                      canEditInvoice(user?.permissions) && (
                         <a
                           href={`/invoices/${inv.id}/edit`}
-                          className="text-xs font-bold text-blue-600"
+                          className="text-xs font-bold text-blue-600 hover:underline"
                         >
                           Edit
                         </a>
                       )}
-
-                    {/* Submit to Finance - only after tax generation */}
-                    {inv.status === "Tax Generated" &&
-                      hasPermission(user, "submit-to-finance") && (
-                        <SubmitToFinanceButton
-                          invoiceId={inv.id}
-                          onSuccess={() => loadInvoices()}
-                        />
-                      )}
-
-                    {/* Approve - Finance only, Submitted only */}
-                    {inv.status === "Submitted" &&
-                      hasPermission(user, "approve-payment") && (
-                        <button
-                          className="text-green-600 text-xs font-bold"
-                          onClick={async () => {
-                            await approveInvoice(inv.id);
-                            loadInvoices();
-                          }}
-                        >
-                          Approve
-                        </button>
-                      )}
-
-                    {/* Locked state */}
-                    {inv.status === "Paid" && (
-                      <span className="text-xs text-gray-400 font-semibold">
-                        Locked
-                      </span>
-                    )}
                   </td>
                 </tr>
               ))

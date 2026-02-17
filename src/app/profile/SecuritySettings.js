@@ -1,3 +1,5 @@
+// src/app/profile/SecuritySettings.js
+/* eslint-disable react-hooks/incompatible-library */
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";

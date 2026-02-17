@@ -1,3 +1,4 @@
+// src/components/Sidebar.js
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
@@ -110,71 +111,81 @@ export default function Sidebar({
 
         {/* Navigation Links */}
         <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-          {navLinks.map((link) => {
-            const isActive = pathname === link.href;
-            const Icon = link.icon;
-            const isHovered = hoveredItem === link.href;
+          {navLinks
+            .filter(
+              (link) =>
+                !link.requiredPermission ||
+                user?.permissions?.includes(link.requiredPermission),
+            )
+            .map((link) => {
+              const isActive = pathname === link.href;
+              const Icon = link.icon;
+              const isHovered = hoveredItem === link.href;
 
-            return (
-              <Link
-                key={link.href}
-                href={link.href}
-                onMouseEnter={() => setHoveredItem(link.href)}
-                onMouseLeave={() => setHoveredItem(null)}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group relative overflow-hidden ${
-                  isActive
-                    ? "bg-gradient-to-r from-primary/15 via-primary/10 to-primary/5 text-primary shadow-sm"
-                    : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-primary"
-                }`}
-                title={isCollapsed ? link.label : ""}
-              >
-                {/* Active Indicator */}
-                {isActive && (
-                  <motion.div
-                    layoutId="activeTab"
-                    className="absolute left-0 top-0 bottom-0 w-1 bg-primary rounded-r-full"
-                    transition={{ type: "spring", stiffness: 380, damping: 30 }}
-                  />
-                )}
-
-                {/* Icon */}
-                <Icon
-                  className={`w-5 h-5 shrink-0 transition-transform group-hover:scale-110 ${
-                    isActive ? "text-primary" : ""
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onMouseEnter={() => setHoveredItem(link.href)}
+                  onMouseLeave={() => setHoveredItem(null)}
+                  className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group relative overflow-hidden ${
+                    isActive
+                      ? "bg-gradient-to-r from-primary/15 via-primary/10 to-primary/5 text-primary shadow-sm"
+                      : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-primary"
                   }`}
-                  strokeWidth={isActive ? 2.5 : 2}
-                />
+                  title={isCollapsed ? link.label : ""}
+                >
+                  {/* Active Indicator */}
+                  {isActive && (
+                    <motion.div
+                      layoutId="activeTab"
+                      className="absolute left-0 top-0 bottom-0 w-1 bg-primary rounded-r-full"
+                      transition={{
+                        type: "spring",
+                        stiffness: 380,
+                        damping: 30,
+                      }}
+                    />
+                  )}
 
-                {/* Label */}
-                {!isCollapsed && (
-                  <motion.span
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                    className={`font-medium text-sm whitespace-nowrap ${
-                      isActive ? "font-semibold" : ""
+                  {/* Icon */}
+                  <Icon
+                    className={`w-5 h-5 shrink-0 transition-transform group-hover:scale-110 ${
+                      isActive ? "text-primary" : ""
                     }`}
-                  >
-                    {link.label}
-                  </motion.span>
-                )}
+                    strokeWidth={isActive ? 2.5 : 2}
+                  />
 
-                {/* Tooltip for Collapsed State */}
-                {isCollapsed && isHovered && (
-                  <motion.div
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -10 }}
-                    className="absolute left-full ml-2 px-3 py-2 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded-lg whitespace-nowrap shadow-xl z-50 pointer-events-none"
-                  >
-                    {link.label}
-                    <div className="absolute left-0 top-1/2 -translate-x-1 -translate-y-1/2 w-2 h-2 bg-gray-900 dark:bg-gray-700 rotate-45" />
-                  </motion.div>
-                )}
-              </Link>
-            );
-          })}
+                  {/* Label */}
+                  {!isCollapsed && (
+                    <motion.span
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className={`font-medium text-sm whitespace-nowrap ${
+                        isActive ? "font-semibold" : ""
+                      }`}
+                    >
+                      {link.label}
+                    </motion.span>
+                  )}
+
+                  {/* Tooltip for Collapsed State */}
+                  {isCollapsed && isHovered && (
+                    <motion.div
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -10 }}
+                      className="absolute left-full ml-2 px-3 py-2 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded-lg whitespace-nowrap shadow-xl z-50 pointer-events-none"
+                    >
+                      {link.label}
+                      <div className="absolute left-0 top-1/2 -translate-x-1 -translate-y-1/2 w-2 h-2 bg-gray-900 dark:bg-gray-700 rotate-45" />
+                    </motion.div>
+                  )}
+                </Link>
+              );
+            })}
         </nav>
 
         {/* User Profile Section */}
@@ -261,44 +272,50 @@ export default function Sidebar({
 
               {/* Navigation Links */}
               <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
-                {navLinks.map((link) => {
-                  const isActive = pathname === link.href;
-                  const Icon = link.icon;
+                {navLinks
+                  .filter(
+                    (link) =>
+                      !link.requiredPermission ||
+                      user?.permissions?.includes(link.requiredPermission),
+                  )
+                  .map((link) => {
+                    const isActive = pathname === link.href;
+                    const Icon = link.icon;
 
-                  return (
-                    <Link
-                      key={link.href}
-                      href={link.href}
-                      className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 relative overflow-hidden group ${
-                        isActive
-                          ? "bg-gradient-to-r from-primary/15 via-primary/10 to-primary/5 text-primary shadow-sm"
-                          : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-primary"
-                      }`}
-                    >
-                      {/* Active Indicator */}
-                      {isActive && (
-                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary rounded-r-full" />
-                      )}
-
-                      {/* Icon */}
-                      <Icon
-                        className={`w-5 h-5 shrink-0 transition-transform group-hover:scale-110 ${
-                          isActive ? "text-primary" : ""
-                        }`}
-                        strokeWidth={isActive ? 2.5 : 2}
-                      />
-
-                      {/* Label */}
-                      <span
-                        className={`font-medium text-sm ${
-                          isActive ? "font-semibold" : ""
+                    return (
+                      <Link
+                        key={link.href}
+                        href={link.href}
+                        className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 relative overflow-hidden group ${
+                          isActive
+                            ? "bg-gradient-to-r from-primary/15 via-primary/10 to-primary/5 text-primary shadow-sm"
+                            : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-primary"
                         }`}
                       >
-                        {link.label}
-                      </span>
-                    </Link>
-                  );
-                })}
+                        {/* Active Indicator */}
+                        {isActive && (
+                          <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary rounded-r-full" />
+                        )}
+
+                        {/* Icon */}
+                        <Icon
+                          className={`w-5 h-5 shrink-0 transition-transform group-hover:scale-110 ${
+                            isActive ? "text-primary" : ""
+                          }`}
+                          strokeWidth={isActive ? 2.5 : 2}
+                        />
+
+                        {/* Label */}
+                        <span
+                          className={`font-medium text-sm ${
+                            isActive ? "font-semibold" : ""
+                          }`}
+                        >
+                          {link.label}
+                        </span>
+                      </Link>
+                    );
+                  })}
               </nav>
 
               {/* Footer */}

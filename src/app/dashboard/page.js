@@ -1,3 +1,4 @@
+// src/app/dashboard/page.js
 "use client";
 
 import { useEffect, useState } from "react";
@@ -10,6 +11,8 @@ import {
   DollarSign,
   ArrowUpRight,
   ArrowDownRight,
+  AlertCircle,
+  ShieldAlert,
 } from "lucide-react";
 import {
   AreaChart,
@@ -182,7 +185,7 @@ export default function Dashboard() {
           </div>
 
           {/* Metrics Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <MetricCard
               icon={FileText}
               label="Total Invoices"
@@ -200,12 +203,28 @@ export default function Dashboard() {
               delay={0.1}
             />
             <MetricCard
+              icon={Clock}
+              label="Pending Approval"
+              value={summary?.pending_approval_count ?? 0}
+              trend={0}
+              color="bg-gradient-to-br from-amber-500 to-amber-600"
+              delay={0.2}
+            />
+            <MetricCard
+              icon={AlertCircle}
+              label="Rejected"
+              value={summary?.rejected_count ?? 0}
+              trend={0}
+              color="bg-gradient-to-br from-red-500 to-red-600"
+              delay={0.3}
+            />
+            <MetricCard
               icon={DollarSign}
               label="Total Revenue"
               value={formatCurrency(summary?.gross_amount ?? 0)}
               trend={15}
               color="bg-gradient-to-br from-purple-500 to-purple-600"
-              delay={0.2}
+              delay={0.4}
             />
             <MetricCard
               icon={CheckCircle}
@@ -213,15 +232,15 @@ export default function Dashboard() {
               value={formatCurrency(summary?.paid_amount ?? 0)}
               trend={10}
               color="bg-gradient-to-br from-emerald-500 to-emerald-600"
-              delay={0.3}
+              delay={0.5}
             />
             <MetricCard
               icon={Clock}
               label="Pending Amount"
               value={formatCurrency(summary?.pending_amount ?? 0)}
               trend={-5}
-              color="bg-gradient-to-br from-amber-500 to-amber-600"
-              delay={0.4}
+              color="bg-gradient-to-br from-amber-700 to-amber-800"
+              delay={0.6}
             />
           </div>
 

@@ -48,3 +48,8 @@ export const fetchInvoices = async ({ page = 1, status = "", search = "" }) => {
   const res = await axios.get(`/api/invoices?${params.toString()}`);
   return res.data;
 };
+
+export const getInvoiceById = async (id) => {
+  const { data } = await axios.get(`/api/invoices/${id}`);
+  return data;
+};
