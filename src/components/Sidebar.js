@@ -77,9 +77,6 @@ export default function Sidebar({
           </motion.div>
         </motion.button>
 
-        {/* Decorative Gradient Overlay */}
-        <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
-
         {/* Header Section */}
         <div className="relative h-16 flex items-center justify-center px-4 border-b border-gray-200/50 dark:border-gray-800/50">
           <AnimatePresence mode="wait">

@@ -3,10 +3,11 @@
 import { usePathname } from "next/navigation";
 import { ScrollArea } from "@/components/ui/ScrollArea";
 import { useEffect, useRef } from "react";
+import { AUTH_PATHS } from "@/constants/navigation";
 
 export default function ThemeScrollArea({ children, className, onScroll }) {
   const pathname = usePathname();
-  const isHomePage = pathname === "/";
+  const isAuthPage = AUTH_PATHS.includes(pathname);
   const scrollAreaRef = useRef(null);
 
   useEffect(() => {
@@ -25,13 +26,13 @@ export default function ThemeScrollArea({ children, className, onScroll }) {
     return () => viewport.removeEventListener("scroll", handleScroll);
   }, [onScroll]);
 
-  // Disable the gradient mask on the homepage to prevent white lines in light mode
-  // appearing over the dark landing page design.
+  // Disable the gradient mask on common pages (dashboard, profile, etc.)
+  // and only enable it on auth pages (signin, signup) as per user request.
   return (
     <ScrollArea
       ref={scrollAreaRef}
       className={className}
-      maskHeight={isHomePage ? 0 : 30}
+      maskHeight={isAuthPage ? 30 : 0}
     >
       {children}
     </ScrollArea>
