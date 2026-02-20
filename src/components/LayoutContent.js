@@ -13,6 +13,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { AUTH_PATHS } from "@/constants/navigation";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import PublicRoute from "@/components/PublicRoute";
+import ScrollToTop from "@/components/ScrollToTop";
 
 const SidebarContext = createContext();
 
@@ -74,6 +75,7 @@ function ScrollableContent({ children }) {
           )}
         </div>
       </ThemeScrollArea>
+      <ScrollToTop />
     </SidebarContext.Provider>
   );
 }

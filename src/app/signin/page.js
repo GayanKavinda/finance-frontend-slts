@@ -334,7 +334,7 @@ export default function Signin() {
 
           <footer className="mt-8 pt-5 border-t border-slate-100 dark:border-slate-800 text-center transition-colors duration-500">
             <p className="text-[13px] text-slate-500 dark:text-slate-400 font-medium">
-              Don't have an account?{" "}
+              Don&lsquo;t have an account?{" "}
               <Link
                 href="/signup"
                 className="font-bold text-sltGreen hover:text-sltGreen-dark hover:underline ml-1.5 transition-all"

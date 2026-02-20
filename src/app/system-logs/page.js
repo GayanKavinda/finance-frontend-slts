@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   Activity,
@@ -31,19 +31,49 @@ import useSystemStatus from "@/hooks/useSystemStatus";
 import Breadcrumb from "@/components/Breadcrumb";
 
 export default function SystemLogsPage() {
-  const { metrics, alerts } = useSystemStatus();
   const [isLive, setIsLive] = useState(true);
+  const { metrics, alerts, history } = useSystemStatus(!isLive);
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Simulated historical data for the mini-charts
-  const chartData = useMemo(
-    () => [
-      { time: "14:00", load: 20, latency: 15 },
-      { time: "14:05", load: 35, latency: 22 },
-      { time: "14:10", load: metrics.serverLoad, latency: metrics.dbLatency },
-    ],
-    [metrics],
-  );
+  const handleDownload = () => {
+    if (!alerts || alerts.length === 0) return;
+
+    // Create CSV content
+    const headers = ["Timestamp", "Level", "Source", "Message", "Latency"].join(
+      ",",
+    );
+    const rows = alerts.map((log) =>
+      [
+        log.time,
+        log.type,
+        log.title,
+        `"${log.description.replace(/"/g, '""')}"`,
+        log.latency || "",
+      ].join(","),
+    );
+
+    const csvContent = [headers, ...rows].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute(
+      "download",
+      `system_logs_${new Date().toISOString().split("T")[0]}.csv`,
+    );
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const filteredLogs = useMemo(() => {
+    if (!alerts) return [];
+    return alerts.filter(
+      (log) =>
+        log.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        log.title.toLowerCase().includes(searchQuery.toLowerCase()),
+    );
+  }, [alerts, searchQuery]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
@@ -82,7 +112,10 @@ export default function SystemLogsPage() {
             {isLive ? <Pause size={14} /> : <Play size={14} />}
             {isLive ? "Pause Stream" : "Resume Stream"}
           </button>
-          <button className="p-2 rounded-lg border border-border bg-card hover:bg-muted cursor-pointer">
+          <button
+            onClick={handleDownload}
+            className="p-2 rounded-lg border border-border bg-card hover:bg-muted cursor-pointer"
+          >
             <Download size={16} className="text-muted-foreground" />
           </button>
         </div>
@@ -95,7 +128,7 @@ export default function SystemLogsPage() {
           value={`${metrics.serverLoad}%`}
           icon={Cpu}
           color="text-blue-500"
-          data={chartData}
+          data={history}
           dataKey="load"
         />
         <MetricCard
@@ -103,7 +136,7 @@ export default function SystemLogsPage() {
           value={`${metrics.dbLatency}ms`}
           icon={Database}
           color="text-amber-500"
-          data={chartData}
+          data={history}
           dataKey="latency"
         />
         <MetricCard
@@ -118,7 +151,16 @@ export default function SystemLogsPage() {
           value={metrics.activeSessions}
           icon={Activity}
           color="text-emerald-500"
-          status="Stable"
+          status={
+            metrics.status === "operational"
+              ? "Stable"
+              : metrics.status.toUpperCase()
+          }
+          statusColor={
+            metrics.status === "critical"
+              ? "text-red-500 bg-red-500/10"
+              : "text-emerald-500 bg-emerald-500/10"
+          }
         />
       </div>
 
@@ -160,7 +202,7 @@ export default function SystemLogsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border/40 font-mono">
-              {alerts.length === 0 ? (
+              {filteredLogs.length === 0 ? (
                 <tr>
                   <td colSpan="5" className="px-6 py-12 text-center">
                     <ShieldCheck
@@ -168,44 +210,44 @@ export default function SystemLogsPage() {
                       className="mx-auto text-emerald-500/20 mb-3"
                     />
                     <p className="text-sm text-muted-foreground italic">
-                      No anomalies detected in the current stream.
+                      No logs found matching your criteria.
                     </p>
                   </td>
                 </tr>
               ) : (
-                alerts.map((alert, idx) => (
+                filteredLogs.map((log, idx) => (
                   <motion.tr
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
-                    key={alert.id + idx}
+                    key={log.id + idx}
                     className="hover:bg-muted/20 transition-colors group"
                   >
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <Clock size={12} /> {alert.time}
+                        <Clock size={12} /> {log.time}
                       </div>
                     </td>
                     <td className="px-6 py-4">
                       <span
                         className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase border ${
-                          alert.type === "error"
+                          log.type === "error"
                             ? "bg-red-500/10 text-red-500 border-red-500/20"
-                            : alert.type === "warning"
+                            : log.type === "warning"
                               ? "bg-amber-500/10 text-amber-500 border-amber-500/20"
                               : "bg-blue-500/10 text-blue-500 border-blue-500/20"
                         }`}
                       >
-                        {alert.type}
+                        {log.type}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-xs font-bold text-foreground/80">
-                      {alert.title.split(" ")[0]}
+                      {log.title}
                     </td>
                     <td className="px-6 py-4 text-xs text-muted-foreground group-hover:text-foreground transition-colors max-w-md">
-                      {alert.description}
+                      {log.description}
                     </td>
                     <td className="px-6 py-4 text-xs text-right font-bold text-muted-foreground">
-                      {alert.latency ? `${alert.latency}ms` : "--"}
+                      {log.latency ? `${log.latency}ms` : "--"}
                     </td>
                   </motion.tr>
                 ))
@@ -228,6 +270,7 @@ function MetricCard({
   dataKey,
   progress,
   status,
+  statusColor,
 }) {
   return (
     <div className="premium-card p-5 space-y-3">
@@ -236,7 +279,9 @@ function MetricCard({
           <Icon size={18} />
         </div>
         {status && (
-          <span className="text-[10px] font-bold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-full uppercase tracking-widest">
+          <span
+            className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-widest ${statusColor || "text-emerald-500 bg-emerald-500/10"}`}
+          >
             {status}
           </span>
         )}
