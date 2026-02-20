@@ -95,14 +95,24 @@ export const invoiceActions = (invoice, permissions = []) => {
 // ─── Status Metadata ──────────────────────────────────────────────
 // Color and label for each status — use in badges and timeline.
 
-export const STATUS_META = {
-  Draft: { label: "Draft", color: "gray" },
-  "Tax Generated": { label: "Tax Generated", color: "blue" },
-  Submitted: { label: "Submitted", color: "yellow" },
-  Approved: { label: "Approved", color: "green" },
-  Rejected: { label: "Rejected", color: "red" },
-  Paid: { label: "Paid", color: "teal" },
-};
+// Roadmap permissions
+export const canRecordPayment = (permissions) =>
+  permissions?.includes("record-payment");
+export const canMarkBanked = (permissions) =>
+  permissions?.includes("mark-banked");
+export const canManageRoles = (permissions) =>
+  permissions?.includes("manage-roles");
 
-export const getStatusMeta = (status) =>
-  STATUS_META[status] ?? { label: status, color: "gray" };
+export const getStatusMeta = (status) => {
+  const meta = {
+    Draft: { label: "Draft", color: "gray" },
+    "Tax Generated": { label: "Tax Generated", color: "blue" },
+    Submitted: { label: "Submitted", color: "amber" },
+    Approved: { label: "Approved", color: "emerald" },
+    Rejected: { label: "Rejected", color: "red" },
+    "Payment Received": { label: "Payment Received", color: "indigo" },
+    Banked: { label: "Banked", color: "teal" },
+    Paid: { label: "Paid", color: "teal" },
+  };
+  return meta[status] || { label: status, color: "gray" };
+};

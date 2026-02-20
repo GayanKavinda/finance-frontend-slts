@@ -34,7 +34,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useRouter, usePathname } from "next/navigation";
 import Image from "next/image";
 import useAutoLogout from "@/hooks/useAutoLogout";
-import useSystemStatus from "@/hooks/useSystemStatus";
 import { useScroll } from "@/contexts/ScrollContext";
 import NotificationDropdown from "@/components/NotificationDropdown";
 
@@ -45,7 +44,6 @@ export default function Navbar({
   setIsMobileSidebarOpen,
 }) {
   const { user, loading, logout } = useAuth();
-  const { metrics, alerts: systemAlerts } = useSystemStatus();
   useAutoLogout();
 
   const router = useRouter();

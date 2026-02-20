@@ -3,12 +3,25 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
-import api from "@/lib/axios";
-import { useAuth } from "@/contexts/AuthContext";
+import {
+  ArrowLeft,
+  CheckCircle2,
+  Clock,
+  Download,
+  Edit2,
+  FileText,
+  Info,
+  Loader2,
+  MoreVertical,
+  Printer,
+  ShieldCheck,
+  XCircle,
+} from "lucide-react";
 import {
   canApproveInvoice,
   canRejectInvoice,
-  canMarkPaid,
+  canRecordPayment,
+  canMarkBanked,
   canSubmitInvoice,
   canViewAuditTrail,
   canEditInvoice,
@@ -50,11 +63,13 @@ function fmtDateTime(d) {
 
 const STATUS_COLORS = {
   Draft: "bg-gray-100 text-gray-700 border-gray-200",
-  "Tax Generated": "bg-blue-50  text-blue-700  border-blue-200",
+  "Tax Generated": "bg-blue-50 text-blue-700 border-blue-200",
   Submitted: "bg-amber-50 text-amber-700 border-amber-200",
-  Approved: "bg-green-50 text-green-700 border-green-200",
-  Rejected: "bg-red-50   text-red-700   border-red-200",
-  Paid: "bg-teal-50  text-teal-700  border-teal-200",
+  Approved: "bg-emerald-50 text-emerald-700 border-emerald-200",
+  Rejected: "bg-red-50 text-red-700 border-red-200",
+  "Payment Received": "bg-indigo-50 text-indigo-700 border-indigo-200",
+  Banked: "bg-teal-50 text-teal-700 border-teal-200",
+  Paid: "bg-teal-50 text-teal-700 border-teal-200", // Legacy
 };
 
 function StatusBadge({ status }) {
@@ -77,14 +92,13 @@ function RejectModal({ invoiceNumber, onConfirm, onClose, loading }) {
   const tooShort = reason.trim().length < 10;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
-        {/* Header */}
-        <div className="bg-red-50 border-b border-red-100 px-6 py-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+      <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-md overflow-hidden border border-gray-100 dark:border-gray-700">
+        <div className="bg-red-50 dark:bg-red-900/10 border-b border-red-100 dark:border-red-900/20 px-6 py-5">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-red-100 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-2xl bg-red-100 dark:bg-red-900/30 flex items-center justify-center text-red-600">
               <svg
-                className="w-5 h-5 text-red-600"
+                className="w-6 h-6"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -98,58 +112,42 @@ function RejectModal({ invoiceNumber, onConfirm, onClose, loading }) {
               </svg>
             </div>
             <div>
-              <h3 className="font-semibold text-gray-900">Reject Invoice</h3>
-              <p className="text-sm text-gray-500">{invoiceNumber}</p>
+              <h3 className="font-black text-gray-900 dark:text-white uppercase tracking-tighter">
+                Reject Invoice
+              </h3>
+              <p className="text-xs text-red-600/60 font-bold">
+                {invoiceNumber}
+              </p>
             </div>
           </div>
         </div>
-
-        {/* Body */}
-        <div className="px-6 py-5">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Rejection Reason <span className="text-red-500">*</span>
+        <div className="p-6 space-y-4 text-left">
+          <label className="block text-xs font-black text-gray-400 uppercase tracking-widest ml-1">
+            Rejection Reason
           </label>
           <textarea
             value={reason}
             onChange={(e) => setReason(e.target.value)}
             rows={4}
-            maxLength={1000}
-            placeholder="Describe the issue clearly so Procurement can correct it and resubmit…"
-            className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-800 placeholder-gray-400
-                       focus:outline-none focus:ring-2 focus:ring-red-300 focus:border-red-400 resize-none transition"
+            placeholder="Describe the issue clearly..."
+            className="w-full bg-gray-50 dark:bg-gray-900 border-none rounded-2xl p-4 text-sm focus:ring-2 focus:ring-red-100 outline-none resize-none"
           />
-          <div className="flex justify-between mt-1.5">
-            {tooShort && reason.length > 0 ? (
-              <p className="text-xs text-red-500">
-                Minimum 10 characters required
-              </p>
-            ) : (
-              <span />
-            )}
-            <p className="text-xs text-gray-400 ml-auto">
-              {reason.length}/1000
-            </p>
-          </div>
+          <p className="text-[10px] text-gray-400 font-bold text-right uppercase tracking-widest">
+            {reason.length}/1000
+          </p>
         </div>
-
-        {/* Footer */}
-        <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-end gap-3">
+        <div className="px-6 py-5 bg-gray-50 dark:bg-gray-900/50 flex gap-3">
           <button
             onClick={onClose}
-            disabled={loading}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition disabled:opacity-50"
+            className="flex-1 py-3 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl font-bold transition-colors"
           >
             Cancel
           </button>
           <button
             onClick={() => onConfirm(reason)}
             disabled={tooShort || loading}
-            className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition
-                       disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
+            className="flex-[2] py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold shadow-lg shadow-red-200 transition-all disabled:opacity-50"
           >
-            {loading && (
-              <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-            )}
             Reject Invoice
           </button>
         </div>
@@ -158,126 +156,178 @@ function RejectModal({ invoiceNumber, onConfirm, onClose, loading }) {
   );
 }
 
-// ─── MarkPaidModal ───────────────────────────────────────────────
+// ─── RecordPaymentModal (Cheque) ─────────────────────────────────
 
-const PAYMENT_METHODS = [
-  "Bank Transfer",
-  "Cheque",
-  "Cash",
-  "Online Transfer",
-  "RTGS",
-  "SLIPS",
-];
-
-function MarkPaidModal({ invoiceNumber, onConfirm, onClose, loading }) {
+function RecordPaymentModal({ invoice, onConfirm, onClose, loading }) {
   const [form, setForm] = useState({
-    payment_reference: "",
-    payment_method: "",
-    payment_notes: "",
+    cheque_number: "",
+    bank_name: "",
+    payment_amount: invoice.invoice_amount || "",
+    payment_received_date: new Date().toISOString().split("T")[0],
   });
 
-  const valid = form.payment_reference.trim() && form.payment_method;
-
-  const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
+  const valid =
+    form.cheque_number.trim() && form.bank_name.trim() && form.payment_amount;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
-        {/* Header */}
-        <div className="bg-teal-50 border-b border-teal-100 px-6 py-4">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-teal-100 flex items-center justify-center">
-              <svg
-                className="w-5 h-5 text-teal-600"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-            </div>
-            <div>
-              <h3 className="font-semibold text-gray-900">Record Payment</h3>
-              <p className="text-sm text-gray-500">{invoiceNumber}</p>
-            </div>
-          </div>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+      <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-md overflow-hidden border border-gray-100 dark:border-gray-700">
+        <div className="bg-indigo-50 dark:bg-indigo-900/10 border-b border-indigo-100 dark:border-indigo-900/20 px-8 py-6">
+          <h3 className="font-black text-indigo-900 dark:text-indigo-400 uppercase tracking-tighter text-xl">
+            Record Received Cheque
+          </h3>
+          <p className="text-xs text-indigo-600 font-bold uppercase tracking-widest mt-1 opacity-60">
+            Prepare Internal Receipt
+          </p>
         </div>
-
-        {/* Body */}
-        <div className="px-6 py-5 space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
-              Payment Reference <span className="text-red-500">*</span>
+        <div className="p-8 space-y-4">
+          <div className="space-y-1">
+            <label className="text-[10px] font-black uppercase text-gray-400 ml-1">
+              Cheque Number / Reference
             </label>
             <input
-              value={form.payment_reference}
-              onChange={(e) => set("payment_reference", e.target.value)}
-              placeholder="e.g. TXN-2026-00123"
-              maxLength={255}
-              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm
-                         focus:outline-none focus:ring-2 focus:ring-teal-300 focus:border-teal-400 transition"
+              required
+              value={form.cheque_number}
+              onChange={(e) =>
+                setForm({ ...form, cheque_number: e.target.value })
+              }
+              className="w-full bg-gray-50 dark:bg-gray-900 p-4 rounded-xl border-none outline-none focus:ring-2 focus:ring-indigo-100 font-bold"
             />
           </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
-              Payment Method <span className="text-red-500">*</span>
+          <div className="space-y-1">
+            <label className="text-[10px] font-black uppercase text-gray-400 ml-1">
+              Bank Name
             </label>
-            <select
-              value={form.payment_method}
-              onChange={(e) => set("payment_method", e.target.value)}
-              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-800
-                         focus:outline-none focus:ring-2 focus:ring-teal-300 focus:border-teal-400 transition bg-white"
-            >
-              <option value="">Select method…</option>
-              {PAYMENT_METHODS.map((m) => (
-                <option key={m} value={m}>
-                  {m}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
-              Notes{" "}
-              <span className="text-gray-400 font-normal">(optional)</span>
-            </label>
-            <textarea
-              value={form.payment_notes}
-              onChange={(e) => set("payment_notes", e.target.value)}
-              rows={3}
-              placeholder="Any additional payment details…"
-              className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm resize-none
-                         focus:outline-none focus:ring-2 focus:ring-teal-300 focus:border-teal-400 transition"
+            <input
+              required
+              value={form.bank_name}
+              onChange={(e) => setForm({ ...form, bank_name: e.target.value })}
+              className="w-full bg-gray-50 dark:bg-gray-900 p-4 rounded-xl border-none outline-none focus:ring-2 focus:ring-indigo-100 font-bold"
             />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1">
+              <label className="text-[10px] font-black uppercase text-gray-400 ml-1">
+                Received Date
+              </label>
+              <input
+                type="date"
+                value={form.payment_received_date}
+                onChange={(e) =>
+                  setForm({ ...form, payment_received_date: e.target.value })
+                }
+                className="w-full bg-gray-50 dark:bg-gray-900 p-4 rounded-xl border-none outline-none focus:ring-2 focus:ring-indigo-100 font-bold"
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-[10px] font-black uppercase text-gray-400 ml-1">
+                Amount
+              </label>
+              <input
+                type="number"
+                value={form.payment_amount}
+                onChange={(e) =>
+                  setForm({ ...form, payment_amount: e.target.value })
+                }
+                className="w-full bg-gray-50 dark:bg-gray-900 p-4 rounded-xl border-none outline-none focus:ring-2 focus:ring-indigo-100 font-black"
+              />
+            </div>
           </div>
         </div>
-
-        {/* Footer */}
-        <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-end gap-3">
+        <div className="px-8 py-6 bg-gray-50 dark:bg-gray-900/50 flex gap-4">
           <button
             onClick={onClose}
-            disabled={loading}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition disabled:opacity-50"
+            className="flex-1 py-4 bg-white dark:bg-gray-800 rounded-2xl font-bold transition-colors shadow-sm"
           >
             Cancel
           </button>
           <button
             onClick={() => onConfirm(form)}
             disabled={!valid || loading}
-            className="px-4 py-2 text-sm font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-700 transition
-                       disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
+            className="flex-[2] py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl shadow-indigo-200 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
           >
-            {loading && (
-              <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-            )}
-            Record Payment
+            {loading && <Loader2 className="w-4 h-4 animate-spin" />}
+            Generate Receipt
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── MarkAsBankedModal ───────────────────────────────────────────
+
+function MarkAsBankedModal({ onConfirm, onClose, loading }) {
+  const [form, setForm] = useState({
+    banked_at: new Date().toISOString().split("T")[0],
+    bank_reference: "",
+  });
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+      <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden">
+        <div className="bg-teal-50 dark:bg-teal-900/10 p-8 text-center space-y-2">
+          <div className="w-16 h-16 bg-teal-100 dark:bg-teal-900/30 rounded-full flex items-center justify-center text-teal-600 mx-auto">
+            <svg
+              className="w-8 h-8"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+              />
+            </svg>
+          </div>
+          <h3 className="font-black text-teal-900 dark:text-teal-400 uppercase tracking-tighter text-xl">
+            Mark as Banked
+          </h3>
+          <p className="text-xs text-teal-600/70 font-medium">
+            Verify that the funds are cleared in the corporate account
+          </p>
+        </div>
+        <div className="p-8 space-y-4">
+          <div className="space-y-1">
+            <label className="text-[10px] font-black uppercase text-gray-400 ml-1">
+              Banking Date
+            </label>
+            <input
+              type="date"
+              value={form.banked_at}
+              onChange={(e) => setForm({ ...form, banked_at: e.target.value })}
+              className="w-full bg-gray-50 p-4 rounded-xl border-none outline-none focus:ring-2 focus:ring-teal-100 font-bold"
+            />
+          </div>
+          <div className="space-y-1">
+            <label className="text-[10px] font-black uppercase text-gray-400 ml-1">
+              Bank Reference (Optional)
+            </label>
+            <input
+              value={form.bank_reference}
+              onChange={(e) =>
+                setForm({ ...form, bank_reference: e.target.value })
+              }
+              placeholder="DEPOSIT-REF-..."
+              className="w-full bg-gray-50 p-4 rounded-xl border-none outline-none focus:ring-2 focus:ring-teal-100 font-bold"
+            />
+          </div>
+        </div>
+        <div className="p-8 pt-0 flex gap-3">
+          <button
+            onClick={onClose}
+            className="flex-1 py-4 bg-gray-100 rounded-2xl font-bold"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={() => onConfirm(form)}
+            disabled={loading}
+            className="flex-[2] py-4 bg-teal-600 text-white rounded-2xl font-black uppercase tracking-widest text-xs shadow-lg shadow-teal-200"
+          >
+            Confirm Banking
           </button>
         </div>
       </div>
@@ -292,6 +342,8 @@ const TIMELINE_ICONS = {
   Submitted: { bg: "bg-amber-100", icon: "📤" },
   Approved: { bg: "bg-green-100", icon: "✅" },
   Rejected: { bg: "bg-red-100", icon: "❌" },
+  "Payment Received": { bg: "bg-indigo-100", icon: "🧾" },
+  Banked: { bg: "bg-teal-100", icon: "🏦" },
   Paid: { bg: "bg-teal-100", icon: "💳" },
   "Tax Generated": { bg: "bg-blue-100", icon: "🧾" },
 };
@@ -393,9 +445,15 @@ function AuditTrail({ invoiceId }) {
 // ─── WorkflowPanel ───────────────────────────────────────────────
 
 function WorkflowPanel({ invoice }) {
-  const STEPS = ["Draft", "Tax Generated", "Submitted", "Approved", "Paid"];
-  const current =
-    invoice.status === "Rejected" ? invoice.status : invoice.status;
+  const STEPS = [
+    "Draft",
+    "Tax Generated",
+    "Submitted",
+    "Approved",
+    "Payment Received",
+    "Banked",
+  ];
+  const current = invoice.status === "Rejected" ? "Submitted" : invoice.status;
   const currentIdx = STEPS.indexOf(current);
 
   return (
@@ -484,9 +542,18 @@ function WorkflowPanel({ invoice }) {
         )}
         {invoice.recordedBy && (
           <div className="flex justify-between text-xs">
-            <span className="text-gray-500">Paid recorded by</span>
+            <span className="text-gray-500">Payment recorded by</span>
+            <span className="font-medium text-indigo-700">
+              {invoice.recordedBy.name} ·{" "}
+              {fmtDateTime(invoice.payment_received_date)}
+            </span>
+          </div>
+        )}
+        {invoice.status === "Banked" && (
+          <div className="flex justify-between text-xs">
+            <span className="text-gray-500">Banked at</span>
             <span className="font-medium text-teal-700">
-              {invoice.recordedBy.name} · {fmtDateTime(invoice.paid_at)}
+              {fmtDateTime(invoice.banked_at)}
             </span>
           </div>
         )}
@@ -512,7 +579,8 @@ export default function InvoiceDetailPage() {
 
   // Modals
   const [showReject, setShowReject] = useState(false);
-  const [showMarkPaid, setShowMarkPaid] = useState(false);
+  const [showRecordPayment, setShowRecordPayment] = useState(false);
+  const [showMarkBanked, setShowMarkBanked] = useState(false);
 
   const showToast = (msg, type = "success") => {
     setToast({ msg, type });
@@ -574,15 +642,35 @@ export default function InvoiceDetailPage() {
     }
   };
 
-  const handleMarkPaid = async (data) => {
+  const handleRecordPayment = async (data) => {
     setActionLoading(true);
     try {
-      await api.post(`/invoices/${id}/mark-paid`, data);
-      showToast("Payment recorded. Invoice marked as Paid.");
-      setShowMarkPaid(false);
+      await api.post(`/invoices/${id}/record-payment`, data);
+      showToast("Payment recorded. Internal receipt generated.");
+      setShowRecordPayment(false);
       loadInvoice();
     } catch (e) {
-      showToast(e.response?.data?.message ?? "Mark paid failed.", "error");
+      showToast(
+        e.response?.data?.message ?? "Failed to record payment.",
+        "error",
+      );
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleMarkBanked = async (data) => {
+    setActionLoading(true);
+    try {
+      await api.post(`/invoices/${id}/bank`, data);
+      showToast("Invoice marked as banked.");
+      setShowMarkBanked(false);
+      loadInvoice();
+    } catch (e) {
+      showToast(
+        e.response?.data?.message ?? "Failed to mark as banked.",
+        "error",
+      );
     } finally {
       setActionLoading(false);
     }
@@ -619,8 +707,10 @@ export default function InvoiceDetailPage() {
   const showRejectBtn =
     ["Submitted", "Approved"].includes(invoice.status) &&
     canRejectInvoice(permissions);
-  const showMarkPaidBtn =
-    invoice.status === "Approved" && canMarkPaid(permissions);
+  const showRecordPaymentBtn =
+    invoice.status === "Approved" && canRecordPayment(permissions);
+  const showMarkBankedBtn =
+    invoice.status === "Payment Received" && canMarkBanked(permissions);
   const showEditBtn = invoice.status === "Draft" && canEditInvoice(permissions);
   const showAuditTab = canViewAuditTrail(permissions);
 
@@ -628,7 +718,8 @@ export default function InvoiceDetailPage() {
     showSubmitBtn ||
     showApproveBtn ||
     showRejectBtn ||
-    showMarkPaidBtn ||
+    showRecordPaymentBtn ||
+    showMarkBankedBtn ||
     showEditBtn;
 
   return (
@@ -658,11 +749,18 @@ export default function InvoiceDetailPage() {
           loading={actionLoading}
         />
       )}
-      {showMarkPaid && (
-        <MarkPaidModal
-          invoiceNumber={invoice.invoice_number}
-          onConfirm={handleMarkPaid}
-          onClose={() => setShowMarkPaid(false)}
+      {showRecordPayment && (
+        <RecordPaymentModal
+          invoice={invoice}
+          onConfirm={handleRecordPayment}
+          onClose={() => setShowRecordPayment(false)}
+          loading={actionLoading}
+        />
+      )}
+      {showMarkBanked && (
+        <MarkAsBankedModal
+          onConfirm={handleMarkBanked}
+          onClose={() => setShowMarkBanked(false)}
           loading={actionLoading}
         />
       )}
@@ -746,13 +844,22 @@ export default function InvoiceDetailPage() {
                   Reject
                 </button>
               )}
-              {showMarkPaidBtn && (
+              {showRecordPaymentBtn && (
                 <button
-                  onClick={() => setShowMarkPaid(true)}
+                  onClick={() => setShowRecordPayment(true)}
+                  disabled={actionLoading}
+                  className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition disabled:opacity-50"
+                >
+                  Record Payment
+                </button>
+              )}
+              {showMarkBankedBtn && (
+                <button
+                  onClick={() => setShowMarkBanked(true)}
                   disabled={actionLoading}
                   className="px-4 py-2 text-sm font-medium text-white bg-teal-600 rounded-lg hover:bg-teal-700 transition disabled:opacity-50"
                 >
-                  Record Payment
+                  Mark as Banked
                 </button>
               )}
             </div>
@@ -838,35 +945,67 @@ export default function InvoiceDetailPage() {
               </div>
             </div>
 
-            {/* Payment Details (only if Paid) */}
-            {invoice.status === "Paid" && (
-              <div className="md:col-span-2 bg-teal-50 border border-teal-100 rounded-2xl p-5 shadow-sm">
-                <h3 className="text-sm font-semibold text-teal-800 mb-3">
-                  Payment Details
-                </h3>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            {/* Payment Details */}
+            {(invoice.status === "Payment Received" ||
+              invoice.status === "Banked" ||
+              invoice.status === "Paid") && (
+              <div className="md:col-span-2 bg-indigo-50 dark:bg-indigo-900/10 border border-indigo-100 dark:border-indigo-900/20 rounded-2xl p-6 shadow-sm">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-sm font-black text-indigo-900 dark:text-indigo-400 uppercase tracking-widest">
+                    Cheque & Payment Information
+                  </h3>
+                  {invoice.receipt_number && (
+                    <span className="text-[10px] font-black bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 px-3 py-1 rounded-full uppercase tracking-widest border border-indigo-200">
+                      {invoice.receipt_number}
+                    </span>
+                  )}
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                   {[
-                    ["Reference", invoice.payment_reference],
-                    ["Method", invoice.payment_method],
-                    ["Paid At", fmtDateTime(invoice.paid_at)],
-                    ["Recorded By", invoice.recordedBy?.name],
+                    [
+                      "Cheque/Ref",
+                      invoice.cheque_number || invoice.payment_reference,
+                    ],
+                    ["Bank", invoice.bank_name || invoice.payment_method],
+                    ["Amount Received", fmt(invoice.payment_amount)],
+                    ["Received Date", fmtDate(invoice.payment_received_date)],
                   ].map(([label, value]) => (
                     <div key={label}>
-                      <p className="text-xs text-teal-600 mb-0.5">{label}</p>
-                      <p className="text-sm font-medium text-teal-900">
+                      <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-1">
+                        {label}
+                      </p>
+                      <p className="text-sm font-bold text-indigo-900 dark:text-gray-200">
                         {value ?? "—"}
                       </p>
                     </div>
                   ))}
-                  {invoice.payment_notes && (
-                    <div className="col-span-full">
-                      <p className="text-xs text-teal-600 mb-0.5">Notes</p>
-                      <p className="text-sm text-teal-800">
-                        {invoice.payment_notes}
-                      </p>
-                    </div>
+                  {invoice.status === "Banked" && (
+                    <>
+                      <div>
+                        <p className="text-[10px] font-black text-teal-500 uppercase tracking-widest mb-1">
+                          Banked Date
+                        </p>
+                        <p className="text-sm font-bold text-teal-700 dark:text-teal-400">
+                          {fmtDate(invoice.banked_at)}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-black text-teal-500 uppercase tracking-widest mb-1">
+                          Bank Ref
+                        </p>
+                        <p className="text-sm font-bold text-teal-700 dark:text-teal-400">
+                          {invoice.bank_reference || "—"}
+                        </p>
+                      </div>
+                    </>
                   )}
                 </div>
+
+                {invoice.recordedBy && (
+                  <p className="text-[10px] text-indigo-400/60 font-medium mt-4 pt-4 border-t border-indigo-100">
+                    Recorded by {invoice.recordedBy.name}
+                  </p>
+                )}
               </div>
             )}
           </div>

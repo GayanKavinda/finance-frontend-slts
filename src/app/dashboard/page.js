@@ -29,18 +29,23 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "next-themes";
 import Breadcrumb from "@/components/Breadcrumb";
 import { fetchMonthlyInvoiceTrend } from "@/lib/invoice";
-import { fetchInvoiceSummary, fetchRecentInvoices } from "@/lib/invoiceSummary";
-import { fetchStatusBreakdown } from "@/lib/invoiceSummary";
+import {
+  fetchInvoiceSummary,
+  fetchRecentInvoices,
+  fetchStatusBreakdown,
+  fetchExecutiveSummary,
+} from "@/lib/invoiceSummary";
 import StatusBadge from "@/components/ui/StatusBadge";
 import Link from "next/link";
 
 const STATUS_COLORS = {
-  Paid: "#10B981",
-  Pending: "#F59E0B",
+  Banked: "#10B981",
+  "Payment Received": "#6366F1",
+  Approved: "#059669",
+  Submitted: "#F59E0B",
   Rejected: "#EF4444",
   Draft: "#6B7280",
   Overdue: "#DC2626",
-  "Pending Approval": "#8B5CF6",
 };
 
 const formatCurrency = (value) =>
@@ -191,6 +196,7 @@ export default function Dashboard() {
   const { theme } = useTheme();
 
   const [summary, setSummary] = useState(null);
+  const [execSummary, setExecSummary] = useState(null);
   const [recentInvoices, setRecentInvoices] = useState([]);
   const [monthlyTrend, setMonthlyTrend] = useState([]);
   const [statusBreakdown, setStatusBreakdown] = useState([]);
@@ -198,16 +204,18 @@ export default function Dashboard() {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [summaryData, invoicesData, trendData, breakdownData] =
+        const [summaryData, execData, invoicesData, trendData, breakdownData] =
           await Promise.all([
             fetchInvoiceSummary(),
+            fetchExecutiveSummary(),
             fetchRecentInvoices(5),
             fetchMonthlyInvoiceTrend(),
             fetchStatusBreakdown(),
           ]);
         setSummary(summaryData);
+        setExecSummary(execData);
         setRecentInvoices(
-          Array.isArray(invoicesData?.data) ? invoicesData.data : []
+          Array.isArray(invoicesData?.data) ? invoicesData.data : [],
         );
         setMonthlyTrend(Array.isArray(trendData) ? trendData : []);
         setStatusBreakdown(Array.isArray(breakdownData) ? breakdownData : []);
@@ -244,71 +252,127 @@ export default function Dashboard() {
         </div>
 
         {/* Header */}
-        <div className="mt-2 sm:mt-4 mb-4 sm:mb-6">
-          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
-            Dashboard
-          </h1>
-          <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5">
-            Welcome back,{" "}
-            <span className="font-medium text-blue-600 dark:text-blue-400">
-              {user.name}
-            </span>
-          </p>
+        <div className="mt-2 sm:mt-4 mb-4 sm:mb-6 flex justify-between items-end">
+          <div>
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
+              Executive Overview
+            </h1>
+            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+              Strategic financial health and procurement metrics
+            </p>
+          </div>
+          <div className="text-right">
+            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none">
+              Logged as
+            </p>
+            <p className="text-sm font-bold text-primary">{user.name}</p>
+          </div>
+        </div>
+
+        {/* Procurement Impact Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-[2rem] border border-gray-100 dark:border-gray-700 shadow-sm space-y-2">
+            <p className="text-xs font-black text-gray-400 uppercase tracking-widest">
+              Total Tender Portfolio
+            </p>
+            <p className="text-2xl font-black text-gray-900 dark:text-white truncate">
+              LKR {formatCompact(execSummary?.total_tender_value || 0)}
+            </p>
+            <div className="w-full h-1 bg-gray-100 rounded-full overflow-hidden">
+              <div className="h-full bg-blue-500 w-3/4"></div>
+            </div>
+          </div>
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-[2rem] border border-gray-100 dark:border-gray-700 shadow-sm space-y-2">
+            <p className="text-xs font-black text-gray-400 uppercase tracking-widest">
+              Committed PO Value
+            </p>
+            <p className="text-2xl font-black text-gray-900 dark:text-white truncate">
+              LKR {formatCompact(execSummary?.total_po_value || 0)}
+            </p>
+            <div className="w-full h-1 bg-gray-100 rounded-full overflow-hidden">
+              <div className="h-full bg-purple-500 w-1/2"></div>
+            </div>
+          </div>
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-[2rem] border border-gray-100 dark:border-gray-700 shadow-sm space-y-2">
+            <p className="text-xs font-black text-gray-400 uppercase tracking-widest">
+              Invoiced Revenue
+            </p>
+            <p className="text-2xl font-black text-gray-900 dark:text-white truncate">
+              LKR {formatCompact(execSummary?.gross_amount || 0)}
+            </p>
+            <div className="w-full h-1 bg-gray-100 rounded-full overflow-hidden">
+              <div className="h-full bg-emerald-500 w-2/3"></div>
+            </div>
+          </div>
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-[2rem] border border-gray-100 dark:border-gray-700 shadow-sm space-y-2">
+            <p className="text-xs font-black text-gray-400 uppercase tracking-widest">
+              Cleared (Banked)
+            </p>
+            <p className="text-2xl font-black text-teal-600 truncate">
+              LKR{" "}
+              {formatCompact(
+                execSummary?.bank_amount || execSummary?.banked_amount || 0,
+              )}
+            </p>
+            <div className="w-full h-1 bg-gray-100 rounded-full overflow-hidden">
+              <div className="h-full bg-teal-500 w-1/3"></div>
+            </div>
+          </div>
         </div>
 
         {/* Count Stats - 2x2 grid on mobile, 4 cols on desktop */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3 mb-4 sm:mb-6">
           <CountStat
             icon={FileText}
-            label="Total Invoices"
-            value={summary?.total_invoices ?? 0}
+            label="Volume of Invoices"
+            value={execSummary?.total_invoices ?? 0}
             color="bg-blue-500"
             delay={0}
           />
           <CountStat
             icon={CheckCircle}
-            label="Paid"
-            value={summary?.paid_invoices ?? 0}
-            color="bg-green-500"
+            label="Banked / Closed"
+            value={execSummary?.paid_count ?? 0}
+            color="bg-emerald-500"
             delay={0.05}
           />
           <CountStat
             icon={Clock}
-            label="Pending"
-            value={summary?.pending_approval_count ?? 0}
+            label="Pending Approval"
+            value={execSummary?.pending_approval_count ?? 0}
             color="bg-amber-500"
             delay={0.1}
           />
           <CountStat
-            icon={AlertCircle}
-            label="Rejected"
-            value={summary?.rejected_count ?? 0}
-            color="bg-red-500"
+            icon={TrendingUp}
+            label="Avg. Approval Time"
+            value={`${Math.round(execSummary?.avg_approval_time_hours || 0)}h`}
+            color="bg-indigo-500"
             delay={0.15}
           />
         </div>
 
-        {/* Revenue Cards - stack on mobile, 3 cols on desktop */}
+        {/* Financial Details Sections */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3 mb-4 sm:mb-6">
           <RevenueCard
-            label="Total Revenue"
-            amount={summary?.gross_amount ?? 0}
+            label="Total Gross Amount"
+            amount={execSummary?.gross_amount ?? 0}
             icon={DollarSign}
-            color="bg-purple-500"
+            color="bg-blue-600"
             delay={0.1}
           />
           <RevenueCard
-            label="Paid Amount"
-            amount={summary?.paid_amount ?? 0}
+            label="Banked Amount"
+            amount={execSummary?.banked_amount ?? 0}
             icon={CheckCircle}
-            color="bg-emerald-500"
+            color="bg-teal-600"
             delay={0.15}
           />
           <RevenueCard
-            label="Pending Amount"
-            amount={summary?.pending_amount ?? 0}
+            label="Outstanding / Transit"
+            amount={execSummary?.pending_amount ?? 0}
             icon={Clock}
-            color="bg-amber-500"
+            color="bg-rose-600"
             delay={0.2}
           />
         </div>
@@ -337,27 +401,15 @@ export default function Dashboard() {
                   <defs>
                     <linearGradient id="gTotal" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="0%" stopColor="#3B82F6" stopOpacity={0.2} />
-                      <stop
-                        offset="100%"
-                        stopColor="#3B82F6"
-                        stopOpacity={0}
-                      />
+                      <stop offset="100%" stopColor="#3B82F6" stopOpacity={0} />
                     </linearGradient>
                     <linearGradient id="gPaid" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="0%" stopColor="#10B981" stopOpacity={0.2} />
-                      <stop
-                        offset="100%"
-                        stopColor="#10B981"
-                        stopOpacity={0}
-                      />
+                      <stop offset="100%" stopColor="#10B981" stopOpacity={0} />
                     </linearGradient>
                     <linearGradient id="gPending" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="0%" stopColor="#F59E0B" stopOpacity={0.2} />
-                      <stop
-                        offset="100%"
-                        stopColor="#F59E0B"
-                        stopOpacity={0}
-                      />
+                      <stop offset="100%" stopColor="#F59E0B" stopOpacity={0} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid
@@ -518,20 +570,16 @@ export default function Dashboard() {
             <table className="w-full">
               <thead>
                 <tr className="bg-gray-50 dark:bg-gray-900/40">
-                  {[
-                    "Invoice No.",
-                    "Customer",
-                    "Date",
-                    "Amount",
-                    "Status",
-                  ].map((h) => (
-                    <th
-                      key={h}
-                      className="px-5 py-2.5 text-left text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider"
-                    >
-                      {h}
-                    </th>
-                  ))}
+                  {["Invoice No.", "Customer", "Date", "Amount", "Status"].map(
+                    (h) => (
+                      <th
+                        key={h}
+                        className="px-5 py-2.5 text-left text-[11px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider"
+                      >
+                        {h}
+                      </th>
+                    ),
+                  )}
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 dark:divide-gray-700/60">
@@ -554,7 +602,7 @@ export default function Dashboard() {
                             month: "short",
                             day: "numeric",
                             year: "numeric",
-                          }
+                          },
                         )}
                       </td>
                       <td className="px-5 py-3 text-sm font-medium text-gray-900 dark:text-white">

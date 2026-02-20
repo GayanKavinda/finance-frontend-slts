@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from "react";
 import axios from "@/lib/axios";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function useSystemStatus(paused = false) {
+  const { user } = useAuth();
   const [state, setState] = useState({
     metrics: {
       serverLoad: 0,
@@ -18,7 +20,13 @@ export default function useSystemStatus(paused = false) {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (paused) return;
+      if (paused || !user) return;
+
+      // Only fetch if user has permission
+      if (!user.permissions?.includes("manage-users")) {
+        return;
+      }
+
       try {
         const [metricsRes, logsRes] = await Promise.all([
           axios.get("/system/metrics"),
@@ -57,7 +65,7 @@ export default function useSystemStatus(paused = false) {
     const interval = setInterval(fetchData, 5000);
 
     return () => clearInterval(interval);
-  }, [paused]);
+  }, [paused, user]);
 
   return state;
 }

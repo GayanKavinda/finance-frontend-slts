@@ -65,7 +65,7 @@ export default function InvoicePage() {
             setPage(1);
             setStatus(e.target.value);
           }}
-          className="border px-3 py-2 rounded text-sm"
+          className="border px-3 py-2 rounded text-sm min-w-[150px] font-medium"
         >
           <option value="">All Statuses</option>
           <option value="Draft">Draft</option>
@@ -73,7 +73,8 @@ export default function InvoicePage() {
           <option value="Submitted">Submitted</option>
           <option value="Approved">Approved</option>
           <option value="Rejected">Rejected</option>
-          <option value="Paid">Paid</option>
+          <option value="Payment Received">Payment Received</option>
+          <option value="Banked">Banked</option>
         </select>
 
         <button
@@ -81,62 +82,114 @@ export default function InvoicePage() {
             setPage(1);
             loadInvoices();
           }}
-          className="px-4 py-2 bg-primary text-white rounded text-sm"
+          className="px-6 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg text-sm font-bold shadow-lg shadow-primary/20 transition-all font-bold"
         >
-          Apply
+          Apply Filters
         </button>
       </div>
 
       {/* Table */}
-      <div className="bg-card rounded-xl shadow border overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead className="bg-muted">
+      <div className="bg-white dark:bg-gray-800 rounded-[2rem] shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+        <table className="w-full text-sm text-left">
+          <thead className="bg-gray-50/50 dark:bg-gray-900 uppercase text-[10px] font-black text-gray-400 tracking-widest">
             <tr>
-              <th className="p-3 text-left">Invoice</th>
-              <th className="p-3">Customer</th>
-              <th className="p-3">Amount</th>
-              <th className="p-3">Status</th>
-              <th className="p-3">Actions</th>
+              <th className="px-8 py-5">Invoice</th>
+              <th className="px-6 py-5">Customer / Reference</th>
+              <th className="px-6 py-5">Value (LKR)</th>
+              <th className="px-6 py-5 text-center">Status</th>
+              <th className="px-8 py-5 text-right">Actions</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="divide-y divide-gray-50 dark:divide-gray-700">
             {invoices.length > 0 ? (
               invoices.map((inv) => (
                 <tr
                   key={inv.id}
                   onClick={() => router.push(`/invoices/${inv.id}`)}
-                  className="border-t hover:bg-muted/50 cursor-pointer transition-colors"
+                  className="hover:bg-gray-50/80 dark:hover:bg-gray-900/50 cursor-pointer transition-all group"
                 >
-                  <td className="p-3 font-medium">{inv.invoice_number}</td>
-                  <td className="p-3">{inv.customer?.name}</td>
-                  <td className="p-3 font-bold">
-                    LKR {Number(inv.invoice_amount).toLocaleString()}
+                  <td className="px-8 py-6">
+                    <div className="flex flex-col">
+                      <span className="font-black text-gray-900 dark:text-white group-hover:text-primary transition-colors">
+                        {inv.invoice_number}
+                      </span>
+                      <span className="text-[10px] text-gray-400 font-bold">
+                        {new Date(inv.invoice_date).toLocaleDateString()}
+                      </span>
+                    </div>
                   </td>
-                  <td className="p-3">
+                  <td className="px-6 py-6">
+                    <div className="flex flex-col">
+                      <span className="font-bold text-gray-700 dark:text-gray-300">
+                        {inv.customer?.name}
+                      </span>
+                      {inv.receipt_number && (
+                        <span className="text-[10px] text-indigo-500 font-black flex items-center gap-1 mt-0.5">
+                          <i className="w-1.5 h-1.5 rounded-full bg-indigo-500"></i>
+                          {inv.receipt_number}
+                        </span>
+                      )}
+                    </div>
+                  </td>
+                  <td className="px-6 py-6">
+                    <span className="font-black text-gray-900 dark:text-white text-base">
+                      {Number(inv.invoice_amount).toLocaleString(undefined, {
+                        minimumFractionDigits: 2,
+                      })}
+                    </span>
+                  </td>
+                  <td className="px-6 py-6 text-center">
                     <StatusBadge status={inv.status} />
                   </td>
                   <td
-                    className="p-3 flex gap-2 items-center"
+                    className="px-8 py-6 text-right"
                     onClick={(e) => e.stopPropagation()}
                   >
-                    {/* Download PDF - always allowed */}
-                    <button
-                      className="text-primary text-xs font-bold hover:underline"
-                      onClick={() => downloadInvoicePdf(inv.id)}
-                    >
-                      PDF
-                    </button>
-
-                    {/* Edit - Procurement only, Draft only */}
-                    {inv.status === "Draft" &&
-                      canEditInvoice(user?.permissions) && (
-                        <a
-                          href={`/invoices/${inv.id}/edit`}
-                          className="text-xs font-bold text-blue-600 hover:underline"
+                    <div className="flex gap-3 justify-end items-center">
+                      <button
+                        title="Download Invoice PDF"
+                        className="p-2 hover:bg-blue-50 text-blue-600 rounded-lg transition-colors border border-transparent hover:border-blue-100"
+                        onClick={() => downloadInvoicePdf(inv.id)}
+                      >
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
                         >
-                          Edit
-                        </a>
-                      )}
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"
+                          />
+                        </svg>
+                      </button>
+
+                      {inv.status === "Draft" &&
+                        canEditInvoice(user?.permissions) && (
+                          <button
+                            onClick={() =>
+                              router.push(`/invoices/${inv.id}/edit`)
+                            }
+                            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-lg transition-colors"
+                          >
+                            <svg
+                              className="w-4 h-4"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                              />
+                            </svg>
+                          </button>
+                        )}
+                    </div>
                   </td>
                 </tr>
               ))

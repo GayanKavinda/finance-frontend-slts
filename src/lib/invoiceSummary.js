@@ -15,3 +15,9 @@ export const fetchStatusBreakdown = async () => {
   const res = await axios.get("/invoices/status-breakdown");
   return res.data;
 };
+
+export const fetchExecutiveSummary = async () => {
+  const res = await axios.get("/executive-summary");
+  // This is the new endpoint we created in InvoiceController
+  return res.data;
+};
