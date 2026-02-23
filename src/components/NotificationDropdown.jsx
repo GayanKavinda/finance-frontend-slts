@@ -164,6 +164,30 @@ export default function NotificationDropdown() {
                               View Invoice
                             </Link>
                           )}
+                          {notif.data.entity_type === 'quotation' && (
+                            <Link
+                              href={`/jobs/${notif.data.entity_id}`}
+                              onClick={() => {
+                                setIsOpen(false);
+                                if (!notif.read_at) markAsRead(notif.id);
+                              }}
+                              className="inline-block mt-2 text-[10px] font-bold text-blue-600 hover:text-blue-700 underline underline-offset-2"
+                            >
+                              View Job
+                            </Link>
+                          )}
+                          {notif.data.entity_type === 'bill' && (
+                            <Link
+                              href={`/contractor-bills`}
+                              onClick={() => {
+                                setIsOpen(false);
+                                if (!notif.read_at) markAsRead(notif.id);
+                              }}
+                              className="inline-block mt-2 text-[10px] font-bold text-blue-600 hover:text-blue-700 underline underline-offset-2"
+                            >
+                              View Bills
+                            </Link>
+                          )}
                         </div>
                       </div>
                     </div>

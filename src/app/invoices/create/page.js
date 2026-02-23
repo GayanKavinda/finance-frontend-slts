@@ -114,7 +114,12 @@ export default function CreateInvoicePage() {
     e.preventDefault();
     setLoading(true);
     try {
-      await axios.post("/invoices", form);
+      const payload = {
+        ...form,
+        invoice_amount:
+          form.invoice_amount === "" ? 0 : Number(form.invoice_amount),
+      };
+      await axios.post("/invoices", payload);
       toast.success("Invoice created as draft successfully");
       router.push("/invoices");
     } catch (error) {

@@ -23,9 +23,11 @@ import {
   Target,
 } from "lucide-react";
 // Removed duplicate Layout wrapper
+import { useRouter } from "next/navigation";
 import StatusBadge from "@/components/ui/StatusBadge";
 
 export default function JobsPage() {
+  const router = useRouter();
   const [jobs, setJobs] = useState([]);
   const [customers, setCustomers] = useState([]);
   const [tenders, setTenders] = useState([]);
@@ -106,11 +108,17 @@ export default function JobsPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      const payload = {
+        ...form,
+        project_value:
+          form.project_value === "" ? 0 : Number(form.project_value),
+      };
+
       if (selectedJob) {
-        await updateJob(selectedJob.id, form);
+        await updateJob(selectedJob.id, payload);
         toast.success("Job updated successfully");
       } else {
-        await createJob(form);
+        await createJob(payload);
         toast.success("Job created successfully");
       }
       setIsModalOpen(false);
@@ -187,7 +195,8 @@ export default function JobsPage() {
             {jobs.map((job) => (
               <div
                 key={job.id}
-                className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-all group overflow-hidden relative"
+                onClick={() => router.push(`/jobs/${job.id}`)}
+                className="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-all group overflow-hidden relative cursor-pointer"
               >
                 <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
                   <button

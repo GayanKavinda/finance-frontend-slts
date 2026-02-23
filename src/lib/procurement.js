@@ -79,6 +79,11 @@ export const updateJob = async (id, data) => {
   return res.data;
 };
 
+export const fetchJob = async (id) => {
+  const res = await axios.get(`/jobs/${id}`);
+  return res.data;
+};
+
 export const deleteJob = async (id) => {
   const res = await axios.delete(`/jobs/${id}`);
   return res.data;
@@ -88,7 +93,7 @@ export const deleteJob = async (id) => {
 export const fetchPurchaseOrders = async ({
   page = 1,
   job_id = "",
-  search = "",  
+  search = "",
 } = {}) => {
   const params = new URLSearchParams();
   params.append("page", page);

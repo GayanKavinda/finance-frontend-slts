@@ -27,6 +27,8 @@ import {
   canEditInvoice,
   getStatusMeta,
 } from "@/lib/permissions";
+import api from "@/lib/axios";
+import { useAuth } from "@/contexts/AuthContext";
 
 // ─── Helpers ────────────────────────────────────────────────────
 
@@ -631,7 +633,7 @@ export default function InvoiceDetailPage() {
   const handleReject = async (reason) => {
     setActionLoading(true);
     try {
-      await api.post(`/invoices/${id}/reject`, { rejection_reason: reason });
+      await api.post(`/invoices/${id}/reject`, { reason: reason });
       showToast("Invoice rejected.", "warning");
       setShowReject(false);
       loadInvoice();
@@ -645,7 +647,12 @@ export default function InvoiceDetailPage() {
   const handleRecordPayment = async (data) => {
     setActionLoading(true);
     try {
-      await api.post(`/invoices/${id}/record-payment`, data);
+      const payload = {
+        ...data,
+        payment_amount:
+          data.payment_amount === "" ? 0 : Number(data.payment_amount),
+      };
+      await api.post(`/invoices/${id}/record-payment`, payload);
       showToast("Payment recorded. Internal receipt generated.");
       setShowRecordPayment(false);
       loadInvoice();
@@ -662,7 +669,7 @@ export default function InvoiceDetailPage() {
   const handleMarkBanked = async (data) => {
     setActionLoading(true);
     try {
-      await api.post(`/invoices/${id}/bank`, data);
+      await api.post(`/invoices/${id}/mark-banked`, data);
       showToast("Invoice marked as banked.");
       setShowMarkBanked(false);
       loadInvoice();

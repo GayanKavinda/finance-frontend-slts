@@ -111,11 +111,18 @@ export default function TendersPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      const payload = {
+        ...form,
+        awarded_amount:
+          form.awarded_amount === "" ? 0 : Number(form.awarded_amount),
+        budget: form.budget === "" ? 0 : Number(form.budget),
+      };
+
       if (selectedTender) {
-        await updateTender(selectedTender.id, form);
+        await updateTender(selectedTender.id, payload);
         toast.success("Tender updated successfully");
       } else {
-        await createTender(form);
+        await createTender(payload);
         toast.success("Tender created successfully");
       }
       setIsModalOpen(false);
@@ -396,7 +403,7 @@ export default function TendersPage() {
                       Estimated Budget
                     </label>
                     <div className="relative">
-                      <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-gray-400">
+                      <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-gray-400 text-xs">
                         LKR
                       </span>
                       <input
@@ -406,7 +413,26 @@ export default function TendersPage() {
                         onChange={(e) =>
                           setForm({ ...form, budget: e.target.value })
                         }
-                        className="w-full pl-14 pr-4 py-3 bg-gray-100 dark:bg-gray-900 border-none rounded-2xl focus:ring-2 focus:ring-primary/20 outline-none font-bold"
+                        className="w-full pl-12 pr-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-700 rounded-2xl focus:ring-2 focus:ring-primary/20 outline-none"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                      Awarded Amount
+                    </label>
+                    <div className="relative">
+                      <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-gray-400 text-xs">
+                        LKR
+                      </span>
+                      <input
+                        type="number"
+                        name="awarded_amount"
+                        value={form.awarded_amount}
+                        onChange={(e) =>
+                          setForm({ ...form, awarded_amount: e.target.value })
+                        }
+                        className="w-full pl-12 pr-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-700 rounded-2xl focus:ring-2 focus:ring-primary/20 outline-none"
                       />
                     </div>
                   </div>

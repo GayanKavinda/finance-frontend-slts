@@ -249,6 +249,22 @@ export default function NotificationsPage() {
                             Go to Invoice →
                           </Link>
                         )}
+                        {notif.data.entity_type === "quotation" && (
+                          <Link
+                            href={`/jobs/${notif.data.entity_id}`}
+                            className="text-xs font-bold text-primary hover:underline underline-offset-4"
+                          >
+                            Go to Job →
+                          </Link>
+                        )}
+                        {notif.data.entity_type === "bill" && (
+                          <Link
+                            href={`/contractor-bills`}
+                            className="text-xs font-bold text-primary hover:underline underline-offset-4"
+                          >
+                            Go to Bills →
+                          </Link>
+                        )}
                       </div>
                     </div>
                   </div>

@@ -110,11 +110,16 @@ export default function POPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      const payload = {
+        ...form,
+        po_amount: form.po_amount === "" ? 0 : Number(form.po_amount),
+      };
+
       if (selectedPO) {
-        await updatePurchaseOrder(selectedPO.id, form);
+        await updatePurchaseOrder(selectedPO.id, payload);
         toast.success("PO updated successfully");
       } else {
-        await createPurchaseOrder(form);
+        await createPurchaseOrder(payload);
         toast.success("PO created successfully");
       }
       setIsModalOpen(false);

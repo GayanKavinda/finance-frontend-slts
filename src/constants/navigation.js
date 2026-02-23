@@ -13,7 +13,10 @@ import {
   FileText,
   FileBarChart, // Added from new import snippet
   HelpCircle, // Added from new import snippet
-  UserCircle, // Added as it's used in navLinks but not in original imports
+  UserCircle,
+  HardHat,
+  Building2,
+  Banknote,
 } from "lucide-react";
 
 export const navLinks = [
@@ -23,6 +26,12 @@ export const navLinks = [
     href: "/customers",
     icon: Users,
     requiredPermission: "manage-customers",
+  },
+  {
+    label: "Contractors",
+    href: "/contractors",
+    icon: Building2,
+    requiredPermission: "manage-contractors",
   },
   {
     label: "Tenders",
@@ -35,6 +44,12 @@ export const navLinks = [
     href: "/jobs",
     icon: Target,
     requiredPermission: "manage-jobs",
+  },
+  {
+    label: "Contractor Bills",
+    href: "/contractor-bills",
+    icon: Banknote,
+    requiredPermission: "submit-contractor-bill",
   },
   {
     label: "Purchase Orders",
