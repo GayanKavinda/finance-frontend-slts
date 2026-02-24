@@ -15,6 +15,8 @@ const STATUS_COLORS = {
   Pending: "bg-orange-100 text-orange-600",
   Active: "bg-emerald-100 text-emerald-600",
   Completed: "bg-blue-100 text-blue-600",
+  "In Progress": "bg-blue-100 text-blue-600",
+  Verified: "bg-indigo-100 text-indigo-600",
 };
 
 export default function StatusBadge({ status }) {

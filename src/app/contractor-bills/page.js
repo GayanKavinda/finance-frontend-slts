@@ -7,7 +7,9 @@ import {
   uploadBillDocument,
   deleteBillDocument,
   verifyContractorBill,
+  submitContractorBill,
   approveContractorBill,
+  rejectContractorBill,
   recordContractorPayment,
   fetchContractors,
 } from "@/lib/contractor";
@@ -29,11 +31,16 @@ import {
   Verified,
   CreditCard,
   Building2,
+  Download,
 } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import StatusBadge from "@/components/ui/StatusBadge";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function ContractorBillsPage() {
+  const { user } = useAuth();
+  const permissions = user?.permissions || [];
+
   const [bills, setBills] = useState([]);
   const [jobs, setJobs] = useState([]);
   const [contractors, setContractors] = useState([]);
@@ -62,6 +69,8 @@ export default function ContractorBillsPage() {
     paid_at: new Date().toISOString().split("T")[0],
   });
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
+  const [rejectionReason, setRejectionReason] = useState("");
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -149,6 +158,30 @@ export default function ContractorBillsPage() {
       loadData();
     } catch (error) {
       toast.error("Approval failed");
+    }
+  };
+
+  const handleSubmitToFinance = async (id) => {
+    try {
+      await submitContractorBill(id);
+      toast.success("Bill submitted to finance");
+      loadData();
+    } catch (error) {
+      toast.error("Submission failed");
+    }
+  };
+
+  const handleReject = async (e) => {
+    e.preventDefault();
+    if (!rejectionReason.trim()) return toast.error("Please provide a reason");
+    try {
+      await rejectContractorBill(selectedBill.id, rejectionReason);
+      toast.success("Bill rejected");
+      setIsRejectModalOpen(false);
+      setRejectionReason("");
+      loadData();
+    } catch (error) {
+      toast.error("Rejection failed");
     }
   };
 
@@ -284,10 +317,13 @@ export default function ContractorBillsPage() {
                           key={doc.id}
                           href={`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/storage/${doc.file_path}`}
                           target="_blank"
-                          className="p-1.5 bg-gray-100 dark:bg-gray-700 rounded-lg hover:text-primary transition-colors"
+                          rel="noopener noreferrer"
+                          download
+                          className="p-1.5 bg-gray-100 dark:bg-gray-700 rounded-lg hover:text-primary transition-colors flex items-center gap-1 text-xs font-bold"
                           title={doc.document_type}
                         >
-                          <ExternalLink className="w-3.5 h-3.5" />
+                          <Download className="w-3.5 h-3.5" />
+                          <span className="hidden sm:inline">DL</span>
                         </a>
                       ))}
                       {bill.status === "Draft" && (
@@ -305,33 +341,95 @@ export default function ContractorBillsPage() {
                   </div>
                 </div>
 
-                <div className="lg:w-64 flex flex-col justify-center gap-3">
-                  {bill.status === "Draft" && (
-                    <button
-                      onClick={() => handleVerify(bill.id)}
-                      className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-2xl font-black transition-all"
-                    >
-                      <Verified className="w-4 h-4" /> Verify (Proc.)
-                    </button>
-                  )}
-                  {bill.status === "Verified" && (
-                    <button
-                      onClick={() => handleApprove(bill.id)}
-                      className="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white py-3 rounded-2xl font-black transition-all"
-                    >
-                      <CheckCircle2 className="w-4 h-4" /> Approve (Fin.)
-                    </button>
-                  )}
-                  {bill.status === "Approved" && (
-                    <button
-                      onClick={() => {
-                        setSelectedBill(bill);
-                        setIsPaymentModalOpen(true);
-                      }}
-                      className="w-full flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-white py-3 rounded-2xl font-black transition-all"
-                    >
-                      <CreditCard className="w-4 h-4" /> Record Payment
-                    </button>
+                <div className="lg:w-72 flex flex-col justify-center gap-3">
+                  {bill.status === "Draft" &&
+                    permissions.includes("enter-quotations") && (
+                      <button
+                        onClick={() => handleVerify(bill.id)}
+                        className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-2xl font-black transition-all"
+                      >
+                        <Verified className="w-4 h-4" /> Verify (Proc.)
+                      </button>
+                    )}
+                  {bill.status === "Verified" &&
+                    permissions.includes("submit-contractor-bill") && (
+                      <button
+                        onClick={() => handleSubmitToFinance(bill.id)}
+                        className="w-full flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-600 text-white py-3 rounded-2xl font-black transition-all"
+                      >
+                        <Plus className="w-4 h-4" /> Submit to Finance
+                      </button>
+                    )}
+                  {bill.status === "Verified" &&
+                    permissions.includes("enter-quotations") && (
+                      <button
+                        className="w-full py-2 text-xs text-gray-400 font-bold hover:text-gray-600 underline"
+                        onClick={() => {
+                          setSelectedBill(bill);
+                          setIsUploadModalOpen(true);
+                        }}
+                      >
+                        Edit Attachments
+                      </button>
+                    )}
+                  {bill.status === "Submitted" &&
+                    permissions.includes("approve-payment") && (
+                      <div className="space-y-2">
+                        <button
+                          onClick={() => handleApprove(bill.id)}
+                          className="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white py-3 rounded-2xl font-black transition-all"
+                        >
+                          <CheckCircle2 className="w-4 h-4" /> Approve (Fin.)
+                        </button>
+                        <button
+                          onClick={() => {
+                            setSelectedBill(bill);
+                            setIsRejectModalOpen(true);
+                          }}
+                          className="w-full flex items-center justify-center gap-2 bg-red-50 text-red-600 hover:bg-red-100 py-3 rounded-2xl font-bold transition-all"
+                        >
+                          <X className="w-4 h-4" /> Reject
+                        </button>
+                      </div>
+                    )}
+                  {bill.status === "Approved" &&
+                    permissions.includes("mark-contractor-paid") && (
+                      <div className="space-y-2">
+                        <button
+                          onClick={() => {
+                            setSelectedBill(bill);
+                            setIsPaymentModalOpen(true);
+                          }}
+                          className="w-full flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-white py-3 rounded-2xl font-black transition-all"
+                        >
+                          <CreditCard className="w-4 h-4" /> Record Payment
+                        </button>
+                        <button
+                          onClick={() => {
+                            setSelectedBill(bill);
+                            setIsRejectModalOpen(true);
+                          }}
+                          className="w-full text-xs text-red-400 font-bold hover:text-red-500 underline"
+                        >
+                          Reject Approved Bill
+                        </button>
+                      </div>
+                    )}
+                  {bill.status === "Rejected" && (
+                    <div className="w-full p-4 bg-red-50 dark:bg-red-900/10 rounded-2xl border border-red-100 dark:border-red-900/20">
+                      <p className="text-[10px] font-black text-red-400 uppercase tracking-widest mb-1">
+                        Rejection Reason
+                      </p>
+                      <p className="text-xs font-bold text-red-700 italic">
+                        &quot;{bill.rejection_reason}&quot;
+                      </p>
+                      <button
+                        onClick={() => handleVerify(bill.id)}
+                        className="w-full mt-3 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-xl font-bold text-xs transition-all"
+                      >
+                        Re-Verify
+                      </button>
+                    </div>
                   )}
                   {bill.status === "Paid" && (
                     <div className="w-full p-4 bg-gray-50 dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-700">
@@ -561,6 +659,40 @@ export default function ContractorBillsPage() {
                 className="w-full py-4.5 bg-primary text-white rounded-2xl font-black shadow-lg shadow-primary/20"
               >
                 Mark as Paid
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+      {/* Rejection Modal */}
+      {isRejectModalOpen && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-gray-800 w-full max-w-lg rounded-[2.5rem] p-8 space-y-6">
+            <div className="flex justify-between items-center">
+              <h2 className="text-2xl font-black text-red-600">Reject Bill</h2>
+              <button onClick={() => setIsRejectModalOpen(false)}>
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            <form onSubmit={handleReject} className="space-y-6">
+              <div className="space-y-1.5">
+                <label className="text-xs font-black uppercase text-gray-400 tracking-widest">
+                  Reason for Rejection
+                </label>
+                <textarea
+                  required
+                  rows={4}
+                  value={rejectionReason}
+                  onChange={(e) => setRejectionReason(e.target.value)}
+                  className="w-full px-5 py-4 bg-gray-50 dark:bg-gray-900 rounded-2xl border-none font-bold resize-none"
+                  placeholder="Explain why this bill is being rejected..."
+                />
+              </div>
+              <button
+                type="submit"
+                className="w-full py-4.5 bg-red-600 text-white rounded-2xl font-black shadow-lg shadow-red-200"
+              >
+                Confirm Rejection
               </button>
             </form>
           </div>

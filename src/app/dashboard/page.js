@@ -11,6 +11,10 @@ import {
   AlertCircle,
   ArrowRight,
   TrendingUp,
+  Briefcase,
+  ShoppingBag,
+  Receipt,
+  Building2,
 } from "lucide-react";
 import {
   AreaChart,
@@ -39,13 +43,14 @@ import StatusBadge from "@/components/ui/StatusBadge";
 import Link from "next/link";
 
 const STATUS_COLORS = {
-  Banked: "#10B981",
-  "Payment Received": "#6366F1",
-  Approved: "#059669",
-  Submitted: "#F59E0B",
-  Rejected: "#EF4444",
-  Draft: "#6B7280",
-  Overdue: "#DC2626",
+  Banked: "#2DD4BF", // Teal
+  "Payment Received": "#6366F1", // Indigo
+  Approved: "#10B981", // Emerald
+  Submitted: "#F59E0B", // Amber
+  Rejected: "#EF4444", // Red
+  Draft: "#6B7280", // Gray
+  Overdue: "#B91C1C", // Dark Red
+  Pending: "#8B5CF6", // Violet
 };
 
 const formatCurrency = (value) =>
@@ -252,72 +257,139 @@ export default function Dashboard() {
         </div>
 
         {/* Header */}
-        <div className="mt-2 sm:mt-4 mb-4 sm:mb-6 flex justify-between items-end">
+        <div className="mt-2 sm:mt-4 mb-8 sm:mb-10 flex justify-between items-end border-b border-gray-100 dark:border-gray-800 pb-4">
           <div>
-            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">
               Executive Overview
             </h1>
-            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+            <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mt-1">
               Strategic financial health and procurement metrics
             </p>
           </div>
           <div className="text-right">
-            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none">
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider leading-none mb-1">
               Logged as
             </p>
-            <p className="text-sm font-bold text-primary">{user.name}</p>
+            <p className="text-base font-semibold text-primary">{user.name}</p>
           </div>
         </div>
 
         {/* Procurement Impact Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-[2rem] border border-gray-100 dark:border-gray-700 shadow-sm space-y-2">
-            <p className="text-xs font-black text-gray-400 uppercase tracking-widest">
-              Total Tender Portfolio
-            </p>
-            <p className="text-2xl font-black text-gray-900 dark:text-white truncate">
-              LKR {formatCompact(execSummary?.total_tender_value || 0)}
-            </p>
-            <div className="w-full h-1 bg-gray-100 rounded-full overflow-hidden">
-              <div className="h-full bg-blue-500 w-3/4"></div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+          {/* Total Tender Portfolio */}
+          <motion.div
+            whileHover={{ y: -5 }}
+            className="group relative bg-white dark:bg-gray-800 p-6 rounded-[2rem] border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden"
+          >
+            <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+              <Briefcase className="w-20 h-20 text-blue-600" />
             </div>
-          </div>
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-[2rem] border border-gray-100 dark:border-gray-700 shadow-sm space-y-2">
-            <p className="text-xs font-black text-gray-400 uppercase tracking-widest">
-              Committed PO Value
-            </p>
-            <p className="text-2xl font-black text-gray-900 dark:text-white truncate">
-              LKR {formatCompact(execSummary?.total_po_value || 0)}
-            </p>
-            <div className="w-full h-1 bg-gray-100 rounded-full overflow-hidden">
-              <div className="h-full bg-purple-500 w-1/2"></div>
+            <div className="relative z-10">
+              <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <Briefcase className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+              </div>
+              <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">
+                Total Tender Portfolio
+              </p>
+              <p className="text-2xl font-black text-gray-900 dark:text-white mb-4 tracking-tight">
+                LKR {formatCompact(execSummary?.total_tender_value || 0)}
+              </p>
+              <div className="w-full h-1.5 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: "75%" }}
+                  className="h-full bg-gradient-to-r from-blue-500 to-blue-400 shadow-[0_0_8px_rgba(59,130,246,0.5)]"
+                />
+              </div>
             </div>
-          </div>
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-[2rem] border border-gray-100 dark:border-gray-700 shadow-sm space-y-2">
-            <p className="text-xs font-black text-gray-400 uppercase tracking-widest">
-              Invoiced Revenue
-            </p>
-            <p className="text-2xl font-black text-gray-900 dark:text-white truncate">
-              LKR {formatCompact(execSummary?.gross_amount || 0)}
-            </p>
-            <div className="w-full h-1 bg-gray-100 rounded-full overflow-hidden">
-              <div className="h-full bg-emerald-500 w-2/3"></div>
+          </motion.div>
+
+          {/* Committed PO Value */}
+          <motion.div
+            whileHover={{ y: -5 }}
+            className="group relative bg-white dark:bg-gray-800 p-6 rounded-[2rem] border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden"
+          >
+            <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+              <ShoppingBag className="w-20 h-20 text-purple-600" />
             </div>
-          </div>
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-[2rem] border border-gray-100 dark:border-gray-700 shadow-sm space-y-2">
-            <p className="text-xs font-black text-gray-400 uppercase tracking-widest">
-              Cleared (Banked)
-            </p>
-            <p className="text-2xl font-black text-teal-600 truncate">
-              LKR{" "}
-              {formatCompact(
-                execSummary?.bank_amount || execSummary?.banked_amount || 0,
-              )}
-            </p>
-            <div className="w-full h-1 bg-gray-100 rounded-full overflow-hidden">
-              <div className="h-full bg-teal-500 w-1/3"></div>
+            <div className="relative z-10">
+              <div className="w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-900/30 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <ShoppingBag className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+              </div>
+              <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">
+                Committed PO Value
+              </p>
+              <p className="text-2xl font-black text-gray-900 dark:text-white mb-4 tracking-tight">
+                LKR {formatCompact(execSummary?.total_po_value || 0)}
+              </p>
+              <div className="w-full h-1.5 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: "50%" }}
+                  className="h-full bg-gradient-to-r from-purple-500 to-purple-400 shadow-[0_0_8px_rgba(168,85,247,0.5)]"
+                />
+              </div>
             </div>
-          </div>
+          </motion.div>
+
+          {/* Invoiced Revenue */}
+          <motion.div
+            whileHover={{ y: -5 }}
+            className="group relative bg-white dark:bg-gray-800 p-6 rounded-[2rem] border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden"
+          >
+            <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+              <Receipt className="w-20 h-20 text-emerald-600" />
+            </div>
+            <div className="relative z-10">
+              <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <Receipt className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+              </div>
+              <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">
+                Invoiced Revenue
+              </p>
+              <p className="text-2xl font-black text-gray-900 dark:text-white mb-4 tracking-tight">
+                LKR {formatCompact(execSummary?.gross_amount || 0)}
+              </p>
+              <div className="w-full h-1.5 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: "66%" }}
+                  className="h-full bg-gradient-to-r from-emerald-500 to-emerald-400 shadow-[0_0_8px_rgba(16,185,129,0.5)]"
+                />
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Cleared (Banked) */}
+          <motion.div
+            whileHover={{ y: -5 }}
+            className="group relative bg-white dark:bg-gray-800 p-6 rounded-[2rem] border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden"
+          >
+            <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+              <Building2 className="w-20 h-20 text-teal-600" />
+            </div>
+            <div className="relative z-10">
+              <div className="w-10 h-10 rounded-xl bg-teal-50 dark:bg-teal-900/30 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <Building2 className="w-5 h-5 text-teal-600 dark:text-teal-400" />
+              </div>
+              <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1">
+                Cleared (Banked)
+              </p>
+              <p className="text-2xl font-black text-teal-600 dark:text-teal-400 mb-4 tracking-tight">
+                LKR{" "}
+                {formatCompact(
+                  execSummary?.bank_amount || execSummary?.banked_amount || 0,
+                )}
+              </p>
+              <div className="w-full h-1.5 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: "33%" }}
+                  className="h-full bg-gradient-to-r from-teal-500 to-teal-400 shadow-[0_0_8px_rgba(45,212,191,0.5)]"
+                />
+              </div>
+            </div>
+          </motion.div>
         </div>
 
         {/* Count Stats - 2x2 grid on mobile, 4 cols on desktop */}

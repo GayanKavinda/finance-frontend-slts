@@ -79,6 +79,16 @@ export const approveContractorBill = async (id) => {
   return res.data;
 };
 
+export const submitContractorBill = async (id) => {
+  const res = await axios.post(`/contractor-bills/${id}/submit`);
+  return res.data;
+};
+
+export const rejectContractorBill = async (id, reason) => {
+  const res = await axios.post(`/contractor-bills/${id}/reject`, { reason });
+  return res.data;
+};
+
 export const recordContractorPayment = async (id, data) => {
   const res = await axios.post(`/contractor-bills/${id}/pay`, data);
   return res.data;
