@@ -137,6 +137,31 @@ export default function JobDetailPage() {
             </p>
           </div>
         </div>
+
+        {job.selected_contractor_id && (
+          <button
+            onClick={async () => {
+              try {
+                const res = await axios.get(`/jobs/${id}/award-letter`, {
+                  responseType: "blob",
+                });
+                const url = window.URL.createObjectURL(new Blob([res.data]));
+                const link = document.createElement("a");
+                link.href = url;
+                link.setAttribute("download", `Award-Letter-${job.name}.pdf`);
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+              } catch (error) {
+                toast.error("Failed to download award letter");
+              }
+            }}
+            className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl font-bold transition-all shadow-lg shadow-indigo-200"
+          >
+            <FileText className="w-5 h-5" />
+            Download Award Letter
+          </button>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

@@ -415,6 +415,21 @@ export default function ContractorsPage() {
                     className="w-full px-5 py-3.5 bg-gray-50 dark:bg-gray-900 border-none rounded-2xl focus:ring-2 focus:ring-primary/20 outline-none resize-none px-4"
                   />
                 </div>
+
+                <div className="space-y-1.5 md:col-span-2">
+                  <label className="text-xs font-black uppercase tracking-widest text-gray-400">
+                    Internal Notes
+                  </label>
+                  <textarea
+                    rows={2}
+                    value={form.notes}
+                    onChange={(e) =>
+                      setForm({ ...form, notes: e.target.value })
+                    }
+                    placeholder="Any internal notes about this contractor..."
+                    className="w-full px-5 py-3.5 bg-gray-50 dark:bg-gray-900 border-none rounded-2xl focus:ring-2 focus:ring-primary/20 outline-none resize-none"
+                  />
+                </div>
               </div>
 
               <div className="flex gap-4 pt-4 shrink-0">

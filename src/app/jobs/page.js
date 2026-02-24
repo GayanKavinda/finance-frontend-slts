@@ -44,6 +44,8 @@ export default function JobsPage() {
     project_value: "",
     description: "",
     status: "Pending",
+    work_start_date: "",
+    work_completion_date: "",
   });
 
   const loadJobs = useCallback(async () => {
@@ -90,6 +92,8 @@ export default function JobsPage() {
         project_value: job.project_value || "",
         description: job.description || "",
         status: job.status || "Pending",
+        work_start_date: job.work_start_date || "",
+        work_completion_date: job.work_completion_date || "",
       });
     } else {
       setSelectedJob(null);
@@ -100,6 +104,8 @@ export default function JobsPage() {
         project_value: "",
         description: "",
         status: "Pending",
+        work_start_date: "",
+        work_completion_date: "",
       });
     }
     setIsModalOpen(true);
@@ -364,6 +370,40 @@ export default function JobsPage() {
                       <option value="Active">Active</option>
                       <option value="Completed">Completed</option>
                     </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="text-sm font-bold text-gray-700 dark:text-gray-300 ml-1 uppercase tracking-tighter">
+                      Work Start Date
+                    </label>
+                    <input
+                      type="date"
+                      name="work_start_date"
+                      value={form.work_start_date}
+                      onChange={(e) =>
+                        setForm({ ...form, work_start_date: e.target.value })
+                      }
+                      className="w-full px-5 py-4 bg-gray-50 dark:bg-gray-900 border-none rounded-2xl focus:ring-2 focus:ring-primary/20 outline-none font-medium"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-sm font-bold text-gray-700 dark:text-gray-300 ml-1 uppercase tracking-tighter">
+                      Work Completion Date
+                    </label>
+                    <input
+                      type="date"
+                      name="work_completion_date"
+                      value={form.work_completion_date}
+                      onChange={(e) =>
+                        setForm({
+                          ...form,
+                          work_completion_date: e.target.value,
+                        })
+                      }
+                      className="w-full px-5 py-4 bg-gray-50 dark:bg-gray-900 border-none rounded-2xl focus:ring-2 focus:ring-primary/20 outline-none font-medium"
+                    />
                   </div>
                 </div>
 

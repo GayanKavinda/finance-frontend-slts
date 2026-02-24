@@ -9,6 +9,7 @@ import {
   deletePurchaseOrder,
   fetchJobs,
   fetchCustomers,
+  fetchTenders,
 } from "@/lib/procurement";
 import { toast } from "react-hot-toast";
 import {
@@ -29,6 +30,7 @@ import axios from "@/lib/axios";
 export default function POPage() {
   const [pos, setPos] = useState([]);
   const [jobs, setJobs] = useState([]);
+  const [tenders, setTenders] = useState([]);
   const [customers, setCustomers] = useState([]);
   const [meta, setMeta] = useState({});
   const [loading, setLoading] = useState(true);
@@ -39,10 +41,12 @@ export default function POPage() {
   const [form, setForm] = useState({
     po_number: "",
     job_id: "",
+    tender_id: "",
     customer_id: "",
     po_amount: "",
     po_date: "",
     po_description: "",
+    billing_address: "",
     status: "Draft",
   });
 
@@ -61,12 +65,14 @@ export default function POPage() {
 
   const loadDependencies = async () => {
     try {
-      const [jRes, cRes] = await Promise.all([
+      const [jRes, cRes, tRes] = await Promise.all([
         fetchJobs({ page: 1 }),
         fetchCustomers({ page: 1 }),
+        fetchTenders({ page: 1 }),
       ]);
       setJobs(jRes.data || []);
       setCustomers(cRes.data || []);
+      setTenders(tRes.data || []);
     } catch (error) {
       console.error("Failed to load dependencies");
     }
@@ -86,10 +92,12 @@ export default function POPage() {
       setForm({
         po_number: po.po_number || "",
         job_id: po.job_id || "",
+        tender_id: po.tender_id || "",
         customer_id: po.customer_id || "",
         po_amount: po.po_amount || "",
         po_date: po.po_date || "",
         po_description: po.po_description || "",
+        billing_address: po.billing_address || "",
         status: po.status || "Draft",
       });
     } else {
@@ -97,10 +105,12 @@ export default function POPage() {
       setForm({
         po_number: "",
         job_id: "",
+        tender_id: "",
         customer_id: "",
         po_amount: "",
         po_date: "",
         po_description: "",
+        billing_address: "",
         status: "Draft",
       });
     }
@@ -326,9 +336,18 @@ export default function POPage() {
                       required
                       name="job_id"
                       value={form.job_id}
-                      onChange={(e) =>
-                        setForm({ ...form, job_id: e.target.value })
-                      }
+                      onChange={(e) => {
+                        const selectedJob = jobs.find(
+                          (j) => j.id === Number(e.target.value),
+                        );
+                        setForm({
+                          ...form,
+                          job_id: e.target.value,
+                          tender_id: selectedJob?.tender_id || "",
+                          customer_id:
+                            selectedJob?.customer_id || form.customer_id,
+                        });
+                      }}
                       className="input-modern appearance-none"
                     >
                       <option value="">Select Job</option>
@@ -391,10 +410,25 @@ export default function POPage() {
                       className="input-modern"
                     >
                       <option value="Draft">Draft</option>
-                      <option value="Active">Active</option>
-                      <option value="Closed">Closed</option>
+                      <option value="Approved">Approved</option>
                     </select>
                   </div>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-black uppercase text-gray-400 ml-1">
+                    Billing Address
+                  </label>
+                  <textarea
+                    rows={2}
+                    name="billing_address"
+                    value={form.billing_address}
+                    onChange={(e) =>
+                      setForm({ ...form, billing_address: e.target.value })
+                    }
+                    className="input-modern resize-none"
+                    placeholder="Enter manual billing address if different from default..."
+                  />
                 </div>
 
                 <div className="space-y-1">

@@ -326,6 +326,20 @@ export default function CustomersPage() {
                     className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border-none rounded-2xl focus:ring-2 focus:ring-primary/20 outline-none resize-none"
                   />
                 </div>
+                <div className="space-y-1">
+                  <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                    Tax / VAT Number
+                  </label>
+                  <input
+                    name="tax_number"
+                    value={form.tax_number}
+                    onChange={(e) =>
+                      setForm({ ...form, tax_number: e.target.value })
+                    }
+                    placeholder="e.g. VAT123456789"
+                    className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border-none rounded-2xl focus:ring-2 focus:ring-primary/20 outline-none"
+                  />
+                </div>
                 <div className="flex gap-3 pt-4">
                   <button
                     type="button"
