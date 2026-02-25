@@ -172,6 +172,35 @@ export default function SecuritySettings() {
     }
   };
 
+  const onPermanentDelete = async () => {
+    if (
+      !confirm(
+        "WARNING: PERMANENTLY REMOVE ACCOUNT? This action cannot be undone. All your data will be permanently deleted and you will lose access immediately.",
+      )
+    )
+      return;
+    if (!confirm("Are you ABSOLUTELY sure? This is your last chance.")) return;
+
+    console.warn("[Profile] Permanently deleting account...");
+    try {
+      await fetchCsrf();
+      const res = await axios.delete("/permanent-delete-account");
+      console.log("[Profile] Account permanently removed");
+      enqueueSnackbar(res.data.message || "Account permanently removed", {
+        variant: "success",
+      });
+      window.location.href = "/signin";
+    } catch (e) {
+      console.error(
+        "[Profile] Permanent deletion failed:",
+        e.response?.data || e.message,
+      );
+      enqueueSnackbar(e.response?.data?.message || "Deletion failed", {
+        variant: "error",
+      });
+    }
+  };
+
   return (
     <motion.div
       key="security"
@@ -323,14 +352,24 @@ export default function SecuritySettings() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={onDeactivate}
-              className="group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-red-500 to-rose-600 px-4 py-2 text-xs font-bold text-white shadow-lg shadow-red-500/25 transition-all duration-300 hover:scale-[1.02] hover:shadow-red-500/40 active:scale-95"
+              className="group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-red-500 to-rose-600 px-4 py-2 text-xs font-bold text-white shadow-lg shadow-red-500/25 transition-all duration-300 hover:scale-[1.02] hover:shadow-red-500/40 active:scale-95 mb-3"
             >
               <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/10 to-transparent transition-transform duration-700 group-hover:animate-[shimmer_1.5s_infinite]"></div>
-              <Trash2
+              <Lock
                 size={16}
                 className="transition-transform duration-300 group-hover:rotate-12"
               />
               <span>Deactivate Account</span>
+            </motion.button>
+
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={onPermanentDelete}
+              className="group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl border border-red-200 dark:border-red-900/30 bg-white dark:bg-transparent px-4 py-2 text-xs font-bold text-red-600 dark:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 transition-all duration-300"
+            >
+              <Trash2 size={16} />
+              <span>Remove Account Permanently</span>
             </motion.button>
           </div>
         </div>

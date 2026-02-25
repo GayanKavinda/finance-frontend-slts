@@ -19,11 +19,173 @@ import {
   Briefcase,
   Calendar,
   DollarSign,
+  ChevronLeft,
+  ChevronRight,
   Filter,
+  TrendingUp,
+  CheckCircle,
+  Clock,
 } from "lucide-react";
-// Removed duplicate Layout wrapper
-import Card from "@/components/ui/Card";
 import StatusBadge from "@/components/ui/StatusBadge";
+
+// ── Status config ──────────────────────────────────────────────
+const STATUS_COLORS = {
+  Open: {
+    accent: "from-emerald-400 to-teal-500",
+    pill: "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400",
+    dot: "bg-emerald-500",
+  },
+  Closed: {
+    accent: "from-gray-400 to-slate-500",
+    pill: "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300",
+    dot: "bg-gray-400",
+  },
+  Won: {
+    accent: "from-blue-500 to-indigo-600",
+    pill: "bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400",
+    dot: "bg-blue-500",
+  },
+  Lost: {
+    accent: "from-red-400 to-rose-500",
+    pill: "bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400",
+    dot: "bg-red-400",
+  },
+};
+const getStatus = (s) => STATUS_COLORS[s] || STATUS_COLORS.Open;
+
+const fmt = (n) => (n ? `LKR ${Number(n).toLocaleString()}` : "—");
+
+function TenderCard({ tender, onEdit, onDelete }) {
+  const st = getStatus(tender.status);
+  const budget = Number(tender.budget || 0);
+  const awarded = Number(tender.awarded_amount || 0);
+  const pct =
+    budget > 0 ? Math.min(100, Math.round((awarded / budget) * 100)) : 0;
+
+  return (
+    <div className="group bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden">
+      {/* Left accent bar via gradient top strip */}
+      <div className={`h-1 w-full bg-gradient-to-r ${st.accent}`} />
+      <div className="p-5">
+        {/* Head */}
+        <div className="flex items-start justify-between mb-3">
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="font-black text-xs text-gray-400 uppercase tracking-widest">
+                {tender.tender_number}
+              </span>
+              <span
+                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wide ${st.pill}`}
+              >
+                <span className={`w-1 h-1 rounded-full ${st.dot}`} />
+                {tender.status}
+              </span>
+            </div>
+            <h3
+              className="font-bold text-gray-900 dark:text-white text-sm leading-snug truncate"
+              style={{ fontFamily: "var(--font-display)" }}
+            >
+              {tender.name}
+            </h3>
+            {tender.customer?.name && (
+              <p className="text-xs text-gray-500 mt-0.5 truncate">
+                {tender.customer.name}
+              </p>
+            )}
+          </div>
+          <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity ml-2 flex-shrink-0">
+            <button
+              onClick={() => onEdit(tender)}
+              className="p-1.5 hover:bg-blue-50 dark:hover:bg-blue-900/20 text-blue-500 rounded-lg transition-colors"
+            >
+              <Edit2 className="w-3.5 h-3.5" />
+            </button>
+            <button
+              onClick={() => onDelete(tender.id)}
+              className="p-1.5 hover:bg-red-50 dark:hover:bg-red-900/20 text-red-500 rounded-lg transition-colors"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+
+        {/* Budget bar */}
+        {budget > 0 && (
+          <div className="mb-3">
+            <div className="flex justify-between text-[10px] text-gray-400 mb-1">
+              <span>Budget</span>
+              <span>{pct}% awarded</span>
+            </div>
+            <div className="h-1.5 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+              <div
+                className={`h-full bg-gradient-to-r ${st.accent} transition-all duration-500 rounded-full`}
+                style={{ width: `${pct}%` }}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Footer amounts */}
+        <div className="grid grid-cols-2 gap-2 text-xs">
+          <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-2.5">
+            <div className="text-gray-400 text-[10px] uppercase font-bold tracking-wide mb-0.5">
+              Budget
+            </div>
+            <div className="font-bold text-gray-800 dark:text-gray-200">
+              {fmt(tender.budget)}
+            </div>
+          </div>
+          <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-2.5">
+            <div className="text-gray-400 text-[10px] uppercase font-bold tracking-wide mb-0.5">
+              Awarded
+            </div>
+            <div className="font-bold text-gray-800 dark:text-gray-200">
+              {fmt(tender.awarded_amount)}
+            </div>
+          </div>
+        </div>
+
+        {/* Dates */}
+        {(tender.start_date || tender.end_date) && (
+          <div className="flex items-center gap-1.5 text-[10px] text-gray-400 mt-3 pt-3 border-t border-gray-50 dark:border-gray-700">
+            <Calendar className="w-3 h-3 flex-shrink-0" />
+            <span>{tender.start_date || "—"}</span>
+            <span>→</span>
+            <span>{tender.end_date || "—"}</span>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function SkeletonCard() {
+  return (
+    <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 overflow-hidden animate-pulse">
+      <div className="h-1 bg-gray-200 dark:bg-gray-700" />
+      <div className="p-5 space-y-3">
+        <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-24" />
+        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-4/5" />
+        <div className="h-1.5 bg-gray-100 dark:bg-gray-700 rounded" />
+        <div className="grid grid-cols-2 gap-2">
+          <div className="h-12 bg-gray-100 dark:bg-gray-700 rounded-xl" />
+          <div className="h-12 bg-gray-100 dark:bg-gray-700 rounded-xl" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const inputCls =
+  "w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-400 outline-none transition-all text-sm font-medium text-gray-800 dark:text-gray-200 placeholder-gray-400";
+const Field = ({ label, children }) => (
+  <div className="space-y-1.5">
+    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500 ml-1">
+      {label}
+    </label>
+    {children}
+  </div>
+);
 
 export default function TendersPage() {
   const [tenders, setTenders] = useState([]);
@@ -31,10 +193,12 @@ export default function TendersPage() {
   const [meta, setMeta] = useState({});
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [status, setStatus] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
   const [page, setPage] = useState(1);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const [selectedTender, setSelectedTender] = useState(null);
+  const [saving, setSaving] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [form, setForm] = useState({
     tender_number: "",
     customer_id: "",
@@ -46,70 +210,63 @@ export default function TendersPage() {
     end_date: "",
     status: "Open",
   });
+  const setF = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
   const loadTenders = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await fetchTenders({ page, status, search });
+      const data = await fetchTenders({ page, status: statusFilter, search });
       setTenders(data.data || []);
       setMeta(data.meta || {});
-    } catch (error) {
+    } catch {
       toast.error("Failed to load tenders");
     } finally {
       setLoading(false);
     }
-  }, [page, status, search]);
-
-  const loadCustomersData = async () => {
-    try {
-      const res = await fetchCustomers({ page: 1 }); // Just get some for dropdown
-      setCustomers(res.data || []);
-    } catch (error) {
-      console.error("Failed to load customers for dropdown");
-    }
-  };
+  }, [page, statusFilter, search]);
 
   useEffect(() => {
     loadTenders();
   }, [loadTenders]);
-
   useEffect(() => {
-    loadCustomersData();
+    fetchCustomers({ page: 1 })
+      .then((r) => setCustomers(r.data || []))
+      .catch(() => {});
   }, []);
 
-  const handleOpenModal = (tender = null) => {
-    if (tender) {
-      setSelectedTender(tender);
-      setForm({
-        tender_number: tender.tender_number || "",
-        customer_id: tender.customer_id || "",
-        name: tender.name || "",
-        description: tender.description || "",
-        awarded_amount: tender.awarded_amount || "",
-        budget: tender.budget || "",
-        start_date: tender.start_date || "",
-        end_date: tender.end_date || "",
-        status: tender.status || "Open",
-      });
-    } else {
-      setSelectedTender(null);
-      setForm({
-        tender_number: "",
-        customer_id: "",
-        name: "",
-        description: "",
-        awarded_amount: "",
-        budget: "",
-        start_date: "",
-        end_date: "",
-        status: "Open",
-      });
-    }
-    setIsModalOpen(true);
+  const openDrawer = (t = null) => {
+    setSelectedTender(t);
+    setForm(
+      t
+        ? {
+            tender_number: t.tender_number || "",
+            customer_id: t.customer_id || "",
+            name: t.name || "",
+            description: t.description || "",
+            awarded_amount: t.awarded_amount || "",
+            budget: t.budget || "",
+            start_date: t.start_date || "",
+            end_date: t.end_date || "",
+            status: t.status || "Open",
+          }
+        : {
+            tender_number: "",
+            customer_id: "",
+            name: "",
+            description: "",
+            awarded_amount: "",
+            budget: "",
+            start_date: "",
+            end_date: "",
+            status: "Open",
+          },
+    );
+    setDrawerOpen(true);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSaving(true);
     try {
       const payload = {
         ...form,
@@ -117,391 +274,395 @@ export default function TendersPage() {
           form.awarded_amount === "" ? 0 : Number(form.awarded_amount),
         budget: form.budget === "" ? 0 : Number(form.budget),
       };
-
       if (selectedTender) {
         await updateTender(selectedTender.id, payload);
-        toast.success("Tender updated successfully");
+        toast.success("Tender updated");
       } else {
         await createTender(payload);
-        toast.success("Tender created successfully");
+        toast.success("Tender created");
       }
-      setIsModalOpen(false);
+      setDrawerOpen(false);
       loadTenders();
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to save tender");
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to save tender");
+    } finally {
+      setSaving(false);
     }
   };
 
   const handleDelete = async (id) => {
-    if (
-      confirm(
-        "Are you sure? This will delete the tender if no jobs are attached.",
-      )
-    ) {
-      try {
-        await deleteTender(id);
-        toast.success("Tender deleted successfully");
-        loadTenders();
-      } catch (error) {
-        toast.error(error.response?.data?.message || "Failed to delete tender");
-      }
+    try {
+      await deleteTender(id);
+      toast.success("Tender deleted");
+      setDeleteConfirm(null);
+      loadTenders();
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Delete failed");
     }
   };
 
+  const totalBudget = tenders.reduce((s, t) => s + Number(t.budget || 0), 0);
+  const openCount = tenders.filter((t) => t.status === "Open").length;
+  const closedCount = tenders.filter((t) => t.status === "Closed").length;
+
   return (
     <>
-      <div className="p-8 max-w-7xl mx-auto space-y-6">
-        <div className="flex justify-between items-center bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-              Tenders Management
-            </h1>
-            <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
-              Track bids, budgets, and awarded contracts
-            </p>
+      <div className="min-h-full p-6 space-y-6">
+        {/* Hero */}
+        <div className="relative bg-gradient-to-br from-teal-900 via-emerald-900 to-slate-900 rounded-3xl p-8 overflow-hidden">
+          <div
+            className="absolute inset-0 opacity-10"
+            style={{
+              backgroundImage:
+                "radial-gradient(circle, #fff 1px, transparent 1px)",
+              backgroundSize: "24px 24px",
+            }}
+          />
+          <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <p className="text-teal-300 text-xs font-bold uppercase tracking-widest mb-1">
+                Bid & Contract Management
+              </p>
+              <h1
+                className="text-3xl font-black text-white tracking-tight"
+                style={{ fontFamily: "var(--font-display)" }}
+              >
+                Tenders
+              </h1>
+              <p className="text-teal-200/60 text-sm mt-1">
+                {meta.total ?? tenders.length} total tender
+                {(meta.total ?? tenders.length) !== 1 ? "s" : ""}
+              </p>
+            </div>
+            <button
+              onClick={() => openDrawer()}
+              className="flex items-center gap-2 bg-white hover:bg-teal-50 text-slate-900 px-5 py-3 rounded-2xl font-bold text-sm shadow-xl hover:scale-105 transition-all"
+              style={{ fontFamily: "var(--font-display)" }}
+            >
+              <Plus className="w-4 h-4" />
+              Add Tender
+            </button>
           </div>
-          <button
-            onClick={() => handleOpenModal()}
-            className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-white px-5 py-2.5 rounded-xl font-medium transition-all shadow-lg shadow-primary/20"
-          >
-            <Plus className="w-5 h-5" />
-            Add Tender
-          </button>
+        </div>
+
+        {/* Stats */}
+        <div className="grid grid-cols-3 gap-4">
+          {[
+            {
+              icon: Briefcase,
+              label: "Open",
+              value: openCount,
+              color: "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600",
+            },
+            {
+              icon: CheckCircle,
+              label: "Closed",
+              value: closedCount,
+              color: "bg-gray-100 dark:bg-gray-700 text-gray-500",
+            },
+            {
+              icon: DollarSign,
+              label: "Total Budget",
+              value:
+                totalBudget > 0
+                  ? `LKR ${(totalBudget / 1e6).toFixed(1)}M`
+                  : "—",
+              color: "bg-blue-50 dark:bg-blue-900/20 text-blue-600",
+            },
+          ].map(({ icon: Icon, label, value, color }) => (
+            <div
+              key={label}
+              className="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm"
+            >
+              <div
+                className={`w-10 h-10 rounded-xl flex items-center justify-center mb-3 ${color}`}
+              >
+                <Icon className="w-5 h-5" />
+              </div>
+              <div
+                className="text-xl font-bold text-gray-900 dark:text-white"
+                style={{ fontFamily: "var(--font-display)" }}
+              >
+                {value}
+              </div>
+              <div className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mt-1">
+                {label}
+              </div>
+            </div>
+          ))}
         </div>
 
         {/* Filters */}
-        <div className="flex flex-wrap gap-4 items-center">
-          <div className="relative group flex-1 max-w-md">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-primary transition-colors" />
+        <div className="flex flex-wrap gap-3 items-center">
+          <div className="relative flex-1 min-w-[200px] max-w-sm">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
               type="text"
-              placeholder="Search tender number or name..."
+              placeholder="Search tenders…"
               value={search}
               onChange={(e) => {
                 setSearch(e.target.value);
                 setPage(1);
               }}
-              className="w-full pl-12 pr-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all shadow-sm"
+              className="w-full pl-11 pr-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-400 shadow-sm"
             />
           </div>
-
-          <div className="flex items-center gap-2 bg-white dark:bg-gray-800 px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
-            <Filter className="w-4 h-4 text-gray-400" />
-            <select
-              value={status}
-              onChange={(e) => {
-                setStatus(e.target.value);
-                setPage(1);
-              }}
-              className="bg-transparent text-sm font-medium outline-none text-gray-700 dark:text-gray-300"
-            >
-              <option value="">All Statuses</option>
-              <option value="Open">Open</option>
-              <option value="Closed">Closed</option>
-            </select>
+          <div className="flex gap-2">
+            {["", "Open", "Closed"].map((s) => (
+              <button
+                key={s}
+                onClick={() => {
+                  setStatusFilter(s);
+                  setPage(1);
+                }}
+                className={`px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${statusFilter === s ? "bg-teal-600 text-white shadow-lg shadow-teal-500/30" : "bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700"}`}
+              >
+                {s || "All"}
+              </button>
+            ))}
           </div>
         </div>
 
-        {/* List */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
-          <table className="w-full text-left">
-            <thead className="bg-gray-50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700">
-              <tr>
-                <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
-                  Tender Details
-                </th>
-                <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
-                  Customer
-                </th>
-                <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
-                  Budget / Awarded
-                </th>
-                <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-right">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-              {loading ? (
-                [1, 2, 3].map((i) => (
-                  <tr key={i} className="animate-pulse">
-                    <td colSpan="5" className="px-6 py-8">
-                      <div className="h-4 bg-gray-100 dark:bg-gray-900 rounded-full w-full" />
-                    </td>
-                  </tr>
-                ))
-              ) : tenders.length > 0 ? (
-                tenders.map((tender) => (
-                  <tr
-                    key={tender.id}
-                    className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors group"
-                  >
-                    <td className="px-6 py-5">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-                          <Briefcase className="w-5 h-5" />
-                        </div>
-                        <div>
-                          <div className="font-bold text-gray-900 dark:text-white uppercase text-xs tracking-tight">
-                            {tender.tender_number}
-                          </div>
-                          <div className="text-gray-500 text-sm font-medium">
-                            {tender.name}
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-5">
-                      <div className="text-sm text-gray-900 dark:text-gray-300 font-medium">
-                        {tender.customer?.name}
-                      </div>
-                      <div className="text-xs text-gray-500 truncate max-w-[150px]">
-                        {tender.customer?.contact_person}
-                      </div>
-                    </td>
-                    <td className="px-6 py-5">
-                      <div className="flex flex-col">
-                        <span className="text-sm font-bold text-gray-900 dark:text-gray-100 flex items-center gap-1">
-                          <DollarSign className="w-3.5 h-3.5 text-green-500" />
-                          {Number(
-                            tender.budget || tender.awarded_amount,
-                          ).toLocaleString()}
-                        </span>
-                        <span className="text-[10px] text-gray-400 uppercase font-bold tracking-widest mt-0.5">
-                          Budgeted
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-5">
-                      <StatusBadge status={tender.status} />
-                    </td>
-                    <td className="px-6 py-5 text-right">
-                      <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button
-                          onClick={() => handleOpenModal(tender)}
-                          className="p-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors"
-                        >
-                          <Edit2 className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(tender.id)}
-                          className="p-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td
-                    colSpan="5"
-                    className="px-6 py-12 text-center text-gray-500"
-                  >
-                    No tenders found.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+        {/* Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {loading ? (
+            Array.from({ length: 8 }).map((_, i) => <SkeletonCard key={i} />)
+          ) : tenders.length === 0 ? (
+            <div className="col-span-full flex flex-col items-center justify-center py-20 text-gray-400">
+              <Briefcase className="w-12 h-12 mb-3 opacity-30" />
+              <p className="text-sm font-medium">No tenders found</p>
+            </div>
+          ) : (
+            tenders.map((t) => (
+              <TenderCard
+                key={t.id}
+                tender={t}
+                onEdit={openDrawer}
+                onDelete={(id) => setDeleteConfirm(id)}
+              />
+            ))
+          )}
         </div>
 
-        {/* Modal */}
-        {isModalOpen && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div className="bg-white dark:bg-gray-800 w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
-              <div className="px-8 py-6 flex justify-between items-center border-b border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/50">
-                <h2 className="text-xl font-bold">
-                  {selectedTender ? "Edit Tender" : "Create Tender"}
-                </h2>
+        {/* Pagination */}
+        {meta.last_page > 1 && (
+          <div className="flex items-center justify-center gap-2 pt-4">
+            <button
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page === 1}
+              className="p-2 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 disabled:opacity-40 hover:bg-gray-50 dark:hover:bg-gray-700 shadow-sm"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            {Array.from({ length: meta.last_page }, (_, i) => i + 1).map(
+              (p) => (
                 <button
-                  onClick={() => setIsModalOpen(false)}
-                  className="p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full transition-colors"
+                  key={p}
+                  onClick={() => setPage(p)}
+                  className={`w-9 h-9 rounded-xl text-sm font-bold transition-all ${page === p ? "bg-teal-600 text-white shadow-lg shadow-teal-500/30" : "bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"}`}
                 >
-                  <X className="w-6 h-6" />
+                  {p}
+                </button>
+              ),
+            )}
+            <button
+              onClick={() => setPage((p) => Math.min(meta.last_page, p + 1))}
+              disabled={page === meta.last_page}
+              className="p-2 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 disabled:opacity-40 hover:bg-gray-50 dark:hover:bg-gray-700 shadow-sm"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Drawer */}
+      {drawerOpen && (
+        <div className="fixed inset-0 z-50 flex">
+          <div
+            className="flex-1 bg-black/40 backdrop-blur-sm"
+            onClick={() => setDrawerOpen(false)}
+          />
+          <div className="w-full max-w-md bg-white dark:bg-gray-900 shadow-2xl flex flex-col h-full overflow-hidden animate-in slide-in-from-right duration-300">
+            <div className="bg-gradient-to-r from-teal-600 to-emerald-600 px-6 py-6 flex-shrink-0">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-teal-200 text-[10px] font-black uppercase tracking-widest mb-1">
+                    {selectedTender ? "Edit" : "Create New"}
+                  </p>
+                  <h2
+                    className="text-xl font-black text-white"
+                    style={{ fontFamily: "var(--font-display)" }}
+                  >
+                    {selectedTender ? "Update Tender" : "New Tender"}
+                  </h2>
+                </div>
+                <button
+                  onClick={() => setDrawerOpen(false)}
+                  className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white"
+                >
+                  <X className="w-5 h-5" />
                 </button>
               </div>
-              <form onSubmit={handleSubmit} className="p-8 space-y-5">
+            </div>
+            <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto">
+              <div className="p-6 space-y-4">
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1">
-                    <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                      Tender Number
-                    </label>
+                  <Field label="Tender Number *">
                     <input
                       required
-                      name="tender_number"
                       value={form.tender_number}
                       onChange={(e) =>
-                        setForm({
-                          ...form,
-                          tender_number: e.target.value.toUpperCase(),
-                        })
+                        setF("tender_number", e.target.value.toUpperCase())
                       }
-                      placeholder="e.g. SLT/2026/001"
-                      className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-700 rounded-2xl focus:ring-2 focus:ring-primary/20 outline-none"
+                      placeholder="SLT/2026/001"
+                      className={inputCls}
                     />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                      Customer
-                    </label>
-                    <select
-                      required
-                      name="customer_id"
-                      value={form.customer_id}
-                      onChange={(e) =>
-                        setForm({ ...form, customer_id: e.target.value })
-                      }
-                      className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-700 rounded-2xl focus:ring-2 focus:ring-primary/20 outline-none appearance-none"
-                    >
-                      <option value="">Select Customer</option>
-                      {customers.map((c) => (
-                        <option key={c.id} value={c.id}>
-                          {c.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                    Tender Name
-                  </label>
-                  <input
-                    required
-                    name="name"
-                    value={form.name}
-                    onChange={(e) => setForm({ ...form, name: e.target.value })}
-                    placeholder="Brief title of the tender"
-                    className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-700 rounded-2xl focus:ring-2 focus:ring-primary/20 outline-none"
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                    Description
-                  </label>
-                  <textarea
-                    rows={2}
-                    name="description"
-                    value={form.description}
-                    onChange={(e) =>
-                      setForm({ ...form, description: e.target.value })
-                    }
-                    className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-700 rounded-2xl focus:ring-2 focus:ring-primary/20 outline-none resize-none"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1">
-                    <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                      Estimated Budget
-                    </label>
-                    <div className="relative">
-                      <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-gray-400 text-xs">
-                        LKR
-                      </span>
-                      <input
-                        type="number"
-                        name="budget"
-                        value={form.budget}
-                        onChange={(e) =>
-                          setForm({ ...form, budget: e.target.value })
-                        }
-                        className="w-full pl-12 pr-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-700 rounded-2xl focus:ring-2 focus:ring-primary/20 outline-none"
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                      Awarded Amount
-                    </label>
-                    <div className="relative">
-                      <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-gray-400 text-xs">
-                        LKR
-                      </span>
-                      <input
-                        type="number"
-                        name="awarded_amount"
-                        value={form.awarded_amount}
-                        onChange={(e) =>
-                          setForm({ ...form, awarded_amount: e.target.value })
-                        }
-                        className="w-full pl-12 pr-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-700 rounded-2xl focus:ring-2 focus:ring-primary/20 outline-none"
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                      Status
-                    </label>
+                  </Field>
+                  <Field label="Status">
                     <select
                       value={form.status}
-                      onChange={(e) =>
-                        setForm({ ...form, status: e.target.value })
-                      }
-                      className="w-full px-4 py-3 bg-gray-100 dark:bg-gray-900 border-none rounded-2xl focus:ring-2 focus:ring-primary/20 outline-none"
+                      onChange={(e) => setF("status", e.target.value)}
+                      className={inputCls}
                     >
                       <option value="Open">Open</option>
                       <option value="Closed">Closed</option>
                     </select>
-                  </div>
+                  </Field>
                 </div>
-
+                <Field label="Tender Name *">
+                  <input
+                    required
+                    value={form.name}
+                    onChange={(e) => setF("name", e.target.value)}
+                    placeholder="Brief title"
+                    className={inputCls}
+                  />
+                </Field>
+                <Field label="Customer *">
+                  <select
+                    required
+                    value={form.customer_id}
+                    onChange={(e) => setF("customer_id", e.target.value)}
+                    className={inputCls}
+                  >
+                    <option value="">Select customer…</option>
+                    {customers.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.name}
+                      </option>
+                    ))}
+                  </select>
+                </Field>
+                <Field label="Description">
+                  <textarea
+                    rows={2}
+                    value={form.description}
+                    onChange={(e) => setF("description", e.target.value)}
+                    placeholder="Brief description…"
+                    className={`${inputCls} resize-none`}
+                  />
+                </Field>
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-1">
-                    <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
-                      <Calendar className="w-3.5 h-3.5" /> Start Date
-                    </label>
+                  <Field label="Budget (LKR)">
+                    <input
+                      type="number"
+                      value={form.budget}
+                      onChange={(e) => setF("budget", e.target.value)}
+                      placeholder="0"
+                      className={inputCls}
+                    />
+                  </Field>
+                  <Field label="Awarded (LKR)">
+                    <input
+                      type="number"
+                      value={form.awarded_amount}
+                      onChange={(e) => setF("awarded_amount", e.target.value)}
+                      placeholder="0"
+                      className={inputCls}
+                    />
+                  </Field>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <Field label="Start Date">
                     <input
                       type="date"
                       value={form.start_date}
-                      onChange={(e) =>
-                        setForm({ ...form, start_date: e.target.value })
-                      }
-                      className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-700 rounded-2xl focus:ring-2 focus:ring-primary/20 outline-none"
+                      onChange={(e) => setF("start_date", e.target.value)}
+                      className={inputCls}
                     />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-sm font-semibold text-gray-700 dark:text-gray-300 flex items-center gap-1.5">
-                      <Calendar className="w-3.5 h-3.5" /> End Date
-                    </label>
+                  </Field>
+                  <Field label="End Date">
                     <input
                       type="date"
                       value={form.end_date}
-                      onChange={(e) =>
-                        setForm({ ...form, end_date: e.target.value })
-                      }
-                      className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-700 rounded-2xl focus:ring-2 focus:ring-primary/20 outline-none"
+                      onChange={(e) => setF("end_date", e.target.value)}
+                      className={inputCls}
                     />
-                  </div>
+                  </Field>
                 </div>
+              </div>
+              <div className="px-6 py-4 bg-gray-50 dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700 flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setDrawerOpen(false)}
+                  className="flex-1 py-3 rounded-xl bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-sm font-bold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="flex-[2] py-3 rounded-xl bg-gradient-to-r from-teal-600 to-emerald-600 text-white text-sm font-black shadow-lg shadow-teal-500/30 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-60"
+                  style={{ fontFamily: "var(--font-display)" }}
+                >
+                  {saving
+                    ? "Saving…"
+                    : selectedTender
+                      ? "Update Tender"
+                      : "Create Tender"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
-                <div className="flex gap-4 pt-4">
-                  <button
-                    type="button"
-                    onClick={() => setIsModalOpen(false)}
-                    className="px-8 py-3.5 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-2xl font-bold transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="flex-1 px-8 py-3.5 bg-primary hover:bg-primary/90 text-white rounded-2xl font-bold shadow-lg shadow-primary/20 transition-all"
-                  >
-                    Save Tender
-                  </button>
-                </div>
-              </form>
+      {/* Delete Confirm */}
+      {deleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-sm p-6 space-y-4">
+            <div className="text-center space-y-2">
+              <div className="w-14 h-14 rounded-2xl bg-red-50 dark:bg-red-900/20 flex items-center justify-center mx-auto">
+                <Trash2 className="w-6 h-6 text-red-500" />
+              </div>
+              <h3
+                className="font-black text-gray-900 dark:text-white text-lg"
+                style={{ fontFamily: "var(--font-display)" }}
+              >
+                Delete Tender?
+              </h3>
+              <p className="text-sm text-gray-500">
+                Tenders with attached jobs cannot be deleted.
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setDeleteConfirm(null)}
+                className="flex-1 py-3 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-bold text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleDelete(deleteConfirm)}
+                className="flex-1 py-3 rounded-xl bg-red-600 hover:bg-red-700 text-white text-sm font-black transition-colors shadow-lg shadow-red-500/30"
+              >
+                Delete
+              </button>
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </>
   );
 }

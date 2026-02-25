@@ -203,48 +203,108 @@ export default function ContractorBillsPage() {
       b.contractor.name.toLowerCase().includes(search.toLowerCase()),
   );
 
+  const totalAmt = bills.reduce((s, b) => s + Number(b.amount || 0), 0);
+  const draftCount = bills.filter((b) => b.status === "Draft").length;
+  const paidCount = bills.filter((b) => b.status === "Paid").length;
+
   return (
-    <div className="p-8 max-w-7xl mx-auto space-y-8">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white dark:bg-gray-800 p-8 rounded-[2.5rem] shadow-sm border border-gray-100 dark:border-gray-700 gap-6">
-        <div>
-          <h1 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight">
-            Contractor Bills
-          </h1>
-          <p className="text-gray-500 font-medium mt-1">
-            Manage vendor invoices and multi-document attachments
-          </p>
+    <div className="min-h-full p-6 space-y-6">
+      {/* Hero */}
+      <div className="relative bg-gradient-to-br from-rose-900 via-pink-900 to-slate-900 rounded-3xl p-8 overflow-hidden">
+        <div
+          className="absolute inset-0 opacity-10"
+          style={{
+            backgroundImage:
+              "radial-gradient(circle, #fff 1px, transparent 1px)",
+            backgroundSize: "24px 24px",
+          }}
+        />
+        <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <p className="text-rose-300 text-xs font-bold uppercase tracking-widest mb-1">
+              Vendor Payments
+            </p>
+            <h1
+              className="text-3xl font-black text-white tracking-tight"
+              style={{ fontFamily: "var(--font-display)" }}
+            >
+              Contractor Bills
+            </h1>
+            <p className="text-rose-200/60 text-sm mt-1">
+              {bills.length} bill{bills.length !== 1 ? "s" : ""} registered
+            </p>
+          </div>
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="flex items-center gap-2 bg-white hover:bg-rose-50 text-slate-900 px-5 py-3 rounded-2xl font-bold text-sm shadow-xl hover:scale-105 transition-all"
+            style={{ fontFamily: "var(--font-display)" }}
+          >
+            <Plus className="w-4 h-4" />
+            Register Bill
+          </button>
         </div>
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-white px-8 py-4 rounded-2xl font-black transition-all shadow-lg shadow-primary/20"
-        >
-          <Plus className="w-5 h-5" />
-          Register New Bill
-        </button>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-4 items-center">
-        <div className="relative group flex-1 max-w-md">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 group-focus-within:text-primary transition-colors" />
-          <input
-            type="text"
-            placeholder="Search by bill number or contractor..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-12 pr-4 py-4 bg-white dark:bg-gray-800 border-none rounded-2xl focus:ring-2 focus:ring-primary/20 outline-none transition-all shadow-sm font-medium"
-          />
-        </div>
-        <div className="flex gap-2 p-1 bg-gray-100 dark:bg-gray-800 rounded-xl">
-          <button className="px-4 py-2 bg-white dark:bg-gray-700 rounded-lg text-sm font-bold shadow-sm">
-            All Bills
-          </button>
-          <button className="px-4 py-2 text-gray-500 text-sm font-bold hover:bg-white/50 dark:hover:bg-gray-700/50 rounded-lg transition-all">
-            Pending
-          </button>
-          <button className="px-4 py-2 text-gray-500 text-sm font-bold hover:bg-white/50 dark:hover:bg-gray-700/50 rounded-lg transition-all">
-            Paid
-          </button>
-        </div>
+      {/* Stats */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        {[
+          {
+            icon: FileText,
+            label: "Total",
+            value: bills.length,
+            color: "bg-rose-50 dark:bg-rose-900/20 text-rose-600",
+          },
+          {
+            icon: Clock,
+            label: "Draft",
+            value: draftCount,
+            color: "bg-gray-100 dark:bg-gray-700 text-gray-500",
+          },
+          {
+            icon: CheckCircle2,
+            label: "Paid",
+            value: paidCount,
+            color: "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600",
+          },
+          {
+            icon: DollarSign,
+            label: "Total Value",
+            value: totalAmt > 0 ? `LKR ${(totalAmt / 1e6).toFixed(1)}M` : "—",
+            color: "bg-blue-50 dark:bg-blue-900/20 text-blue-600",
+          },
+        ].map(({ icon: Icon, label, value, color }) => (
+          <div
+            key={label}
+            className="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm"
+          >
+            <div
+              className={`w-10 h-10 rounded-xl flex items-center justify-center mb-3 ${color}`}
+            >
+              <Icon className="w-5 h-5" />
+            </div>
+            <div
+              className="text-xl font-bold text-gray-900 dark:text-white"
+              style={{ fontFamily: "var(--font-display)" }}
+            >
+              {value}
+            </div>
+            <div className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mt-1">
+              {label}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Search */}
+      <div className="relative max-w-md">
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+        <input
+          type="text"
+          placeholder="Search by bill number or contractor…"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-full pl-11 pr-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-400 shadow-sm"
+        />
       </div>
 
       <div className="grid grid-cols-1 gap-6">
@@ -279,7 +339,7 @@ export default function ContractorBillsPage() {
                         <h3 className="text-xl font-black text-gray-900 dark:text-white">
                           #{bill.bill_number}
                         </h3>
-                        <p className="font-bold text-gray-500">
+                        <p className="font-bold text-gray-500 dark:text-gray-400">
                           {bill.contractor.name}
                         </p>
                       </div>
@@ -291,7 +351,7 @@ export default function ContractorBillsPage() {
                       <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
                         Job / Project
                       </p>
-                      <p className="font-bold text-sm truncate">
+                      <p className="font-bold text-sm truncate text-gray-800 dark:text-gray-200">
                         {bill.job.name}
                       </p>
                     </div>
@@ -299,7 +359,7 @@ export default function ContractorBillsPage() {
                       <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
                         Amount
                       </p>
-                      <p className="font-black text-sm">
+                      <p className="font-black text-sm text-gray-800 dark:text-gray-100">
                         LKR {Number(bill.amount).toLocaleString()}
                       </p>
                     </div>
@@ -307,7 +367,7 @@ export default function ContractorBillsPage() {
                       <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
                         Date
                       </p>
-                      <p className="font-bold text-sm">
+                      <p className="font-bold text-sm text-gray-800 dark:text-gray-200">
                         {new Date(bill.bill_date).toLocaleDateString()}
                       </p>
                     </div>
@@ -436,10 +496,10 @@ export default function ContractorBillsPage() {
                       <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">
                         Payment Ref
                       </p>
-                      <p className="font-bold text-xs truncate">
+                      <p className="font-bold text-xs truncate text-gray-800 dark:text-gray-200">
                         {bill.payment_reference}
                       </p>
-                      <p className="text-[10px] font-medium text-gray-500 mt-1">
+                      <p className="text-[10px] font-medium text-gray-500 dark:text-gray-400 mt-1">
                         Paid on {new Date(bill.paid_at).toLocaleDateString()}
                       </p>
                     </div>
