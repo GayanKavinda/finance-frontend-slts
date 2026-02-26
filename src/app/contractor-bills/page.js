@@ -33,7 +33,7 @@ import {
   Building2,
   Download,
 } from "lucide-react";
-import { Card } from "@/components/ui/Card";
+import { Card } from "@/components/ui/card";
 import StatusBadge from "@/components/ui/StatusBadge";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -66,6 +66,8 @@ export default function ContractorBillsPage() {
 
   const [paymentForm, setPaymentForm] = useState({
     payment_reference: "",
+    bank_name: "",
+    payment_amount: "",
     paid_at: new Date().toISOString().split("T")[0],
   });
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
@@ -193,7 +195,7 @@ export default function ContractorBillsPage() {
       setIsPaymentModalOpen(false);
       loadData();
     } catch (error) {
-      toast.error("Payment recording failed");
+      toast.error(error.response?.data?.message || "Payment recording failed");
     }
   };
 
@@ -458,6 +460,10 @@ export default function ContractorBillsPage() {
                         <button
                           onClick={() => {
                             setSelectedBill(bill);
+                            setPaymentForm({
+                              ...paymentForm,
+                              payment_amount: bill.amount,
+                            });
                             setIsPaymentModalOpen(true);
                           }}
                           className="w-full flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-white py-3 rounded-2xl font-black transition-all"
@@ -493,14 +499,27 @@ export default function ContractorBillsPage() {
                   )}
                   {bill.status === "Paid" && (
                     <div className="w-full p-4 bg-gray-50 dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-700">
-                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">
-                        Payment Ref
-                      </p>
-                      <p className="font-bold text-xs truncate text-gray-800 dark:text-gray-200">
-                        {bill.payment_reference}
-                      </p>
-                      <p className="text-[10px] font-medium text-gray-500 dark:text-gray-400 mt-1">
-                        Paid on {new Date(bill.paid_at).toLocaleDateString()}
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">
+                            Ref
+                          </p>
+                          <p className="font-bold text-xs truncate text-gray-800 dark:text-gray-200">
+                            {bill.payment_reference}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">
+                            Bank
+                          </p>
+                          <p className="font-bold text-xs truncate text-gray-800 dark:text-gray-200">
+                            {bill.bank_name}
+                          </p>
+                        </div>
+                      </div>
+                      <p className="text-[10px] font-medium text-gray-500 dark:text-gray-400 mt-2">
+                        Paid LKR {Number(bill.payment_amount).toLocaleString()}{" "}
+                        on {new Date(bill.paid_at).toLocaleDateString()}
                       </p>
                     </div>
                   )}
@@ -683,36 +702,77 @@ export default function ContractorBillsPage() {
               </p>
             </div>
             <form onSubmit={handlePayment} className="space-y-6">
-              <div className="space-y-1.5">
-                <label className="text-xs font-black uppercase text-gray-400 tracking-widest">
-                  Payment Reference (e.g. Chq No)
-                </label>
-                <input
-                  required
-                  value={paymentForm.payment_reference}
-                  onChange={(e) =>
-                    setPaymentForm({
-                      ...paymentForm,
-                      payment_reference: e.target.value,
-                    })
-                  }
-                  className="w-full px-5 py-4 bg-gray-50 dark:bg-gray-900 rounded-2xl border-none font-black"
-                  placeholder="C123..."
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-black uppercase text-gray-400 tracking-widest">
+                    Reference
+                  </label>
+                  <input
+                    required
+                    value={paymentForm.payment_reference}
+                    onChange={(e) =>
+                      setPaymentForm({
+                        ...paymentForm,
+                        payment_reference: e.target.value,
+                      })
+                    }
+                    className="w-full px-5 py-4 bg-gray-50 dark:bg-gray-900 rounded-2xl border-none font-black"
+                    placeholder="Chq No..."
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-black uppercase text-gray-400 tracking-widest">
+                    Bank Name
+                  </label>
+                  <input
+                    required
+                    value={paymentForm.bank_name}
+                    onChange={(e) =>
+                      setPaymentForm({
+                        ...paymentForm,
+                        bank_name: e.target.value,
+                      })
+                    }
+                    className="w-full px-5 py-4 bg-gray-50 dark:bg-gray-900 rounded-2xl border-none font-black"
+                    placeholder="e.g. BOC, Sampath"
+                  />
+                </div>
               </div>
-              <div className="space-y-1.5">
-                <label className="text-xs font-black uppercase text-gray-400 tracking-widest">
-                  Payment Date
-                </label>
-                <input
-                  type="date"
-                  required
-                  value={paymentForm.paid_at}
-                  onChange={(e) =>
-                    setPaymentForm({ ...paymentForm, paid_at: e.target.value })
-                  }
-                  className="w-full px-5 py-4 bg-gray-50 dark:bg-gray-900 rounded-2xl border-none font-bold"
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-black uppercase text-gray-400 tracking-widest">
+                    Amount Paid
+                  </label>
+                  <input
+                    type="number"
+                    required
+                    value={paymentForm.payment_amount}
+                    onChange={(e) =>
+                      setPaymentForm({
+                        ...paymentForm,
+                        payment_amount: e.target.value,
+                      })
+                    }
+                    className="w-full px-5 py-4 bg-gray-50 dark:bg-gray-900 rounded-2xl border-none font-black"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-black uppercase text-gray-400 tracking-widest">
+                    Date
+                  </label>
+                  <input
+                    type="date"
+                    required
+                    value={paymentForm.paid_at}
+                    onChange={(e) =>
+                      setPaymentForm({
+                        ...paymentForm,
+                        paid_at: e.target.value,
+                      })
+                    }
+                    className="w-full px-5 py-4 bg-gray-50 dark:bg-gray-900 rounded-2xl border-none font-bold"
+                  />
+                </div>
               </div>
               <button
                 type="submit"

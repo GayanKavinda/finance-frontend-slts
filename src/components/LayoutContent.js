@@ -19,6 +19,8 @@ const SidebarContext = createContext();
 
 export const useSidebarContext = () => useContext(SidebarContext);
 
+import Breadcrumb from "@/components/Breadcrumb";
+
 function ScrollableContent({ children }) {
   const { handleScroll } = useScroll();
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
@@ -29,6 +31,7 @@ function ScrollableContent({ children }) {
   // Show sidebar on authenticated pages (not auth pages or home page)
   const isAuthPage = AUTH_PATHS.includes(pathname);
   const isHomePage = pathname === "/";
+  const isDashboard = pathname === "/dashboard";
   const showSidebar = user && !isAuthPage && !isHomePage;
 
   const renderContent = () => {
@@ -67,7 +70,10 @@ function ScrollableContent({ children }) {
                   isSidebarCollapsed ? "lg:ml-[80px]" : "lg:ml-[280px]"
                 }`}
               >
-                {renderContent()}
+                <div className="p-6">
+                  {!isDashboard && <Breadcrumb path={pathname} />}
+                  {renderContent()}
+                </div>
               </main>
             </div>
           ) : (

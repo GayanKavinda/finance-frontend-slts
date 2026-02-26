@@ -34,7 +34,6 @@ import {
 } from "recharts";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "next-themes";
-import Breadcrumb from "@/components/Breadcrumb";
 import { fetchMonthlyInvoiceTrend } from "@/lib/invoice";
 import {
   fetchInvoiceSummary,
@@ -357,11 +356,6 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="px-4 sm:px-6 lg:px-10 py-4 sm:py-6 max-w-[1440px] mx-auto space-y-6">
-        {/* Breadcrumb */}
-        <div className="hidden sm:block">
-          <Breadcrumb items={[{ label: "Dashboard", href: "/dashboard" }]} />
-        </div>
-
         {/* ── Hero Banner ──────────────────────────────────────────────── */}
         <motion.div
           initial={{ opacity: 0, y: -16 }}

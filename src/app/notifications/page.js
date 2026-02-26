@@ -17,7 +17,6 @@ import { motion } from "framer-motion";
 import api from "@/lib/axios";
 import { formatDistanceToNow } from "date-fns";
 import Link from "next/link";
-import Breadcrumb from "@/components/Breadcrumb";
 
 export default function NotificationsPage() {
   const [notifications, setNotifications] = useState([]);
@@ -96,13 +95,6 @@ export default function NotificationsPage() {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 p-6 lg:p-10">
       <div className="max-w-4xl mx-auto">
-        <Breadcrumb
-          items={[
-            { label: "Dashboard", href: "/dashboard" },
-            { label: "Notifications", href: "/notifications" },
-          ]}
-        />
-
         <div className="mt-8 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white flex items-center gap-3">

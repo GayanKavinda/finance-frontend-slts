@@ -28,7 +28,6 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import useSystemStatus from "@/hooks/useSystemStatus";
-import Breadcrumb from "@/components/Breadcrumb";
 
 export default function SystemLogsPage() {
   const [isLive, setIsLive] = useState(true);
@@ -80,12 +79,6 @@ export default function SystemLogsPage() {
       {/* TOP BAR: Breadcrumbs & Actions */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <Breadcrumb
-            items={[
-              { label: "Dashboard", href: "/dashboard" },
-              { label: "System Monitor" },
-            ]}
-          />
           <div className="flex items-center gap-3">
             <div className="p-2 bg-primary/10 rounded-lg text-primary">
               <Terminal size={20} />
