@@ -29,6 +29,10 @@ import {
 import { Card } from "@/components/ui/Card";
 import StatusBadge from "@/components/ui/StatusBadge";
 import axios from "@/lib/axios";
+import FormModal from "@/components/ui/FormModal";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function JobDetailPage() {
   const { id } = useParams();
@@ -385,133 +389,102 @@ export default function JobDetailPage() {
       </div>
 
       {/* Quotation Modal */}
-      {isQuoteModalOpen && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-gray-800 w-full max-w-lg rounded-[2.5rem] shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
-            <div className="px-8 py-6 flex justify-between items-center border-b border-gray-100 dark:border-gray-700">
-              <h2 className="text-2xl font-black text-gray-900 dark:text-white">
-                Submit Quotation
-              </h2>
-              <button
-                onClick={() => setIsQuoteModalOpen(false)}
-                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
-              >
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-            <form onSubmit={handleQuoteSubmit} className="p-8 space-y-6">
-              <div className="space-y-1.5">
-                <label className="text-xs font-black uppercase tracking-widest text-gray-400">
-                  Contractor
-                </label>
-                <select
-                  required
-                  value={quoteForm.contractor_id}
-                  onChange={(e) =>
-                    setQuoteForm({
-                      ...quoteForm,
-                      contractor_id: e.target.value,
-                    })
-                  }
-                  className="w-full px-5 py-3.5 bg-gray-50 dark:bg-gray-900 border-none rounded-2xl focus:ring-2 focus:ring-primary/20 outline-none font-bold appearance-none"
-                >
-                  <option value="">Select a contractor</option>
-                  {contractors.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.name}{" "}
-                      {c.status === "Blacklisted" ? "(Blacklisted)" : ""}
-                    </option>
-                  ))}
-                </select>
-              </div>
+      <FormModal
+        isOpen={isQuoteModalOpen}
+        onClose={() => setIsQuoteModalOpen(false)}
+        title="Submit Quotation"
+        description="Submit a contractor quotation for this job"
+        onSubmit={handleQuoteSubmit}
+        submitText="Submit Quote"
+        size="lg"
+      >
+        <div className="space-y-2">
+          <Label htmlFor="contractor_id">Contractor *</Label>
+          <select
+            id="contractor_id"
+            required
+            value={quoteForm.contractor_id}
+            onChange={(e) =>
+              setQuoteForm({
+                ...quoteForm,
+                contractor_id: e.target.value,
+              })
+            }
+            className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <option value="">Select a contractor</option>
+            {contractors.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name} {c.status === "Blacklisted" ? "(Blacklisted)" : ""}
+              </option>
+            ))}
+          </select>
+        </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-black uppercase tracking-widest text-gray-400">
-                    Quoted Amount
-                  </label>
-                  <input
-                    type="number"
-                    required
-                    value={quoteForm.quotation_amount}
-                    onChange={(e) =>
-                      setQuoteForm({
-                        ...quoteForm,
-                        quotation_amount: e.target.value,
-                      })
-                    }
-                    className="w-full px-5 py-3.5 bg-gray-50 dark:bg-gray-900 border-none rounded-2xl focus:ring-2 focus:ring-primary/20 outline-none font-black"
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs font-black uppercase tracking-widest text-gray-400">
-                    Quote Date
-                  </label>
-                  <input
-                    type="date"
-                    required
-                    value={quoteForm.quotation_date}
-                    onChange={(e) =>
-                      setQuoteForm({
-                        ...quoteForm,
-                        quotation_date: e.target.value,
-                      })
-                    }
-                    className="w-full px-5 py-3.5 bg-gray-50 dark:bg-gray-900 border-none rounded-2xl focus:ring-2 focus:ring-primary/20 outline-none font-bold"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-black uppercase tracking-widest text-gray-400">
-                  Est. Duration (Days)
-                </label>
-                <input
-                  type="number"
-                  value={quoteForm.estimated_days}
-                  onChange={(e) =>
-                    setQuoteForm({
-                      ...quoteForm,
-                      estimated_days: e.target.value,
-                    })
-                  }
-                  className="w-full px-5 py-3.5 bg-gray-50 dark:bg-gray-900 border-none rounded-2xl focus:ring-2 focus:ring-primary/20 outline-none font-bold"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="text-xs font-black uppercase tracking-widest text-gray-400">
-                  Work Scope / Notes
-                </label>
-                <textarea
-                  rows={3}
-                  value={quoteForm.work_scope}
-                  onChange={(e) =>
-                    setQuoteForm({ ...quoteForm, work_scope: e.target.value })
-                  }
-                  className="w-full px-5 py-3.5 bg-gray-50 dark:bg-gray-900 border-none rounded-2xl focus:ring-2 focus:ring-primary/20 outline-none resize-none font-medium"
-                />
-              </div>
-
-              <div className="flex gap-4 pt-4">
-                <button
-                  type="button"
-                  onClick={() => setIsQuoteModalOpen(false)}
-                  className="flex-1 px-8 py-4 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-2xl font-black transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="flex-[2] px-8 py-4 bg-primary hover:bg-primary/90 text-white rounded-2xl font-black shadow-lg shadow-primary/20 transition-all"
-                >
-                  Submit Quote
-                </button>
-              </div>
-            </form>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="quotation_amount">Quotation Amount (LKR) *</Label>
+            <Input
+              id="quotation_amount"
+              type="number"
+              step="0.01"
+              required
+              value={quoteForm.quotation_amount}
+              onChange={(e) =>
+                setQuoteForm({
+                  ...quoteForm,
+                  quotation_amount: e.target.value,
+                })
+              }
+              placeholder="0.00"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="quotation_date">Quotation Date *</Label>
+            <Input
+              id="quotation_date"
+              type="date"
+              required
+              value={quoteForm.quotation_date}
+              onChange={(e) =>
+                setQuoteForm({
+                  ...quoteForm,
+                  quotation_date: e.target.value,
+                })
+              }
+            />
           </div>
         </div>
-      )}
+
+        <div className="space-y-2">
+          <Label htmlFor="estimated_days">Estimated Duration (Days)</Label>
+          <Input
+            id="estimated_days"
+            type="number"
+            value={quoteForm.estimated_days}
+            onChange={(e) =>
+              setQuoteForm({
+                ...quoteForm,
+                estimated_days: e.target.value,
+              })
+            }
+            placeholder="e.g. 30"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="work_scope">Work Scope / Notes</Label>
+          <Textarea
+            id="work_scope"
+            rows={3}
+            value={quoteForm.work_scope}
+            onChange={(e) =>
+              setQuoteForm({ ...quoteForm, work_scope: e.target.value })
+            }
+            placeholder="Describe the work scope..."
+          />
+        </div>
+      </FormModal>
     </div>
   );
 }

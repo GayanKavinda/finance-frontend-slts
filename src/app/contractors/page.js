@@ -25,6 +25,10 @@ import {
   Shield,
   Award,
 } from "lucide-react";
+import FormModal from "@/components/ui/FormModal";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 // ── helpers ─────────────────────────────────────────────────────
 const STATUS_CONFIG = {
@@ -457,168 +461,132 @@ export default function ContractorsPage() {
       </div>
 
       {/* Drawer */}
-      {drawerOpen && (
-        <div className="fixed inset-0 z-50 flex">
-          <div
-            className="flex-1 bg-black/40 backdrop-blur-sm"
-            onClick={() => setDrawerOpen(false)}
+      {/* Contractor Form Modal */}
+      <FormModal
+        isOpen={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        title={selectedContractor ? "Update Contractor" : "Add Contractor"}
+        description={selectedContractor ? "Edit contractor information" : "Create a new contractor"}
+        onSubmit={handleSubmit}
+        submitText={selectedContractor ? "Update" : "Create"}
+        isSubmitting={saving}
+        size="lg"
+      >
+        <div className="space-y-2">
+          <Label htmlFor="name">Company Name *</Label>
+          <Input
+            id="name"
+            required
+            value={form.name}
+            onChange={(e) => setF("name", e.target.value)}
+            placeholder="e.g. ABC Construction"
           />
-          <div className="w-full max-w-md bg-white dark:bg-gray-900 shadow-2xl flex flex-col h-full overflow-hidden animate-in slide-in-from-right duration-300">
-            <div className="bg-gradient-to-r from-orange-600 to-rose-600 px-6 py-6 flex-shrink-0">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-orange-200 text-[10px] font-black uppercase tracking-widest mb-1">
-                    {selectedContractor ? "Edit" : "Create New"}
-                  </p>
-                  <h2
-                    className="text-xl font-black text-white"
-                    style={{ fontFamily: "var(--font-display)" }}
-                  >
-                    {selectedContractor
-                      ? "Update Contractor"
-                      : "Add Contractor"}
-                  </h2>
-                </div>
-                <button
-                  onClick={() => setDrawerOpen(false)}
-                  className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
-            <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto">
-              <div className="p-6 space-y-4">
-                <Field label="Company Name *" col2={false}>
-                  <input
-                    required
-                    value={form.name}
-                    onChange={(e) => setF("name", e.target.value)}
-                    placeholder="e.g. ABC Construction"
-                    className={inputCls}
-                  />
-                </Field>
-                <div className="grid grid-cols-2 gap-4">
-                  <Field label="Contact Person">
-                    <input
-                      value={form.contact_person}
-                      onChange={(e) => setF("contact_person", e.target.value)}
-                      placeholder="Full name"
-                      className={inputCls}
-                    />
-                  </Field>
-                  <Field label="Status">
-                    <select
-                      value={form.status}
-                      onChange={(e) => setF("status", e.target.value)}
-                      className={inputCls}
-                    >
-                      <option value="Active">Active</option>
-                      <option value="Blacklisted">Blacklisted</option>
-                    </select>
-                  </Field>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <Field label="Email">
-                    <input
-                      type="email"
-                      value={form.email}
-                      onChange={(e) => setF("email", e.target.value)}
-                      placeholder="email@co.com"
-                      className={inputCls}
-                    />
-                  </Field>
-                  <Field label="Phone">
-                    <input
-                      value={form.phone}
-                      onChange={(e) => setF("phone", e.target.value)}
-                      placeholder="+94 77…"
-                      className={inputCls}
-                    />
-                  </Field>
-                </div>
-                <div className="bg-blue-50 dark:bg-blue-900/10 rounded-2xl p-4 space-y-3">
-                  <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest">
-                    Banking Details
-                  </p>
-                  <div className="grid grid-cols-2 gap-3">
-                    <Field label="Bank Name">
-                      <input
-                        value={form.bank_name}
-                        onChange={(e) => setF("bank_name", e.target.value)}
-                        placeholder="e.g. BOC"
-                        className={inputCls}
-                      />
-                    </Field>
-                    <Field label="Account No.">
-                      <input
-                        value={form.bank_account_number}
-                        onChange={(e) =>
-                          setF("bank_account_number", e.target.value)
-                        }
-                        placeholder="0000000000"
-                        className={inputCls}
-                      />
-                    </Field>
-                  </div>
-                </div>
-                <Field label="Tax ID">
-                  <input
-                    value={form.tax_id}
-                    onChange={(e) => setF("tax_id", e.target.value)}
-                    placeholder="VAT-…"
-                    className={inputCls}
-                  />
-                </Field>
-                <Field label="Address">
-                  <textarea
-                    rows={2}
-                    value={form.address}
-                    onChange={(e) => setF("address", e.target.value)}
-                    className={`${inputCls} resize-none`}
-                  />
-                </Field>
-                <Field label="Performance Rating">
-                  <StarRating
-                    rating={form.rating}
-                    onChange={(v) => setF("rating", v)}
-                  />
-                </Field>
-                <Field label="Internal Notes">
-                  <textarea
-                    rows={2}
-                    value={form.notes}
-                    onChange={(e) => setF("notes", e.target.value)}
-                    placeholder="Any internal notes…"
-                    className={`${inputCls} resize-none`}
-                  />
-                </Field>
-              </div>
-              <div className="px-6 py-4 bg-gray-50 dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700 flex gap-3">
-                <button
-                  type="button"
-                  onClick={() => setDrawerOpen(false)}
-                  className="flex-1 py-3 rounded-xl bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-sm font-bold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={saving}
-                  className="flex-[2] py-3 rounded-xl bg-gradient-to-r from-orange-600 to-rose-600 text-white text-sm font-black shadow-lg shadow-orange-500/30 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-60"
-                  style={{ fontFamily: "var(--font-display)" }}
-                >
-                  {saving
-                    ? "Saving…"
-                    : selectedContractor
-                      ? "Update Contractor"
-                      : "Add Contractor"}
-                </button>
-              </div>
-            </form>
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="contact_person">Contact Person</Label>
+            <Input
+              id="contact_person"
+              value={form.contact_person}
+              onChange={(e) => setF("contact_person", e.target.value)}
+              placeholder="Full name"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="status">Status</Label>
+            <select
+              id="status"
+              value={form.status}
+              onChange={(e) => setF("status", e.target.value)}
+              className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+            >
+              <option value="Active">Active</option>
+              <option value="Blacklisted">Blacklisted</option>
+            </select>
           </div>
         </div>
-      )}
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              value={form.email}
+              onChange={(e) => setF("email", e.target.value)}
+              placeholder="email@co.com"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="phone">Phone</Label>
+            <Input
+              id="phone"
+              value={form.phone}
+              onChange={(e) => setF("phone", e.target.value)}
+              placeholder="+94 77…"
+            />
+          </div>
+        </div>
+        <div className="rounded-lg border bg-muted p-4 space-y-3">
+          <p className="text-sm font-medium">Banking Details</p>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-2">
+              <Label htmlFor="bank_name">Bank Name</Label>
+              <Input
+                id="bank_name"
+                value={form.bank_name}
+                onChange={(e) => setF("bank_name", e.target.value)}
+                placeholder="e.g. BOC"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="bank_account_number">Account No.</Label>
+              <Input
+                id="bank_account_number"
+                value={form.bank_account_number}
+                onChange={(e) =>
+                  setF("bank_account_number", e.target.value)
+                }
+                placeholder="0000000000"
+              />
+            </div>
+          </div>
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="tax_id">Tax ID</Label>
+          <Input
+            id="tax_id"
+            value={form.tax_id}
+            onChange={(e) => setF("tax_id", e.target.value)}
+            placeholder="VAT-…"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="address">Address</Label>
+          <Textarea
+            id="address"
+            rows={2}
+            value={form.address}
+            onChange={(e) => setF("address", e.target.value)}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label>Performance Rating</Label>
+          <StarRating
+            rating={form.rating}
+            onChange={(v) => setF("rating", v)}
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="notes">Internal Notes</Label>
+          <Textarea
+            id="notes"
+            rows={2}
+            value={form.notes}
+            onChange={(e) => setF("notes", e.target.value)}
+            placeholder="Any internal notes…"
+          />
+        </div>
+      </FormModal>
 
       {/* Delete Confirm */}
       {deleteConfirm && (

@@ -26,6 +26,10 @@ import {
   TrendingUp,
   FileText,
 } from "lucide-react";
+import FormModal from "@/components/ui/FormModal";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 // ─── helpers ────────────────────────────────────────────────────
 const avatarColor = (name = "") => {
@@ -422,122 +426,78 @@ export default function CustomersPage() {
         )}
       </div>
 
-      {/* ── Right Drawer ── */}
-      {drawerOpen && (
-        <div className="fixed inset-0 z-50 flex">
-          <div
-            className="flex-1 bg-black/40 backdrop-blur-sm"
-            onClick={() => setDrawerOpen(false)}
+      {/* ── Customer Form Modal ── */}
+      <FormModal
+        isOpen={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        title={selectedCustomer ? "Update Customer" : "Add Customer"}
+        description={selectedCustomer ? "Edit customer information" : "Create a new customer"}
+        onSubmit={handleSubmit}
+        submitText={selectedCustomer ? "Update" : "Create"}
+        isSubmitting={saving}
+        size="lg"
+      >
+        <div className="space-y-2">
+          <Label htmlFor="name">Customer Name *</Label>
+          <Input
+            id="name"
+            required
+            value={form.name}
+            onChange={(e) => setF("name", e.target.value)}
+            placeholder="e.g. Acme Corp"
           />
-          <div className="w-full max-w-md bg-white dark:bg-gray-900 shadow-2xl flex flex-col h-full overflow-hidden animate-in slide-in-from-right duration-300">
-            {/* Drawer header */}
-            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-6 flex-shrink-0">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-blue-200 text-[10px] font-black uppercase tracking-widest mb-1">
-                    {selectedCustomer ? "Edit" : "Create New"}
-                  </p>
-                  <h2
-                    className="text-xl font-black text-white"
-                    style={{ fontFamily: "var(--font-display)" }}
-                  >
-                    {selectedCustomer ? "Update Customer" : "Add Customer"}
-                  </h2>
-                </div>
-                <button
-                  onClick={() => setDrawerOpen(false)}
-                  className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-colors"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
-
-            {/* Drawer form */}
-            <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto">
-              <div className="p-6 space-y-5">
-                <Field label="Customer Name *">
-                  <input
-                    required
-                    value={form.name}
-                    onChange={(e) => setF("name", e.target.value)}
-                    placeholder="e.g. Acme Corp"
-                    className={inputCls}
-                  />
-                </Field>
-                <div className="grid grid-cols-2 gap-4">
-                  <Field label="Email">
-                    <input
-                      type="email"
-                      value={form.email}
-                      onChange={(e) => setF("email", e.target.value)}
-                      placeholder="email@company.com"
-                      className={inputCls}
-                    />
-                  </Field>
-                  <Field label="Phone">
-                    <input
-                      value={form.phone}
-                      onChange={(e) => setF("phone", e.target.value)}
-                      placeholder="+94 77 …"
-                      className={inputCls}
-                    />
-                  </Field>
-                </div>
-                <Field label="Contact Person">
-                  <input
-                    value={form.contact_person}
-                    onChange={(e) => setF("contact_person", e.target.value)}
-                    placeholder="Full name"
-                    className={inputCls}
-                  />
-                </Field>
-                <Field label="Billing Address *">
-                  <textarea
-                    required
-                    rows={3}
-                    value={form.billing_address}
-                    onChange={(e) => setF("billing_address", e.target.value)}
-                    placeholder="Full postal address"
-                    className={`${inputCls} resize-none`}
-                  />
-                </Field>
-                <Field label="Tax / VAT Number">
-                  <input
-                    value={form.tax_number}
-                    onChange={(e) => setF("tax_number", e.target.value)}
-                    placeholder="e.g. VAT-123456789"
-                    className={inputCls}
-                  />
-                </Field>
-              </div>
-
-              {/* Drawer footer */}
-              <div className="px-6 py-4 bg-gray-50 dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700 flex gap-3 flex-shrink-0">
-                <button
-                  type="button"
-                  onClick={() => setDrawerOpen(false)}
-                  className="flex-1 py-3 rounded-xl bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-sm font-bold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={saving}
-                  className="flex-[2] py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-black shadow-lg shadow-blue-500/30 hover:shadow-xl hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-60"
-                  style={{ fontFamily: "var(--font-display)" }}
-                >
-                  {saving
-                    ? "Saving…"
-                    : selectedCustomer
-                      ? "Update Customer"
-                      : "Create Customer"}
-                </button>
-              </div>
-            </form>
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              value={form.email}
+              onChange={(e) => setF("email", e.target.value)}
+              placeholder="email@company.com"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="phone">Phone</Label>
+            <Input
+              id="phone"
+              value={form.phone}
+              onChange={(e) => setF("phone", e.target.value)}
+              placeholder="+94 77 …"
+            />
           </div>
         </div>
-      )}
+        <div className="space-y-2">
+          <Label htmlFor="contact_person">Contact Person</Label>
+          <Input
+            id="contact_person"
+            value={form.contact_person}
+            onChange={(e) => setF("contact_person", e.target.value)}
+            placeholder="Full name"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="billing_address">Billing Address *</Label>
+          <Textarea
+            id="billing_address"
+            required
+            rows={3}
+            value={form.billing_address}
+            onChange={(e) => setF("billing_address", e.target.value)}
+            placeholder="Full postal address"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="tax_number">Tax / VAT Number</Label>
+          <Input
+            id="tax_number"
+            value={form.tax_number}
+            onChange={(e) => setF("tax_number", e.target.value)}
+            placeholder="e.g. VAT-123456789"
+          />
+        </div>
+      </FormModal>
 
       {/* ── Delete Confirm Modal ── */}
       {deleteConfirm && (

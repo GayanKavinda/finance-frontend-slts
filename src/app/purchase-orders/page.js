@@ -30,6 +30,7 @@ import {
   DollarSign,
 } from "lucide-react";
 import StatusBadge from "@/components/ui/StatusBadge";
+import FormModal from "@/components/ui/FormModal";
 import axios from "@/lib/axios";
 
 const PO_STATUS = {
@@ -472,37 +473,18 @@ export default function POPage() {
         )}
       </div>
 
-      {/* Drawer */}
-      {drawerOpen && (
-        <div className="fixed inset-0 z-50 flex">
-          <div
-            className="flex-1 bg-black/40 backdrop-blur-sm"
-            onClick={() => setDrawerOpen(false)}
-          />
-          <div className="w-full max-w-md bg-white dark:bg-gray-900 shadow-2xl flex flex-col h-full overflow-hidden animate-in slide-in-from-right duration-300">
-            <div className="bg-gradient-to-r from-violet-600 to-purple-600 px-6 py-6 flex-shrink-0">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-violet-200 text-[10px] font-black uppercase tracking-widest mb-1">
-                    {selectedPO ? "Edit" : "Issue New"}
-                  </p>
-                  <h2
-                    className="text-xl font-black text-white"
-                    style={{ fontFamily: "var(--font-display)" }}
-                  >
-                    {selectedPO ? "Update PO" : "Issue Purchase Order"}
-                  </h2>
-                </div>
-                <button
-                  onClick={() => setDrawerOpen(false)}
-                  className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
-            <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto">
-              <div className="p-6 space-y-4">
+      {/* PO Form Modal */}
+      <FormModal
+        isOpen={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        title={selectedPO ? "Update PO" : "Issue Purchase Order"}
+        description={selectedPO ? "Edit purchase order details" : "Issue a new purchase order"}
+        onSubmit={handleSubmit}
+        submitText={selectedPO ? "Update" : "Issue"}
+        isSubmitting={saving}
+        size="lg"
+      >
+        <div className="space-y-5">
                 <div className="grid grid-cols-2 gap-4">
                   <Field label="PO Number *">
                     <input
@@ -603,28 +585,8 @@ export default function POPage() {
                     className={`${inputCls} resize-none`}
                   />
                 </Field>
-              </div>
-              <div className="px-6 py-4 bg-gray-50 dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700 flex gap-3">
-                <button
-                  type="button"
-                  onClick={() => setDrawerOpen(false)}
-                  className="flex-1 py-3 rounded-xl bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-sm font-bold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={saving}
-                  className="flex-[2] py-3 rounded-xl bg-gradient-to-r from-violet-600 to-purple-600 text-white text-sm font-black shadow-lg shadow-violet-500/30 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-60"
-                  style={{ fontFamily: "var(--font-display)" }}
-                >
-                  {saving ? "Saving…" : selectedPO ? "Update PO" : "Issue PO"}
-                </button>
-              </div>
-            </form>
-          </div>
         </div>
-      )}
+      </FormModal>
 
       {/* Delete Confirm */}
       {deleteConfirm && (

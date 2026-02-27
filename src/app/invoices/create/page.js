@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import axios from "@/lib/axios";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
-import { ArrowLeft, Save, Loader2, Info } from "lucide-react";
+import { ArrowLeft, Save, Loader2, Info, Plus } from "lucide-react";
 // Removed duplicate Layout wrapper
 import Link from "next/link";
 import {
@@ -13,10 +13,21 @@ import {
   fetchJobs,
   fetchPurchaseOrders,
 } from "@/lib/procurement";
+import FormModal from "@/components/ui/FormModal";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function CreateInvoicePage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
 
   // Cascading data
   const [tenders, setTenders] = useState([]);
@@ -131,219 +142,172 @@ export default function CreateInvoicePage() {
 
   return (
     <>
-      <div className="p-8 max-w-4xl mx-auto space-y-8">
-        <div className="flex items-center gap-4">
-          <Link
-            href="/invoices"
-            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-colors"
-          >
-            <ArrowLeft className="w-6 h-6" />
-          </Link>
-          <div>
-            <h1 className="text-3xl font-black text-gray-900 dark:text-white">
-              Create New Invoice
-            </h1>
-            <p className="text-gray-500 font-medium">
-              Draft a new revenue invoice for a client
-            </p>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2">
-            <form
-              onSubmit={handleSubmit}
-              className="bg-white dark:bg-gray-800 rounded-[2.5rem] p-10 shadow-sm border border-gray-100 dark:border-gray-700 space-y-8"
+      <div className="space-y-8">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Link
+              href="/invoices"
+              className="p-3 rounded-2xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
             >
-              <div className="space-y-6">
-                <h3 className="text-lg font-bold flex items-center gap-2 border-b pb-4">
-                  <span className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center text-sm">
-                    1
-                  </span>
-                  Contract Information
-                </h3>
-
-                <div className="grid grid-cols-1 gap-6">
-                  <div className="space-y-2">
-                    <label className="text-xs font-black uppercase text-gray-400 ml-1">
-                      Select Tender
-                    </label>
-                    <select
-                      required
-                      name="tender_id"
-                      value={form.tender_id}
-                      onChange={handleChange}
-                      className="w-full px-5 py-4 bg-gray-50 dark:bg-gray-900 border-none rounded-2xl focus:ring-2 focus:ring-primary/20 outline-none font-bold"
-                    >
-                      <option value="">Choose a Tender...</option>
-                      {tenders.map((t) => (
-                        <option key={t.id} value={t.id}>
-                          {t.tender_number} - {t.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <label className="text-xs font-black uppercase text-gray-400 ml-1">
-                        Select Job
-                      </label>
-                      <select
-                        required
-                        name="job_id"
-                        value={form.job_id}
-                        onChange={handleChange}
-                        disabled={!form.tender_id}
-                        className="w-full px-5 py-4 bg-gray-50 dark:bg-gray-900 border-none rounded-2xl focus:ring-2 focus:ring-primary/20 outline-none font-bold disabled:opacity-50"
-                      >
-                        <option value="">Choose a Job...</option>
-                        {jobs.map((j) => (
-                          <option key={j.id} value={j.id}>
-                            {j.name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-xs font-black uppercase text-gray-400 ml-1">
-                        Linked PO
-                      </label>
-                      <select
-                        required
-                        name="po_id"
-                        value={form.po_id}
-                        onChange={handleChange}
-                        disabled={!form.job_id}
-                        className="w-full px-5 py-4 bg-gray-50 dark:bg-gray-900 border-none rounded-2xl focus:ring-2 focus:ring-primary/20 outline-none font-bold disabled:opacity-50"
-                      >
-                        <option value="">Choose a Purchase Order...</option>
-                        {pos.map((p) => (
-                          <option key={p.id} value={p.id}>
-                            {p.po_number}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-6">
-                <h3 className="text-lg font-bold flex items-center gap-2 border-b pb-4">
-                  <span className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center text-sm">
-                    2
-                  </span>
-                  Invoice Details
-                </h3>
-
-                <div className="grid grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <label className="text-xs font-black uppercase text-gray-400 ml-1">
-                      Invoice Number
-                    </label>
-                    <input
-                      required
-                      name="invoice_number"
-                      value={form.invoice_number}
-                      onChange={(e) =>
-                        setForm({
-                          ...form,
-                          invoice_number: e.target.value.toUpperCase(),
-                        })
-                      }
-                      placeholder="e.g. SLT-INV-001"
-                      className="w-full px-5 py-4 bg-gray-50 dark:bg-gray-900 border-none rounded-2xl focus:ring-2 focus:ring-primary/20 outline-none font-bold"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-xs font-black uppercase text-gray-400 ml-1">
-                      Invoice Date
-                    </label>
-                    <input
-                      type="date"
-                      required
-                      name="invoice_date"
-                      value={form.invoice_date}
-                      onChange={handleChange}
-                      className="w-full px-5 py-4 bg-gray-50 dark:bg-gray-900 border-none rounded-2xl focus:ring-2 focus:ring-primary/20 outline-none font-bold"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-xs font-black uppercase text-gray-400 ml-1">
-                    Invoice Amount (LKR)
-                  </label>
-                  <div className="relative">
-                    <span className="absolute left-5 top-1/2 -translate-y-1/2 font-black text-gray-400">
-                      LKR
-                    </span>
-                    <input
-                      type="number"
-                      required
-                      name="invoice_amount"
-                      value={form.invoice_amount}
-                      onChange={handleChange}
-                      className="w-full pl-16 pr-5 py-5 bg-gray-100 dark:bg-gray-900 border-none rounded-3xl focus:ring-2 focus:ring-primary/20 outline-none font-black text-2xl"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex gap-4 pt-4">
-                <button
-                  disabled={loading}
-                  type="submit"
-                  className="flex-1 bg-primary hover:bg-primary/90 text-white py-5 rounded-3xl font-black uppercase tracking-widest shadow-2xl shadow-primary/30 flex items-center justify-center gap-2 transition-all transform active:scale-95 disabled:opacity-50"
-                >
-                  {loading ? (
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                  ) : (
-                    <Save className="w-5 h-5" />
-                  )}
-                  Create Draft Invoice
-                </button>
-              </div>
-            </form>
-          </div>
-
-          <div className="space-y-6">
-            <div className="bg-gradient-to-br from-primary to-primary-dark text-white p-8 rounded-[2.5rem] shadow-xl space-y-4">
-              <Info className="w-10 h-10 opacity-50" />
-              <h4 className="font-black text-xl leading-tight">
-                Cascading Selections
-              </h4>
-              <p className="text-primary-foreground/80 text-sm font-medium">
-                Quickly create invoices by selecting the Tender first.
-                We&apos;ll automatically filter associated Jobs and Purchase
-                Orders for you.
+              <ArrowLeft className="w-5 h-5" />
+            </Link>
+            <div>
+              <h1 className="text-3xl font-black text-gray-900 dark:text-white">
+                Invoices
+              </h1>
+              <p className="text-gray-500 font-medium">
+                Manage revenue invoices for clients
               </p>
             </div>
-
-            <div className="bg-white dark:bg-gray-800 p-8 rounded-[2.5rem] border border-gray-100 dark:border-gray-700 space-y-4 shadow-sm">
-              <h4 className="font-bold text-gray-400 uppercase text-xs tracking-widest">
-                Selected Customer
-              </h4>
-              {form.customer_id ? (
-                <div className="space-y-1">
-                  <div className="font-black text-gray-900 dark:text-white">
-                    {tenders.find((t) => t.id == form.tender_id)?.customer
-                      ?.name || "Customer Identified"}
-                  </div>
-                  <div className="text-xs text-gray-500 font-medium break-all">
-                    ID: {form.customer_id}
-                  </div>
-                </div>
-              ) : (
-                <div className="text-gray-400 italic text-sm">
-                  No customer linked yet
-                </div>
-              )}
-            </div>
           </div>
+
+          <button
+            onClick={() => setModalOpen(true)}
+            className="flex items-center gap-2 px-6 py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl font-bold shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 transition-all hover:scale-105 active:scale-95"
+          >
+            <Plus className="w-5 h-5" />
+            Create Invoice
+          </button>
+        </div>
+
+        <div className="bg-white dark:bg-gray-800 rounded-3xl p-8 shadow-sm border border-gray-100 dark:border-gray-700">
+          <p className="text-gray-500 text-center py-12">
+            Click "Create Invoice" to draft a new revenue invoice
+          </p>
         </div>
       </div>
+
+      {/* Create Invoice Modal */}
+      <FormModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        title="Create New Invoice"
+        description="Draft a new revenue invoice for a client"
+        onSubmit={handleSubmit}
+        submitText="Create Draft"
+        isSubmitting={loading}
+        size="xl"
+      >
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="tender_id">Select Tender *</Label>
+            <select
+              id="tender_id"
+              required
+              name="tender_id"
+              value={form.tender_id}
+              onChange={handleChange}
+              className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <option value="">Choose a Tender...</option>
+              {tenders.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.tender_number} - {t.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="job_id">Select Job *</Label>
+              <select
+                id="job_id"
+                required
+                name="job_id"
+                value={form.job_id}
+                onChange={handleChange}
+                disabled={!form.tender_id}
+                className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <option value="">Choose a Job...</option>
+                {jobs.map((j) => (
+                  <option key={j.id} value={j.id}>
+                    {j.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="po_id">Linked PO *</Label>
+              <select
+                id="po_id"
+                required
+                name="po_id"
+                value={form.po_id}
+                onChange={handleChange}
+                disabled={!form.job_id}
+                className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <option value="">Choose a PO...</option>
+                {pos.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.po_number}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="invoice_number">Invoice Number *</Label>
+              <Input
+                id="invoice_number"
+                required
+                name="invoice_number"
+                value={form.invoice_number}
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    invoice_number: e.target.value.toUpperCase(),
+                  })
+                }
+                placeholder="e.g. SLT-INV-001"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="invoice_date">Invoice Date *</Label>
+              <Input
+                id="invoice_date"
+                type="date"
+                required
+                name="invoice_date"
+                value={form.invoice_date}
+                onChange={handleChange}
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="invoice_amount">Invoice Amount (LKR) *</Label>
+            <Input
+              id="invoice_amount"
+              type="number"
+              required
+              name="invoice_amount"
+              value={form.invoice_amount}
+              onChange={handleChange}
+              placeholder="0.00"
+            />
+          </div>
+
+          {form.customer_id && (
+            <div className="rounded-lg border bg-card text-card-foreground p-4">
+              <div className="flex items-start gap-3">
+                <Info className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                <div className="space-y-1">
+                  <p className="text-sm font-medium">Selected Customer</p>
+                  <p className="text-sm text-muted-foreground">
+                    {tenders.find((t) => t.id == form.tender_id)?.customer
+                      ?.name || "Customer Identified"}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      </FormModal>
     </>
   );
 }
