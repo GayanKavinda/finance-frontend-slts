@@ -116,78 +116,49 @@ function ImpactCard({
   icon: Icon,
   label,
   value,
-  gradient,
-  bgGradient,
-  barWidth,
+  iconColor,
   delay,
 }) {
   const count = useCountUp(Number(value) || 0);
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay }}
-      whileHover={{ y: -6, scale: 1.02 }}
-      className={`group relative ${bgGradient} rounded-2xl p-6 overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300`}
+      transition={{ duration: 0.3, delay }}
+      className="bg-card rounded-lg border p-6 hover:shadow-md transition-shadow"
     >
-      {/* Background glow */}
-      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-        <div
-          className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-10`}
-        />
-      </div>
-      {/* Large ghost icon */}
-      <div className="absolute -bottom-3 -right-3 opacity-10 group-hover:opacity-20 transition-opacity">
-        <Icon className="w-24 h-24" />
-      </div>
-      <div className="relative">
-        <div
-          className={`w-11 h-11 rounded-xl bg-gradient-to-br ${gradient} flex items-center justify-center mb-4 shadow-lg group-hover:scale-110 transition-transform`}
-        >
-          <Icon className="w-5 h-5 text-white" />
-        </div>
-        <p className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-0.5">
-          {label}
-        </p>
-        <p
-          className="text-2xl font-black text-gray-900 dark:text-white mb-4 tracking-tight"
-          style={{ fontFamily: "var(--font-display)" }}
-        >
-          LKR {formatCompact(count)}
-        </p>
-        <div className="w-full h-1.5 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
-          <motion.div
-            initial={{ width: 0 }}
-            animate={{ width: barWidth }}
-            transition={{ duration: 1.2, delay: delay + 0.3, ease: "easeOut" }}
-            className={`h-full bg-gradient-to-r ${gradient} rounded-full`}
-          />
+      <div className="flex items-center justify-between mb-4">
+        <div className={`w-10 h-10 rounded-md ${iconColor} flex items-center justify-center`}>
+          <Icon className="w-5 h-5" />
         </div>
       </div>
+      <p className="text-sm font-medium text-muted-foreground mb-1">
+        {label}
+      </p>
+      <p className="text-2xl font-semibold text-foreground">
+        LKR {formatCompact(count)}
+      </p>
     </motion.div>
   );
 }
 
-// ─── Count stat chip ─────────────────────────────────────────────────────────
-function StatChip({ icon: Icon, label, value, iconBg, delay }) {
+// ─── Clean stat chip ──────────────────────────────────────────────────────────
+function StatChip({ icon: Icon, label, value, iconColor, delay }) {
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.9 }}
+      initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.3, delay }}
-      className="flex items-center gap-3 bg-white dark:bg-gray-800 rounded-2xl px-4 py-3.5 shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-md transition-all"
+      className="flex items-center gap-3 bg-card rounded-lg px-4 py-3 border hover:shadow-sm transition-shadow"
     >
-      <div className={`p-2 rounded-xl ${iconBg} shrink-0`}>
-        <Icon className="w-4 h-4 text-white" />
+      <div className={`p-2 rounded-md ${iconColor} shrink-0`}>
+        <Icon className="w-4 h-4" />
       </div>
       <div className="min-w-0">
-        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none mb-1 truncate">
+        <p className="text-xs font-medium text-muted-foreground leading-none mb-1 truncate">
           {label}
         </p>
-        <p
-          className="text-lg font-black text-gray-900 dark:text-white leading-none"
-          style={{ fontFamily: "var(--font-display)" }}
-        >
+        <p className="text-lg font-semibold text-foreground leading-none">
           {value}
         </p>
       </div>
@@ -195,28 +166,25 @@ function StatChip({ icon: Icon, label, value, iconBg, delay }) {
   );
 }
 
-// ─── Revenue metric card ──────────────────────────────────────────────────────
-function RevenueMetric({ label, amount, icon: Icon, accent, delay }) {
+// ─── Clean revenue card ───────────────────────────────────────────────────────
+function RevenueMetric({ label, amount, icon: Icon, iconColor, delay }) {
   const count = useCountUp(Number(amount) || 0);
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35, delay }}
-      className="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-lg transition-all"
+      transition={{ duration: 0.3, delay }}
+      className="bg-card rounded-lg border p-4"
     >
       <div className="flex items-center justify-between mb-3">
-        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+        <p className="text-xs font-medium text-muted-foreground">
           {label}
         </p>
-        <div className={`p-1.5 rounded-lg ${accent}`}>
-          <Icon className="w-3.5 h-3.5 text-white" />
+        <div className={`p-2 rounded-md ${iconColor}`}>
+          <Icon className="w-4 h-4" />
         </div>
       </div>
-      <p
-        className="text-lg font-black text-gray-900 dark:text-white break-all"
-        style={{ fontFamily: "var(--font-display)" }}
-      >
+      <p className="text-lg font-semibold text-foreground">
         LKR{" "}
         {count.toLocaleString("en-US", {
           minimumFractionDigits: 2,
@@ -227,62 +195,70 @@ function RevenueMetric({ label, amount, icon: Icon, accent, delay }) {
   );
 }
 
-// ─── Recent invoice row ───────────────────────────────────────────────────────
-function InvoiceRow({ inv }) {
+// ─── Clean table row ──────────────────────────────────────────────────────────
+function InvoiceTableRow({ inv }) {
   return (
-    <div className="flex items-center justify-between px-5 py-3.5 hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors group">
-      <div className="flex items-center gap-3 min-w-0">
-        <div className="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center flex-shrink-0">
-          <FileText className="w-4 h-4 text-blue-500" />
+    <tr className="border-b border-border hover:bg-muted/50 transition-colors">
+      <td className="px-4 py-3">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center flex-shrink-0">
+            <FileText className="w-4 h-4 text-primary" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-sm font-medium text-foreground truncate">
+              {inv.invoice_number}
+            </p>
+            <p className="text-xs text-muted-foreground truncate">
+              {inv.customer?.name}
+            </p>
+          </div>
         </div>
-        <div className="min-w-0">
-          <p className="text-sm font-bold text-gray-900 dark:text-white truncate">
-            {inv.invoice_number}
-          </p>
-          <p className="text-xs text-gray-400 truncate">{inv.customer?.name}</p>
-        </div>
-      </div>
-      <div className="flex items-center gap-4 flex-shrink-0">
-        <p className="text-xs text-gray-400 hidden sm:block">
+      </td>
+      <td className="px-4 py-3 hidden md:table-cell">
+        <p className="text-sm text-muted-foreground">
           {new Date(inv.invoice_date).toLocaleDateString("en-US", {
             month: "short",
             day: "numeric",
             year: "numeric",
           })}
         </p>
-        <p className="text-sm font-bold text-gray-900 dark:text-white">
+      </td>
+      <td className="px-4 py-3 text-right">
+        <p className="text-sm font-medium text-foreground">
           {formatCurrency(inv.invoice_amount)}
         </p>
+      </td>
+      <td className="px-4 py-3">
         <StatusBadge status={inv.status} />
-      </div>
-    </div>
+      </td>
+    </tr>
   );
 }
 
-// ─── Mobile invoice card ──────────────────────────────────────────────────────
+// ─── Mobile card ──────────────────────────────────────────────────────────────
 function InvoiceCard({ inv }) {
   return (
-    <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700/60 last:border-b-0">
+    <div className="p-4 border-b border-border last:border-b-0">
       <div className="flex items-start justify-between gap-2 mb-2">
         <div className="min-w-0">
-          <p className="text-sm font-bold text-gray-900 dark:text-white truncate">
+          <p className="text-sm font-medium text-foreground truncate">
             {inv.invoice_number}
           </p>
-          <p className="text-xs text-gray-400 truncate mt-0.5">
+          <p className="text-xs text-muted-foreground truncate mt-0.5">
             {inv.customer?.name}
           </p>
         </div>
         <StatusBadge status={inv.status} />
       </div>
-      <div className="flex items-center justify-between">
-        <p className="text-xs text-gray-400">
+      <div className="flex items-center justify-between mt-2">
+        <p className="text-xs text-muted-foreground">
           {new Date(inv.invoice_date).toLocaleDateString("en-US", {
             month: "short",
             day: "numeric",
             year: "numeric",
           })}
         </p>
-        <p className="text-sm font-bold text-gray-900 dark:text-white">
+        <p className="text-sm font-medium text-foreground">
           {formatCurrency(inv.invoice_amount)}
         </p>
       </div>
@@ -354,130 +330,98 @@ export default function Dashboard() {
   const firstName = user.name?.split(" ")[0];
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="px-4 sm:px-6 lg:px-10 py-4 sm:py-6 max-w-[1440px] mx-auto space-y-6">
+    <div className="min-h-screen bg-background">
+      <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8 max-w-[1440px] mx-auto space-y-6">
         {/* ── Hero Banner ──────────────────────────────────────────────── */}
         <motion.div
           initial={{ opacity: 0, y: -16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="relative bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-950 rounded-3xl p-8 overflow-hidden"
+          className="bg-card rounded-xl border shadow-sm p-6"
         >
-          {/* Dot grid */}
-          <div
-            className="absolute inset-0 opacity-10"
-            style={{
-              backgroundImage:
-                "radial-gradient(circle, #fff 1px, transparent 1px)",
-              backgroundSize: "28px 28px",
-            }}
-          />
-          {/* Glow orbs */}
-          <div className="absolute -top-20 -right-20 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl" />
-          <div className="absolute -bottom-10 left-40 w-48 h-48 bg-indigo-500/20 rounded-full blur-3xl" />
-
-          <div className="relative flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <Sparkles className="w-4 h-4 text-blue-400" />
-                <p className="text-blue-300/80 text-xs font-bold uppercase tracking-widest">
-                  Executive Overview
-                </p>
-              </div>
-              <h1
-                className="text-3xl sm:text-4xl font-black text-white tracking-tight"
-                style={{ fontFamily: "var(--font-display)" }}
-              >
-                {greeting}, {firstName} 👋
-              </h1>
-              <p className="text-blue-200/50 text-sm mt-1">
-                Here's your financial health &amp; procurement metrics
-              </p>
-            </div>
-            <div className="flex items-center gap-3 bg-white/10 backdrop-blur-sm border border-white/10 px-4 py-2.5 rounded-2xl flex-shrink-0">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-white text-xs font-black">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-xl font-bold shadow-md">
                 {user.name?.charAt(0)}
               </div>
               <div>
-                <p className="text-white text-sm font-bold leading-none">
-                  {user.name}
-                </p>
-                <p className="text-blue-300/60 text-[10px] font-medium mt-0.5">
-                  {user.roles?.[0]?.name ?? "User"}
+                <h1 className="text-2xl font-bold text-foreground">
+                  Welcome back, {firstName}
+                </h1>
+                <p className="text-sm text-muted-foreground mt-0.5">
+                  {greeting}! Here's your financial overview
                 </p>
               </div>
+            </div>
+            <div className="flex items-center gap-2 bg-muted/50 px-3 py-2 rounded-lg">
+              <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+              <span className="text-sm font-medium text-foreground">
+                {user.roles?.[0]?.name ?? "User"}
+              </span>
             </div>
           </div>
         </motion.div>
 
         {/* ── Procurement Impact Cards ──────────────────────────────────── */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <ImpactCard
             icon={Briefcase}
             label="Total Tender Portfolio"
             value={execSummary?.total_tender_value || 0}
-            gradient="from-blue-500 to-blue-400"
-            bgGradient="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700"
-            barWidth="75%"
+            iconColor="bg-blue-500/10 text-blue-600 dark:bg-blue-500/20"
             delay={0}
           />
           <ImpactCard
             icon={ShoppingBag}
             label="Committed PO Value"
             value={execSummary?.total_po_value || 0}
-            gradient="from-violet-500 to-purple-400"
-            bgGradient="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700"
-            barWidth="50%"
+            iconColor="bg-violet-500/10 text-violet-600 dark:bg-violet-500/20"
             delay={0.06}
           />
           <ImpactCard
             icon={Receipt}
             label="Invoiced Revenue"
             value={execSummary?.gross_amount || 0}
-            gradient="from-emerald-500 to-teal-400"
-            bgGradient="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700"
-            barWidth="65%"
+            iconColor="bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20"
             delay={0.12}
           />
           <ImpactCard
             icon={Building2}
             label="Cleared (Banked)"
             value={execSummary?.bank_amount || execSummary?.banked_amount || 0}
-            gradient="from-teal-500 to-cyan-400"
-            bgGradient="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700"
-            barWidth="33%"
+            iconColor="bg-teal-500/10 text-teal-600 dark:bg-teal-500/20"
             delay={0.18}
           />
         </div>
 
         {/* ── Count Stats ───────────────────────────────────────────────── */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <StatChip
             icon={FileText}
             label="Volume of Invoices"
             value={execSummary?.total_invoices ?? 0}
-            iconBg="bg-blue-500"
+            iconColor="bg-blue-500/10 text-blue-600 dark:bg-blue-500/20"
             delay={0}
           />
           <StatChip
             icon={CheckCircle}
             label="Banked / Closed"
             value={execSummary?.paid_count ?? 0}
-            iconBg="bg-emerald-500"
+            iconColor="bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20"
             delay={0.05}
           />
           <StatChip
             icon={Clock}
             label="Pending Approval"
             value={execSummary?.pending_approval_count ?? 0}
-            iconBg="bg-amber-500"
+            iconColor="bg-amber-500/10 text-amber-600 dark:bg-amber-500/20"
             delay={0.1}
           />
           <StatChip
             icon={TrendingUp}
             label="Avg. Approval Time"
             value={`${Math.round(execSummary?.avg_approval_time_hours || 0)}h`}
-            iconBg="bg-indigo-500"
+            iconColor="bg-indigo-500/10 text-indigo-600 dark:bg-indigo-500/20"
             delay={0.15}
           />
         </div>
@@ -488,21 +432,21 @@ export default function Dashboard() {
             label="Total Gross Amount"
             amount={execSummary?.gross_amount ?? 0}
             icon={DollarSign}
-            accent="bg-blue-600"
+            iconColor="bg-blue-500/10 text-blue-600"
             delay={0.1}
           />
           <RevenueMetric
             label="Banked Amount"
             amount={execSummary?.banked_amount ?? 0}
             icon={CheckCircle}
-            accent="bg-teal-600"
+            iconColor="bg-teal-500/10 text-teal-600"
             delay={0.15}
           />
           <RevenueMetric
             label="Outstanding / Transit"
             amount={execSummary?.pending_amount ?? 0}
             icon={Clock}
-            accent="bg-rose-600"
+            iconColor="bg-rose-500/10 text-rose-600"
             delay={0.2}
           />
         </div>
@@ -514,21 +458,18 @@ export default function Dashboard() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.35, delay: 0.2 }}
-            className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-sm border border-gray-100 dark:border-gray-700"
+            className="lg:col-span-2 bg-card rounded-xl p-6 shadow-sm border"
           >
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center">
-                  <Activity className="w-4 h-4 text-blue-500" />
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-blue-500/10 dark:bg-blue-500/20 flex items-center justify-center">
+                  <Activity className="w-5 h-5 text-blue-600" />
                 </div>
                 <div>
-                  <h3
-                    className="text-sm font-black text-gray-900 dark:text-white"
-                    style={{ fontFamily: "var(--font-display)" }}
-                  >
+                  <h3 className="text-base font-semibold text-foreground">
                     Monthly Revenue Trend
                   </h3>
-                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                  <p className="text-xs text-muted-foreground">
                     Invoice performance over time
                   </p>
                 </div>
@@ -622,118 +563,141 @@ export default function Dashboard() {
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.35, delay: 0.25 }}
-            className="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-sm border border-gray-100 dark:border-gray-700"
+            transition={{ duration: 0.3, delay: 0.25 }}
+            className="bg-card rounded-xl border p-6"
           >
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 rounded-xl bg-violet-50 dark:bg-violet-900/30 flex items-center justify-center">
-                <BarChart2 className="w-4 h-4 text-violet-500" />
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-lg bg-emerald-500/10 dark:bg-emerald-500/20 flex items-center justify-center">
+                <BarChart2 className="w-5 h-5 text-emerald-600" />
               </div>
               <div>
-                <h3
-                  className="text-sm font-black text-gray-900 dark:text-white"
-                  style={{ fontFamily: "var(--font-display)" }}
-                >
+                <h3 className="text-base font-semibold text-foreground">
                   Status Breakdown
                 </h3>
-                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                <p className="text-xs text-muted-foreground">
                   By invoice count
                 </p>
               </div>
             </div>
-            <ResponsiveContainer width="100%" height={180}>
+            <ResponsiveContainer width="100%" height={200}>
               <BarChart
                 data={barData}
                 layout="vertical"
-                barSize={10}
+                barSize={14}
                 margin={{ top: 0, right: 10, left: 0, bottom: 0 }}
               >
                 <CartesianGrid
                   strokeDasharray="3 3"
                   stroke={axisColor}
-                  opacity={0.6}
+                  opacity={0.3}
                   horizontal={false}
                 />
                 <XAxis
                   type="number"
-                  tick={{ fill: tickColor, fontSize: 10 }}
+                  tick={{ fill: tickColor, fontSize: 11 }}
                   axisLine={false}
                   tickLine={false}
                 />
                 <YAxis
                   type="category"
                   dataKey="name"
-                  tick={{ fill: tickColor, fontSize: 10, fontWeight: 600 }}
+                  tick={{ fill: tickColor, fontSize: 11, fontWeight: 600 }}
                   axisLine={false}
                   tickLine={false}
-                  width={70}
+                  width={90}
                 />
                 <Tooltip content={<ChartTooltip />} />
-                <Bar dataKey="count" radius={[0, 6, 6, 0]} name="Invoices">
+                <Bar dataKey="count" radius={[0, 8, 8, 0]} name="Invoices">
                   {barData.map((entry, i) => (
                     <Cell key={i} fill={entry.fill} />
                   ))}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
-            <div className="flex flex-wrap gap-x-3 gap-y-1.5 mt-3">
+            <div className="flex flex-wrap gap-x-4 gap-y-2 mt-4 pt-4 border-t">
               {barData.map((item) => (
-                <span
+                <div
                   key={item.name}
-                  className="inline-flex items-center gap-1.5 text-[10px] font-bold text-gray-500 dark:text-gray-400"
+                  className="inline-flex items-center gap-2"
                 >
-                  <span
-                    className="w-2 h-2 rounded-full shrink-0"
+                  <div
+                    className="w-3 h-3 rounded-sm shrink-0"
                     style={{ backgroundColor: item.fill }}
                   />
-                  {item.name} ({item.count})
-                </span>
+                  <span className="text-xs font-medium text-foreground">
+                    {item.name}
+                  </span>
+                  <span className="text-xs font-semibold text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
+                    {item.count}
+                  </span>
+                </div>
               ))}
             </div>
           </motion.div>
         </div>
 
-        {/* ── Recent Invoices ───────────────────────────────────────────── */}
+        {/* ── Recent Invoices Table ────────────────────────────────────── */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35, delay: 0.3 }}
-          className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden"
+          className="bg-card rounded-xl border shadow-sm overflow-hidden"
         >
-          <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-gray-700">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-xl bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center">
-                <FileText className="w-4 h-4 text-indigo-500" />
+          <div className="flex items-center justify-between p-6 border-b">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-indigo-500/10 dark:bg-indigo-500/20 flex items-center justify-center">
+                <FileText className="w-5 h-5 text-indigo-600" />
               </div>
               <div>
-                <h3
-                  className="text-sm font-black text-gray-900 dark:text-white"
-                  style={{ fontFamily: "var(--font-display)" }}
-                >
+                <h3 className="text-base font-semibold text-foreground">
                   Recent Invoices
                 </h3>
-                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider hidden sm:block">
+                <p className="text-xs text-muted-foreground">
                   Latest 5 transactions
                 </p>
               </div>
             </div>
             <Link
               href="/invoices"
-              className="flex items-center gap-1 text-xs font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 transition-colors px-3 py-1.5 rounded-xl hover:bg-blue-50 dark:hover:bg-blue-900/20"
+              className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
             >
-              View all <ArrowRight className="w-3 h-3" />
+              View all <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
 
-          {/* Desktop rows */}
-          <div className="hidden md:block divide-y divide-gray-50 dark:divide-gray-700/40">
-            {recentInvoices.length > 0 ? (
-              recentInvoices.map((inv) => <InvoiceRow key={inv.id} inv={inv} />)
-            ) : (
-              <p className="px-5 py-10 text-center text-sm text-gray-400">
-                No recent invoices found.
-              </p>
-            )}
+          {/* Desktop table */}
+          <div className="hidden md:block overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b bg-muted/50">
+                  <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                    Invoice
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                    Date
+                  </th>
+                  <th className="px-4 py-3 text-right text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                    Amount
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                    Status
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {recentInvoices.length > 0 ? (
+                  recentInvoices.map((inv) => (
+                    <InvoiceTableRow key={inv.id} inv={inv} />
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="4" className="px-4 py-10 text-center text-sm text-muted-foreground">
+                      No recent invoices found.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
 
           {/* Mobile cards */}
@@ -743,7 +707,7 @@ export default function Dashboard() {
                 <InvoiceCard key={inv.id} inv={inv} />
               ))
             ) : (
-              <p className="px-4 py-10 text-center text-sm text-gray-400">
+              <p className="px-4 py-10 text-center text-sm text-muted-foreground">
                 No recent invoices found.
               </p>
             )}

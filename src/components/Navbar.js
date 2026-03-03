@@ -36,6 +36,7 @@ import Image from "next/image";
 import useAutoLogout from "@/hooks/useAutoLogout";
 import { useScroll } from "@/contexts/ScrollContext";
 import NotificationDropdown from "@/components/NotificationDropdown";
+import ThemeToggle from "@/components/ThemeToggle";
 
 import { navLinks, AUTH_PATHS } from "@/constants/navigation";
 
@@ -302,45 +303,7 @@ export default function Navbar({
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center gap-3">
               {/* Theme Toggle */}
-              <div className="relative">
-                {!mounted ? (
-                  <div className="w-9 h-9 bg-white/5 dark:bg-white/5 rounded-full animate-pulse border border-white/10" />
-                ) : (
-                  <div
-                    onClick={() =>
-                      setTheme(resolvedTheme === "dark" ? "light" : "dark")
-                    }
-                    className={`relative w-14 h-7 rounded-full cursor-pointer transition-all duration-500 p-1 flex items-center border group overflow-hidden ${
-                      resolvedTheme === "dark"
-                        ? "bg-white/5 border-white/10 hover:bg-white/10"
-                        : "bg-white/20 border-white/30 hover:bg-white/30"
-                    } backdrop-blur-xl shadow-lg ring-1 ring-black/5`}
-                  >
-                    {/* Glass Shine Effect */}
-                    <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent pointer-events-none" />
-
-                    <motion.div
-                      layout
-                      transition={{
-                        type: "spring",
-                        stiffness: 400,
-                        damping: 25,
-                      }}
-                      className={`w-5 h-5 rounded-full shadow-[0_0_15px_rgba(0,180,235,0.4)] flex items-center justify-center transition-all duration-500 relative z-10 ${
-                        resolvedTheme === "dark"
-                          ? "bg-[#00B4EB] text-white translate-x-7"
-                          : "bg-white text-[#00B4EB] translate-x-0"
-                      }`}
-                    >
-                      {resolvedTheme === "dark" ? (
-                        <Moon size={11} fill="currentColor" />
-                      ) : (
-                        <Sun size={11} fill="currentColor" />
-                      )}
-                    </motion.div>
-                  </div>
-                )}
-              </div>
+              <ThemeToggle />
 
               {user && <NotificationDropdown />}
 
