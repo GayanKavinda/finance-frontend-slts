@@ -2,7 +2,14 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { fetchJobs, createJob, updateJob, deleteJob, fetchCustomers, fetchTenders } from "@/lib/procurement";
+import {
+  fetchJobs,
+  createJob,
+  updateJob,
+  deleteJob,
+  fetchCustomers,
+  fetchTenders,
+} from "@/lib/procurement";
 import { toast } from "react-hot-toast";
 import {
   Plus,
@@ -96,7 +103,9 @@ function JobGridCard({ job, onEdit, onDelete, onClick }) {
         <div className="flex items-start justify-between gap-3 mb-4">
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-2">
-              <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold ${config.light} ${config.text}`}>
+              <span
+                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold ${config.light} ${config.text}`}
+              >
                 <span className={`w-1.5 h-1.5 rounded-full ${config.bg}`} />
                 {job.status}
               </span>
@@ -110,7 +119,10 @@ function JobGridCard({ job, onEdit, onDelete, onClick }) {
           </div>
 
           {/* Actions */}
-          <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
+          <div
+            className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
+            onClick={(e) => e.stopPropagation()}
+          >
             <button
               onClick={() => onEdit(job)}
               className="p-2 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors"
@@ -134,7 +146,9 @@ function JobGridCard({ job, onEdit, onDelete, onClick }) {
                 <DollarSign className="w-5 h-5 text-white" />
               </div>
               <div>
-                <p className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-wider font-medium">Project Value</p>
+                <p className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-wider font-medium">
+                  Project Value
+                </p>
                 <p className="text-lg font-bold text-slate-900 dark:text-white">
                   LKR {Number(job.project_value || 0).toLocaleString()}
                 </p>
@@ -151,8 +165,12 @@ function JobGridCard({ job, onEdit, onDelete, onClick }) {
                 <Briefcase className="w-4 h-4 text-violet-500" />
               </div>
               <div className="min-w-0">
-                <p className="text-[10px] text-slate-400 dark:text-slate-500 uppercase">Tender</p>
-                <p className="text-xs font-medium text-slate-700 dark:text-slate-300 truncate">{job.tender.tender_number}</p>
+                <p className="text-[10px] text-slate-400 dark:text-slate-500 uppercase">
+                  Tender
+                </p>
+                <p className="text-xs font-medium text-slate-700 dark:text-slate-300 truncate">
+                  {job.tender.tender_number}
+                </p>
               </div>
             </div>
           )}
@@ -162,9 +180,12 @@ function JobGridCard({ job, onEdit, onDelete, onClick }) {
                 <Calendar className="w-4 h-4 text-orange-500" />
               </div>
               <div className="min-w-0">
-                <p className="text-[10px] text-slate-400 dark:text-slate-500 uppercase">Duration</p>
+                <p className="text-[10px] text-slate-400 dark:text-slate-500 uppercase">
+                  Duration
+                </p>
                 <p className="text-xs font-medium text-slate-700 dark:text-slate-300 truncate">
-                  {job.work_start_date?.split("-")[0] || "—"} → {job.work_completion_date?.split("-")[0] || "—"}
+                  {job.work_start_date?.split("-")[0] || "—"} →{" "}
+                  {job.work_completion_date?.split("-")[0] || "—"}
                 </p>
               </div>
             </div>
@@ -203,14 +224,20 @@ function JobListCard({ job, onEdit, onDelete, onClick }) {
             {/* Main Content */}
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1">
-                <h3 className="text-sm font-semibold text-slate-900 dark:text-white">{job.name}</h3>
-                <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold ${config.light} ${config.text}`}>
+                <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
+                  {job.name}
+                </h3>
+                <span
+                  className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold ${config.light} ${config.text}`}
+                >
                   {job.status}
                 </span>
               </div>
               <div className="flex items-center gap-4 text-xs text-slate-400 dark:text-slate-500">
                 <span className="flex items-center gap-1">
-                  <span className="text-slate-300 dark:text-slate-600">#{job.id}</span>
+                  <span className="text-slate-300 dark:text-slate-600">
+                    #{job.id}
+                  </span>
                 </span>
                 {job.customer?.name && (
                   <span className="flex items-center gap-1">
@@ -229,7 +256,9 @@ function JobListCard({ job, onEdit, onDelete, onClick }) {
 
             {/* Value */}
             <div className="text-right hidden sm:block min-w-[140px]">
-              <p className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-wide">Value</p>
+              <p className="text-[10px] text-slate-400 dark:text-slate-500 uppercase tracking-wide">
+                Value
+              </p>
               <p className="text-base font-bold text-slate-900 dark:text-white">
                 LKR {Number(job.project_value || 0).toLocaleString()}
               </p>
@@ -237,7 +266,10 @@ function JobListCard({ job, onEdit, onDelete, onClick }) {
 
             {/* Actions */}
             <div className="flex items-center gap-2">
-              <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
+              <div
+                className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                onClick={(e) => e.stopPropagation()}
+              >
                 <button
                   onClick={() => onEdit(job)}
                   className="p-2 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors"
@@ -306,7 +338,9 @@ const inputCls =
 
 const Field = ({ label, children }) => (
   <div className="space-y-1.5">
-    <label className="text-xs font-medium text-slate-500 dark:text-slate-400">{label}</label>
+    <label className="text-xs font-medium text-slate-500 dark:text-slate-400">
+      {label}
+    </label>
     {children}
   </div>
 );
@@ -391,7 +425,7 @@ export default function JobsPage() {
             status: "Pending",
             work_start_date: "",
             work_completion_date: "",
-          }
+          },
     );
     setDrawerOpen(true);
   };
@@ -402,7 +436,8 @@ export default function JobsPage() {
     try {
       const payload = {
         ...form,
-        project_value: form.project_value === "" ? 0 : Number(form.project_value),
+        project_value:
+          form.project_value === "" ? 0 : Number(form.project_value),
       };
       if (selectedJob) {
         await updateJob(selectedJob.id, payload);
@@ -436,7 +471,8 @@ export default function JobsPage() {
     setPage(1);
   };
 
-  const hasActiveFilters = filters.status || filters.customer_id || filters.tender_id;
+  const hasActiveFilters =
+    filters.status || filters.customer_id || filters.tender_id;
 
   const total = meta.total ?? jobs.length;
   const pending = jobs.filter((j) => j.status === "Pending").length;
@@ -454,7 +490,9 @@ export default function JobsPage() {
                 <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center">
                   <FolderOpen className="w-4 h-4 text-white" />
                 </div>
-                <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">Jobs & Projects</h1>
+                <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">
+                  Jobs & Projects
+                </h1>
               </div>
               <p className="text-sm text-slate-500 dark:text-slate-400">
                 Manage project execution and contractor assignments
@@ -478,8 +516,12 @@ export default function JobsPage() {
                 </div>
                 <TrendingUp className="w-4 h-4 text-slate-300 dark:text-slate-600" />
               </div>
-              <p className="text-2xl font-bold text-slate-900 dark:text-white">{total}</p>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Total Jobs</p>
+              <p className="text-2xl font-bold text-slate-900 dark:text-white">
+                {total}
+              </p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                Total Jobs
+              </p>
             </div>
 
             <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 hover:shadow-lg hover:shadow-slate-200/50 dark:hover:shadow-none transition-all">
@@ -488,8 +530,12 @@ export default function JobsPage() {
                   <Clock className="w-5 h-5 text-amber-500" />
                 </div>
               </div>
-              <p className="text-2xl font-bold text-slate-900 dark:text-white">{pending}</p>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Pending</p>
+              <p className="text-2xl font-bold text-slate-900 dark:text-white">
+                {pending}
+              </p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                Pending
+              </p>
             </div>
 
             <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 hover:shadow-lg hover:shadow-slate-200/50 dark:hover:shadow-none transition-all">
@@ -498,8 +544,12 @@ export default function JobsPage() {
                   <HardHat className="w-5 h-5 text-sky-500" />
                 </div>
               </div>
-              <p className="text-2xl font-bold text-slate-900 dark:text-white">{active}</p>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Active</p>
+              <p className="text-2xl font-bold text-slate-900 dark:text-white">
+                {active}
+              </p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                Active
+              </p>
             </div>
 
             <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 hover:shadow-lg hover:shadow-slate-200/50 dark:hover:shadow-none transition-all">
@@ -508,8 +558,12 @@ export default function JobsPage() {
                   <CheckCircle className="w-5 h-5 text-emerald-500" />
                 </div>
               </div>
-              <p className="text-2xl font-bold text-slate-900 dark:text-white">{completed}</p>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Completed</p>
+              <p className="text-2xl font-bold text-slate-900 dark:text-white">
+                {completed}
+              </p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                Completed
+              </p>
             </div>
           </div>
 
@@ -545,7 +599,13 @@ export default function JobsPage() {
                 Filters
                 {hasActiveFilters && (
                   <span className="min-w-[20px] h-5 rounded-full bg-primary text-white text-[10px] font-bold flex items-center justify-center px-1">
-                    {[filters.status, filters.customer_id, filters.tender_id].filter(Boolean).length}
+                    {
+                      [
+                        filters.status,
+                        filters.customer_id,
+                        filters.tender_id,
+                      ].filter(Boolean).length
+                    }
                   </span>
                 )}
               </button>
@@ -581,7 +641,9 @@ export default function JobsPage() {
           {/* Active Filter Chips */}
           {hasActiveFilters && (
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-xs text-slate-400 dark:text-slate-500">Active filters:</span>
+              <span className="text-xs text-slate-400 dark:text-slate-500">
+                Active filters:
+              </span>
               {filters.status && (
                 <button
                   onClick={() => setFilters((f) => ({ ...f, status: "" }))}
@@ -596,7 +658,8 @@ export default function JobsPage() {
                   onClick={() => setFilters((f) => ({ ...f, customer_id: "" }))}
                   className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-primary/10 text-primary text-xs font-medium rounded-lg"
                 >
-                  {customers.find((c) => c.id == filters.customer_id)?.name || "Customer"}
+                  {customers.find((c) => c.id == filters.customer_id)?.name ||
+                    "Customer"}
                   <X className="w-3 h-3" />
                 </button>
               )}
@@ -605,7 +668,8 @@ export default function JobsPage() {
                   onClick={() => setFilters((f) => ({ ...f, tender_id: "" }))}
                   className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-primary/10 text-primary text-xs font-medium rounded-lg"
                 >
-                  {tenders.find((t) => t.id == filters.tender_id)?.tender_number || "Tender"}
+                  {tenders.find((t) => t.id == filters.tender_id)
+                    ?.tender_number || "Tender"}
                   <X className="w-3 h-3" />
                 </button>
               )}
@@ -645,10 +709,14 @@ export default function JobsPage() {
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>
-                      <label className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5 block">Status</label>
+                      <label className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5 block">
+                        Status
+                      </label>
                       <select
                         value={filters.status}
-                        onChange={(e) => setFilters((f) => ({ ...f, status: e.target.value }))}
+                        onChange={(e) =>
+                          setFilters((f) => ({ ...f, status: e.target.value }))
+                        }
                         className="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-700 dark:text-slate-300 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                       >
                         <option value="">All Statuses</option>
@@ -659,10 +727,17 @@ export default function JobsPage() {
                       </select>
                     </div>
                     <div>
-                      <label className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5 block">Customer</label>
+                      <label className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5 block">
+                        Customer
+                      </label>
                       <select
                         value={filters.customer_id}
-                        onChange={(e) => setFilters((f) => ({ ...f, customer_id: e.target.value }))}
+                        onChange={(e) =>
+                          setFilters((f) => ({
+                            ...f,
+                            customer_id: e.target.value,
+                          }))
+                        }
                         className="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-700 dark:text-slate-300 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                       >
                         <option value="">All Customers</option>
@@ -674,10 +749,17 @@ export default function JobsPage() {
                       </select>
                     </div>
                     <div>
-                      <label className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5 block">Tender</label>
+                      <label className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5 block">
+                        Tender
+                      </label>
                       <select
                         value={filters.tender_id}
-                        onChange={(e) => setFilters((f) => ({ ...f, tender_id: e.target.value }))}
+                        onChange={(e) =>
+                          setFilters((f) => ({
+                            ...f,
+                            tender_id: e.target.value,
+                          }))
+                        }
                         className="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-700 dark:text-slate-300 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                       >
                         <option value="">All Tenders</option>
@@ -705,14 +787,20 @@ export default function JobsPage() {
                 className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5"
               >
                 {loading ? (
-                  Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} viewMode="grid" />)
+                  Array.from({ length: 6 }).map((_, i) => (
+                    <SkeletonCard key={i} viewMode="grid" />
+                  ))
                 ) : jobs.length === 0 ? (
                   <div className="col-span-full flex flex-col items-center justify-center py-20 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800">
                     <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-50 dark:from-slate-800 dark:to-slate-800/50 flex items-center justify-center mb-4">
                       <FolderOpen className="w-8 h-8 text-slate-300 dark:text-slate-600" />
                     </div>
-                    <p className="text-base font-medium text-slate-700 dark:text-slate-300">No jobs found</p>
-                    <p className="text-sm text-slate-400 dark:text-slate-500 mt-1 mb-4">Create your first job to get started</p>
+                    <p className="text-base font-medium text-slate-700 dark:text-slate-300">
+                      No jobs found
+                    </p>
+                    <p className="text-sm text-slate-400 dark:text-slate-500 mt-1 mb-4">
+                      Create your first job to get started
+                    </p>
                     <button
                       onClick={() => openDrawer()}
                       className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary/90 transition-colors"
@@ -742,14 +830,20 @@ export default function JobsPage() {
                 className="space-y-3"
               >
                 {loading ? (
-                  Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} viewMode="list" />)
+                  Array.from({ length: 6 }).map((_, i) => (
+                    <SkeletonCard key={i} viewMode="list" />
+                  ))
                 ) : jobs.length === 0 ? (
                   <div className="flex flex-col items-center justify-center py-20 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800">
                     <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-50 dark:from-slate-800 dark:to-slate-800/50 flex items-center justify-center mb-4">
                       <FolderOpen className="w-8 h-8 text-slate-300 dark:text-slate-600" />
                     </div>
-                    <p className="text-base font-medium text-slate-700 dark:text-slate-300">No jobs found</p>
-                    <p className="text-sm text-slate-400 dark:text-slate-500 mt-1 mb-4">Create your first job to get started</p>
+                    <p className="text-base font-medium text-slate-700 dark:text-slate-300">
+                      No jobs found
+                    </p>
+                    <p className="text-sm text-slate-400 dark:text-slate-500 mt-1 mb-4">
+                      Create your first job to get started
+                    </p>
                     <button
                       onClick={() => openDrawer()}
                       className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary/90 transition-colors"
@@ -784,19 +878,21 @@ export default function JobsPage() {
                 <ChevronLeft className="w-4 h-4" />
               </button>
               <div className="flex items-center gap-1">
-                {Array.from({ length: meta.last_page }, (_, i) => i + 1).map((p) => (
-                  <button
-                    key={p}
-                    onClick={() => setPage(p)}
-                    className={`min-w-[40px] h-10 rounded-xl text-sm font-medium transition-all ${
-                      page === p
-                        ? "bg-primary text-white shadow-lg shadow-primary/20"
-                        : "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800"
-                    }`}
-                  >
-                    {p}
-                  </button>
-                ))}
+                {Array.from({ length: meta.last_page }, (_, i) => i + 1).map(
+                  (p) => (
+                    <button
+                      key={p}
+                      onClick={() => setPage(p)}
+                      className={`min-w-[40px] h-10 rounded-xl text-sm font-medium transition-all ${
+                        page === p
+                          ? "bg-primary text-white shadow-lg shadow-primary/20"
+                          : "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800"
+                      }`}
+                    >
+                      {p}
+                    </button>
+                  ),
+                )}
               </div>
               <button
                 onClick={() => setPage((p) => Math.min(meta.last_page, p + 1))}
@@ -815,7 +911,9 @@ export default function JobsPage() {
         isOpen={drawerOpen}
         onClose={() => setDrawerOpen(false)}
         title={selectedJob ? "Update Job" : "Create Job"}
-        description={selectedJob ? "Edit job details" : "Create a new project job"}
+        description={
+          selectedJob ? "Edit job details" : "Create a new project job"
+        }
         onSubmit={handleSubmit}
         submitText={selectedJob ? "Update" : "Create"}
         isSubmitting={saving}
@@ -849,7 +947,11 @@ export default function JobsPage() {
               </select>
             </Field>
             <Field label="Status">
-              <select value={form.status} onChange={(e) => setF("status", e.target.value)} className={inputCls}>
+              <select
+                value={form.status}
+                onChange={(e) => setF("status", e.target.value)}
+                className={inputCls}
+              >
                 <option value="Pending">Pending</option>
                 <option value="Active">Active</option>
                 <option value="Completed">Completed</option>
@@ -926,9 +1028,12 @@ export default function JobsPage() {
               <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-red-100 to-red-50 dark:from-red-500/20 dark:to-red-500/10 flex items-center justify-center mx-auto mb-4">
                 <Trash2 className="w-7 h-7 text-red-500" />
               </div>
-              <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Delete Job?</h3>
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
+                Delete Job?
+              </h3>
               <p className="text-sm text-slate-500 dark:text-slate-400 mt-2">
-                This action cannot be undone. Jobs with purchase orders cannot be deleted.
+                This action cannot be undone. Jobs with purchase orders cannot
+                be deleted.
               </p>
             </div>
             <div className="flex gap-3">
