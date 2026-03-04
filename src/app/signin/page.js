@@ -15,7 +15,7 @@ import {
   Lock as LockIcon,
 } from "lucide-react";
 import axios from "@/lib/axios";
-import { useSnackbar } from "notistack";
+import { toast } from "@/lib/toast";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { fetchCsrf } from "@/lib/auth";
@@ -28,10 +28,10 @@ const schema = yup.object({
     .required("Work email is required")
     .email("Invalid email format"),
   password: yup.string().required("Password is required"),
+  remember: yup.boolean(),
 });
 
 export default function Signin() {
-  const { enqueueSnackbar } = useSnackbar();
   const router = useRouter();
   const { refetch } = useAuth();
   const [passwordStrength, setPasswordStrength] = useState({
@@ -119,17 +119,13 @@ export default function Signin() {
       await fetchCsrf();
       await axios.post("/login", data);
       await refetch();
-      enqueueSnackbar("Welcome back to Finance Portal!", {
-        variant: "success",
-      });
+      toast.success("Welcome back to SLT ProcureX!");
       router.push("/dashboard");
     } catch (error) {
       if (error.response?.status === 401) {
-        enqueueSnackbar("Invalid email or password.", { variant: "error" });
+        toast.error("Invalid email or password.");
       } else {
-        enqueueSnackbar("Login failed. Please try again.", {
-          variant: "error",
-        });
+        toast.error("Login failed. Please try again.");
       }
     }
   };
@@ -174,8 +170,8 @@ export default function Signin() {
               Financial Intelligence <br />& Strategic Insight.
             </h1>
             <p className="text-blue-50 text-base font-light max-w-xs opacity-95 leading-relaxed drop-shadow-md">
-              Empowering the Internal Finance Division with secure, real-time
-              data management.
+              Empowering the Internal Procurement Division with secure,
+              real-time data management.
             </p>
           </div>
 
@@ -187,7 +183,7 @@ export default function Signin() {
                 System Status
               </p>
               <p className="text-sm font-semibold truncate">
-                Finance Division Secure Portal - Active
+                SLT ProcureX Secure Portal - Active
               </p>
             </div>
           </div>
@@ -214,7 +210,7 @@ export default function Signin() {
 
           <header className="mb-8 text-left">
             <h2 className="text-2xl font-bold text-slate-800 dark:text-white mb-2 transition-colors tracking-tight">
-              Finance Division Portal
+              SLT ProcureX Portal
             </h2>
             <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">
               Secure access for authorized personnel only.
@@ -310,6 +306,7 @@ export default function Signin() {
                 name="remember-device"
                 type="checkbox"
                 className="h-4 w-4 text-sltBlue focus:ring-sltBlue/30 border-slate-300 dark:border-slate-700 rounded cursor-pointer bg-white dark:bg-slate-800"
+                {...register("remember")}
               />
               <label
                 htmlFor="remember-device"

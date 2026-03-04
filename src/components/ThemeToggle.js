@@ -23,7 +23,7 @@ const ThemeToggle = () => {
 
   return (
     <div className="flex items-center">
-      <label className="group relative inline-block w-[4.2em] h-[2.2em] rounded-[30px] text-[14px] cursor-pointer ring-1 ring-black/5">
+      <label className="group relative inline-block w-[4.2em] h-[2.2em] rounded-[30px] text-[10px] cursor-pointer ring-1 ring-black/5">
         <input
           checked={isDark}
           onChange={() => setTheme(isDark ? "light" : "dark")}

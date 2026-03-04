@@ -17,8 +17,8 @@ import LayoutContent from "@/components/LayoutContent";
 import { ScrollArea } from "@/components/ui/ScrollArea";
 
 export const metadata = {
-  title: "FinancePro - Personal Finance Manager",
-  description: "Secure and modern finance management app",
+  title: "SLT ProcureX - Intelligent Procurement",
+  description: "Powering Intelligent Procurement",
 };
 
 export default function RootLayout({ children }) {

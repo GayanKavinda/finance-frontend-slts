@@ -2,7 +2,7 @@ export const SLIDE_DURATION = 5000;
 
 export const slides = [
   {
-    title: "SLT Finance Division",
+    title: "SLT Procurement Division",
     subtitle:
       "Empowering employees with comprehensive salary and payment management",
     image: "/slides/2.santa-claus-chariot-3840x2160-24949.avif",

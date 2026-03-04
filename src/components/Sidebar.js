@@ -90,7 +90,7 @@ export default function Sidebar({
               >
                 <Sparkles className="w-5 h-5 text-primary" />
                 <span className="font-bold text-lg bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-                  FinancePro
+                  SLT ProcureX
                 </span>
               </motion.div>
             ) : (
@@ -320,9 +320,12 @@ export default function Sidebar({
                 <div className="flex items-center gap-2 mb-2">
                   <Sparkles className="w-4 h-4 text-primary" />
                   <p className="font-semibold text-sm text-gray-900 dark:text-white">
-                    FinancePro
+                    SLT ProcureX
                   </p>
                 </div>
+                <p className="text-[10px] text-primary/80 font-medium mb-2 italic">
+                  Powering Intelligent Procurement
+                </p>
                 <p className="text-xs text-gray-500 dark:text-gray-400">
                   © 2026 SLT Digital
                 </p>

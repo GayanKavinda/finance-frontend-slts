@@ -48,7 +48,7 @@ export default function HelpPage() {
   const filteredFaqs = faqs.filter(
     (faq) =>
       faq.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      faq.answer.toLowerCase().includes(searchQuery.toLowerCase())
+      faq.answer.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   return (
@@ -72,7 +72,7 @@ export default function HelpPage() {
           </h1>
           <p className="text-muted-foreground max-w-xl text-sm md:text-base leading-relaxed">
             Access internal resources, technical support, and financial
-            guidelines for the SLT Digital Finance Division.
+            guidelines for the SLT Digital Procurement Division.
           </p>
 
           {/* Search Bar - More Refined */}
@@ -229,8 +229,8 @@ export default function HelpPage() {
                   Need Technical Assistance?
                 </h3>
                 <p className="text-xs text-white/80 dark:text-slate-300 leading-relaxed">
-                  Can't find what you're looking for? Raise a ticket and our IT
-                  team will respond within 2 hours.
+                  Can&apos;t find what you&apos;re looking for? Raise a ticket
+                  and our IT team will respond within 2 hours.
                 </p>
                 <button className="w-full py-3 bg-white text-primary dark:bg-primary dark:text-primary-foreground text-xs font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-slate-50 dark:hover:bg-primary/90 transition-colors shadow-lg">
                   Submit Support Ticket

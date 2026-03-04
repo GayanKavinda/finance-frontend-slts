@@ -295,7 +295,7 @@ export default function Navbar({
                       : "text-slate-500 dark:text-slate-400"
                   }`}
                 >
-                  Finance Division
+                  Procurement Division
                 </span>
               </div>
             </Link>
