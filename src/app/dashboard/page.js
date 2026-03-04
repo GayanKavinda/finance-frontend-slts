@@ -112,13 +112,7 @@ function ChartTooltip({ active, payload, label }) {
 }
 
 // ─── Procurement "impact" card ────────────────────────────────────────────────
-function ImpactCard({
-  icon: Icon,
-  label,
-  value,
-  iconColor,
-  delay,
-}) {
+function ImpactCard({ icon: Icon, label, value, iconColor, delay }) {
   const count = useCountUp(Number(value) || 0);
   return (
     <motion.div
@@ -128,13 +122,13 @@ function ImpactCard({
       className="bg-card rounded-lg border p-6 hover:shadow-md transition-shadow"
     >
       <div className="flex items-center justify-between mb-4">
-        <div className={`w-10 h-10 rounded-md ${iconColor} flex items-center justify-center`}>
+        <div
+          className={`w-10 h-10 rounded-md ${iconColor} flex items-center justify-center`}
+        >
           <Icon className="w-5 h-5" />
         </div>
       </div>
-      <p className="text-sm font-medium text-muted-foreground mb-1">
-        {label}
-      </p>
+      <p className="text-sm font-medium text-muted-foreground mb-1">{label}</p>
       <p className="text-2xl font-semibold text-foreground">
         LKR {formatCompact(count)}
       </p>
@@ -177,9 +171,7 @@ function RevenueMetric({ label, amount, icon: Icon, iconColor, delay }) {
       className="bg-card rounded-lg border p-4"
     >
       <div className="flex items-center justify-between mb-3">
-        <p className="text-xs font-medium text-muted-foreground">
-          {label}
-        </p>
+        <p className="text-xs font-medium text-muted-foreground">{label}</p>
         <div className={`p-2 rounded-md ${iconColor}`}>
           <Icon className="w-4 h-4" />
         </div>
@@ -616,10 +608,7 @@ export default function Dashboard() {
             </ResponsiveContainer>
             <div className="flex flex-wrap gap-x-4 gap-y-2 mt-4 pt-4 border-t">
               {barData.map((item) => (
-                <div
-                  key={item.name}
-                  className="inline-flex items-center gap-2"
-                >
+                <div key={item.name} className="inline-flex items-center gap-2">
                   <div
                     className="w-3 h-3 rounded-sm shrink-0"
                     style={{ backgroundColor: item.fill }}
@@ -691,7 +680,10 @@ export default function Dashboard() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="4" className="px-4 py-10 text-center text-sm text-muted-foreground">
+                    <td
+                      colSpan="4"
+                      className="px-4 py-10 text-center text-sm text-muted-foreground"
+                    >
                       No recent invoices found.
                     </td>
                   </tr>

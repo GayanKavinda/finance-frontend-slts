@@ -139,7 +139,9 @@ export default function EditInvoicePage() {
                   Date
                 </p>
                 <p className="text-lg font-bold text-gray-900 dark:text-white">
-                  {invoice.invoice_date ? invoice.invoice_date.split("T")[0] : ""}
+                  {invoice.invoice_date
+                    ? invoice.invoice_date.split("T")[0]
+                    : ""}
                 </p>
               </div>
             </div>

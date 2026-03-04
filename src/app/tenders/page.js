@@ -482,107 +482,109 @@ export default function TendersPage() {
         isOpen={drawerOpen}
         onClose={() => setDrawerOpen(false)}
         title={selectedTender ? "Update Tender" : "New Tender"}
-        description={selectedTender ? "Edit tender details" : "Create a new tender"}
+        description={
+          selectedTender ? "Edit tender details" : "Create a new tender"
+        }
         onSubmit={handleSubmit}
         submitText={selectedTender ? "Update" : "Create"}
         isSubmitting={saving}
         size="lg"
       >
         <div className="space-y-5">
-                <div className="grid grid-cols-2 gap-4">
-                  <Field label="Tender Number *">
-                    <input
-                      required
-                      value={form.tender_number}
-                      onChange={(e) =>
-                        setF("tender_number", e.target.value.toUpperCase())
-                      }
-                      placeholder="SLT/2026/001"
-                      className={inputCls}
-                    />
-                  </Field>
-                  <Field label="Status">
-                    <select
-                      value={form.status}
-                      onChange={(e) => setF("status", e.target.value)}
-                      className={inputCls}
-                    >
-                      <option value="Open">Open</option>
-                      <option value="Closed">Closed</option>
-                    </select>
-                  </Field>
-                </div>
-                <Field label="Tender Name *">
-                  <input
-                    required
-                    value={form.name}
-                    onChange={(e) => setF("name", e.target.value)}
-                    placeholder="Brief title"
-                    className={inputCls}
-                  />
-                </Field>
-                <Field label="Customer *">
-                  <select
-                    required
-                    value={form.customer_id}
-                    onChange={(e) => setF("customer_id", e.target.value)}
-                    className={inputCls}
-                  >
-                    <option value="">Select customer…</option>
-                    {customers.map((c) => (
-                      <option key={c.id} value={c.id}>
-                        {c.name}
-                      </option>
-                    ))}
-                  </select>
-                </Field>
-                <Field label="Description">
-                  <textarea
-                    rows={2}
-                    value={form.description}
-                    onChange={(e) => setF("description", e.target.value)}
-                    placeholder="Brief description…"
-                    className={`${inputCls} resize-none`}
-                  />
-                </Field>
-                <div className="grid grid-cols-2 gap-4">
-                  <Field label="Budget (LKR)">
-                    <input
-                      type="number"
-                      value={form.budget}
-                      onChange={(e) => setF("budget", e.target.value)}
-                      placeholder="0"
-                      className={inputCls}
-                    />
-                  </Field>
-                  <Field label="Awarded (LKR)">
-                    <input
-                      type="number"
-                      value={form.awarded_amount}
-                      onChange={(e) => setF("awarded_amount", e.target.value)}
-                      placeholder="0"
-                      className={inputCls}
-                    />
-                  </Field>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <Field label="Start Date">
-                    <input
-                      type="date"
-                      value={form.start_date}
-                      onChange={(e) => setF("start_date", e.target.value)}
-                      className={inputCls}
-                    />
-                  </Field>
-                  <Field label="End Date">
-                    <input
-                      type="date"
-                      value={form.end_date}
-                      onChange={(e) => setF("end_date", e.target.value)}
-                      className={inputCls}
-                    />
-                  </Field>
-                </div>
+          <div className="grid grid-cols-2 gap-4">
+            <Field label="Tender Number *">
+              <input
+                required
+                value={form.tender_number}
+                onChange={(e) =>
+                  setF("tender_number", e.target.value.toUpperCase())
+                }
+                placeholder="SLT/2026/001"
+                className={inputCls}
+              />
+            </Field>
+            <Field label="Status">
+              <select
+                value={form.status}
+                onChange={(e) => setF("status", e.target.value)}
+                className={inputCls}
+              >
+                <option value="Open">Open</option>
+                <option value="Closed">Closed</option>
+              </select>
+            </Field>
+          </div>
+          <Field label="Tender Name *">
+            <input
+              required
+              value={form.name}
+              onChange={(e) => setF("name", e.target.value)}
+              placeholder="Brief title"
+              className={inputCls}
+            />
+          </Field>
+          <Field label="Customer *">
+            <select
+              required
+              value={form.customer_id}
+              onChange={(e) => setF("customer_id", e.target.value)}
+              className={inputCls}
+            >
+              <option value="">Select customer…</option>
+              {customers.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          </Field>
+          <Field label="Description">
+            <textarea
+              rows={2}
+              value={form.description}
+              onChange={(e) => setF("description", e.target.value)}
+              placeholder="Brief description…"
+              className={`${inputCls} resize-none`}
+            />
+          </Field>
+          <div className="grid grid-cols-2 gap-4">
+            <Field label="Budget (LKR)">
+              <input
+                type="number"
+                value={form.budget}
+                onChange={(e) => setF("budget", e.target.value)}
+                placeholder="0"
+                className={inputCls}
+              />
+            </Field>
+            <Field label="Awarded (LKR)">
+              <input
+                type="number"
+                value={form.awarded_amount}
+                onChange={(e) => setF("awarded_amount", e.target.value)}
+                placeholder="0"
+                className={inputCls}
+              />
+            </Field>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <Field label="Start Date">
+              <input
+                type="date"
+                value={form.start_date}
+                onChange={(e) => setF("start_date", e.target.value)}
+                className={inputCls}
+              />
+            </Field>
+            <Field label="End Date">
+              <input
+                type="date"
+                value={form.end_date}
+                onChange={(e) => setF("end_date", e.target.value)}
+                className={inputCls}
+              />
+            </Field>
+          </div>
         </div>
       </FormModal>
 

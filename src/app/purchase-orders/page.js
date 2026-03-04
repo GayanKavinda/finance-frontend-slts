@@ -478,113 +478,115 @@ export default function POPage() {
         isOpen={drawerOpen}
         onClose={() => setDrawerOpen(false)}
         title={selectedPO ? "Update PO" : "Issue Purchase Order"}
-        description={selectedPO ? "Edit purchase order details" : "Issue a new purchase order"}
+        description={
+          selectedPO
+            ? "Edit purchase order details"
+            : "Issue a new purchase order"
+        }
         onSubmit={handleSubmit}
         submitText={selectedPO ? "Update" : "Issue"}
         isSubmitting={saving}
         size="lg"
       >
         <div className="space-y-5">
-                <div className="grid grid-cols-2 gap-4">
-                  <Field label="PO Number *">
-                    <input
-                      required
-                      value={form.po_number}
-                      onChange={(e) => setF("po_number", e.target.value)}
-                      placeholder="PO/001/2026"
-                      className={inputCls}
-                    />
-                  </Field>
-                  <Field label="PO Date *">
-                    <input
-                      required
-                      type="date"
-                      value={form.po_date}
-                      onChange={(e) => setF("po_date", e.target.value)}
-                      className={inputCls}
-                    />
-                  </Field>
-                </div>
-                <Field label="Project Job *">
-                  <select
-                    required
-                    value={form.job_id}
-                    onChange={(e) => {
-                      const j = jobs.find(
-                        (j) => j.id === Number(e.target.value),
-                      );
-                      setForm((f) => ({
-                        ...f,
-                        job_id: e.target.value,
-                        tender_id: j?.tender_id || "",
-                        customer_id: j?.customer_id || f.customer_id,
-                      }));
-                    }}
-                    className={inputCls}
-                  >
-                    <option value="">Select job…</option>
-                    {jobs.map((j) => (
-                      <option key={j.id} value={j.id}>
-                        {j.name}
-                      </option>
-                    ))}
-                  </select>
-                </Field>
-                <div className="grid grid-cols-2 gap-4">
-                  <Field label="Customer *">
-                    <select
-                      required
-                      value={form.customer_id}
-                      onChange={(e) => setF("customer_id", e.target.value)}
-                      className={inputCls}
-                    >
-                      <option value="">Select…</option>
-                      {customers.map((c) => (
-                        <option key={c.id} value={c.id}>
-                          {c.name}
-                        </option>
-                      ))}
-                    </select>
-                  </Field>
-                  <Field label="Status">
-                    <select
-                      value={form.status}
-                      onChange={(e) => setF("status", e.target.value)}
-                      className={inputCls}
-                    >
-                      <option value="Draft">Draft</option>
-                      <option value="Approved">Approved</option>
-                    </select>
-                  </Field>
-                </div>
-                <Field label="Amount (LKR) *">
-                  <input
-                    required
-                    type="number"
-                    value={form.po_amount}
-                    onChange={(e) => setF("po_amount", e.target.value)}
-                    placeholder="0"
-                    className={inputCls}
-                  />
-                </Field>
-                <Field label="Billing Address">
-                  <textarea
-                    rows={2}
-                    value={form.billing_address}
-                    onChange={(e) => setF("billing_address", e.target.value)}
-                    placeholder="Billing address…"
-                    className={`${inputCls} resize-none`}
-                  />
-                </Field>
-                <Field label="Description / Terms">
-                  <textarea
-                    rows={3}
-                    value={form.po_description}
-                    onChange={(e) => setF("po_description", e.target.value)}
-                    placeholder="PO details or terms…"
-                    className={`${inputCls} resize-none`}
-                  />
-                </Field>
+          <div className="grid grid-cols-2 gap-4">
+            <Field label="PO Number *">
+              <input
+                required
+                value={form.po_number}
+                onChange={(e) => setF("po_number", e.target.value)}
+                placeholder="PO/001/2026"
+                className={inputCls}
+              />
+            </Field>
+            <Field label="PO Date *">
+              <input
+                required
+                type="date"
+                value={form.po_date}
+                onChange={(e) => setF("po_date", e.target.value)}
+                className={inputCls}
+              />
+            </Field>
+          </div>
+          <Field label="Project Job *">
+            <select
+              required
+              value={form.job_id}
+              onChange={(e) => {
+                const j = jobs.find((j) => j.id === Number(e.target.value));
+                setForm((f) => ({
+                  ...f,
+                  job_id: e.target.value,
+                  tender_id: j?.tender_id || "",
+                  customer_id: j?.customer_id || f.customer_id,
+                }));
+              }}
+              className={inputCls}
+            >
+              <option value="">Select job…</option>
+              {jobs.map((j) => (
+                <option key={j.id} value={j.id}>
+                  {j.name}
+                </option>
+              ))}
+            </select>
+          </Field>
+          <div className="grid grid-cols-2 gap-4">
+            <Field label="Customer *">
+              <select
+                required
+                value={form.customer_id}
+                onChange={(e) => setF("customer_id", e.target.value)}
+                className={inputCls}
+              >
+                <option value="">Select…</option>
+                {customers.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+            </Field>
+            <Field label="Status">
+              <select
+                value={form.status}
+                onChange={(e) => setF("status", e.target.value)}
+                className={inputCls}
+              >
+                <option value="Draft">Draft</option>
+                <option value="Approved">Approved</option>
+              </select>
+            </Field>
+          </div>
+          <Field label="Amount (LKR) *">
+            <input
+              required
+              type="number"
+              value={form.po_amount}
+              onChange={(e) => setF("po_amount", e.target.value)}
+              placeholder="0"
+              className={inputCls}
+            />
+          </Field>
+          <Field label="Billing Address">
+            <textarea
+              rows={2}
+              value={form.billing_address}
+              onChange={(e) => setF("billing_address", e.target.value)}
+              placeholder="Billing address…"
+              className={`${inputCls} resize-none`}
+            />
+          </Field>
+          <Field label="Description / Terms">
+            <textarea
+              rows={3}
+              value={form.po_description}
+              onChange={(e) => setF("po_description", e.target.value)}
+              placeholder="PO details or terms…"
+              className={`${inputCls} resize-none`}
+            />
+          </Field>
         </div>
       </FormModal>
 

@@ -12,7 +12,6 @@ export default function Home() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
 
-
   useEffect(() => {
     if (!isAutoPlaying) return;
 
