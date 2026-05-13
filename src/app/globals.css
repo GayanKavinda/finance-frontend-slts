@@ -109,7 +109,7 @@
   }
 
   body {
-    background-color: hsl(var(--background));
+    background-color: transparent;
     color: hsl(var(--foreground));
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -195,15 +195,91 @@
 @layer utilities {
   /* Glassmorphism effect */
   .glass-effect {
-    background: rgba(255, 255, 255, 0.85);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.05);
   }
 
   .dark .glass-effect {
-    background: rgba(15, 23, 42, 0.8);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(15, 23, 42, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.2);
+  }
+
+  /* Pulsing Background Animations */
+  .pulsing-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    overflow: hidden;
+    background: hsl(var(--background));
+  }
+
+  .pulsing-blob {
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.15;
+    animation: pulse-movement 20s infinite alternate ease-in-out;
+  }
+
+  .dark .pulsing-blob {
+    opacity: 0.1;
+  }
+
+  .blob-1 {
+    background: #a855f7; /* Purple */
+    top: -100px;
+    right: -100px;
+    animation-delay: 0s;
+  }
+
+  .blob-2 {
+    background: #ec4899; /* Pink */
+    bottom: -150px;
+    left: -100px;
+    animation-delay: -5s;
+  }
+
+  .blob-3 {
+    background: #8b5cf6; /* Violet */
+    top: 40%;
+    left: 20%;
+    width: 400px;
+    height: 400px;
+    animation-delay: -10s;
+  }
+
+  /* Light mode specific blob colors */
+  :root .blob-1 { background: #f3e8ff; }
+  :root .blob-2 { background: #fce7f3; }
+  :root .blob-3 { background: #ede9fe; }
+
+  /* Dark mode specific blob colors */
+  .dark .blob-1 { background: #6b21a8; }
+  .dark .blob-2 { background: #9d174d; }
+  .dark .blob-3 { background: #4c1d95; }
+
+  @keyframes pulse-movement {
+    0% {
+      transform: translate(0, 0) scale(1);
+    }
+    33% {
+      transform: translate(50px, 100px) scale(1.1);
+    }
+    66% {
+      transform: translate(-100px, 50px) scale(0.9);
+    }
+    100% {
+      transform: translate(0, 0) scale(1);
+    }
   }
 
   /* Animated background for the visual side */

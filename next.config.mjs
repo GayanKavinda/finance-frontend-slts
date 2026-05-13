@@ -12,7 +12,7 @@ const nextConfig = {
   },
   async rewrites() {
     const backendUrl =
-      process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+      process.env.NEXT_PUBLIC_API_URL || "http://localhost:9000";
     return [
       {
         source: "/api/:path*",
@@ -33,7 +33,7 @@ const nextConfig = {
       {
         protocol: "http",
         hostname: "localhost",
-        port: "8000",
+        port: "9000",
         pathname: "/storage/**",
       },
       {

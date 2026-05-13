@@ -14,6 +14,7 @@ import { AUTH_PATHS } from "@/constants/navigation";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import PublicRoute from "@/components/PublicRoute";
 import ScrollToTop from "@/components/ScrollToTop";
+import PulsingBackground from "@/components/PulsingBackground";
 
 const SidebarContext = createContext();
 
@@ -49,9 +50,10 @@ function ScrollableContent({ children }) {
       value={{ isSidebarCollapsed, setIsSidebarCollapsed }}
     >
       <ThemeScrollArea
-        className="h-full w-full bg-inherit"
+        className="h-full w-full bg-transparent"
         onScroll={handleScroll}
       >
+        <PulsingBackground />
         <div className="flex flex-col min-h-screen">
           <Navbar
             isMobileSidebarOpen={isMobileSidebarOpen}

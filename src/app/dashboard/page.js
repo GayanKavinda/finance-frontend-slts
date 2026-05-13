@@ -89,7 +89,7 @@ function useCountUp(target, duration = 1200) {
 function ChartTooltip({ active, payload, label }) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-white dark:bg-gray-800 px-3 py-2.5 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 max-w-[200px]">
+    <div className="glass-effect px-3 py-2.5 rounded-xl shadow-xl max-w-[200px]">
       <p className="text-[11px] font-bold text-gray-400 mb-1.5 uppercase tracking-wider">
         {label}
       </p>
@@ -119,7 +119,7 @@ function ImpactCard({ icon: Icon, label, value, iconColor, delay }) {
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay }}
-      className="bg-card rounded-lg border p-6 hover:shadow-md transition-shadow"
+      className="glass-effect rounded-lg p-6 hover:shadow-md transition-shadow"
     >
       <div className="flex items-center justify-between mb-4">
         <div
@@ -143,7 +143,7 @@ function StatChip({ icon: Icon, label, value, iconColor, delay }) {
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.3, delay }}
-      className="flex items-center gap-3 bg-card rounded-lg px-4 py-3 border hover:shadow-sm transition-shadow"
+      className="flex items-center gap-3 glass-effect rounded-lg px-4 py-3 hover:shadow-sm transition-shadow"
     >
       <div className={`p-2 rounded-md ${iconColor} shrink-0`}>
         <Icon className="w-4 h-4" />
@@ -168,7 +168,7 @@ function RevenueMetric({ label, amount, icon: Icon, iconColor, delay }) {
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay }}
-      className="bg-card rounded-lg border p-4"
+      className="glass-effect rounded-lg p-4"
     >
       <div className="flex items-center justify-between mb-3">
         <p className="text-xs font-medium text-muted-foreground">{label}</p>
@@ -322,14 +322,14 @@ export default function Dashboard() {
   const firstName = user.name?.split(" ")[0];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-transparent">
       <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8 max-w-[1440px] mx-auto space-y-6">
         {/* ── Hero Banner ──────────────────────────────────────────────── */}
         <motion.div
           initial={{ opacity: 0, y: -16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="bg-card rounded-xl border shadow-sm p-6"
+          className="glass-effect rounded-xl shadow-sm p-6"
         >
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-center gap-4">
@@ -450,7 +450,7 @@ export default function Dashboard() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.35, delay: 0.2 }}
-            className="lg:col-span-2 bg-card rounded-xl p-6 shadow-sm border"
+            className="lg:col-span-2 glass-effect rounded-xl p-6 shadow-sm"
           >
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
@@ -556,7 +556,7 @@ export default function Dashboard() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: 0.25 }}
-            className="bg-card rounded-xl border p-6"
+            className="glass-effect rounded-xl p-6"
           >
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 rounded-lg bg-emerald-500/10 dark:bg-emerald-500/20 flex items-center justify-center">
@@ -630,7 +630,7 @@ export default function Dashboard() {
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35, delay: 0.3 }}
-          className="bg-card rounded-xl border shadow-sm overflow-hidden"
+          className="glass-effect rounded-xl shadow-sm overflow-hidden"
         >
           <div className="flex items-center justify-between p-6 border-b">
             <div className="flex items-center gap-3">

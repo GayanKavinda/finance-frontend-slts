@@ -25,7 +25,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`font-sans h-screen w-full overflow-hidden antialiased bg-slate-50 dark:bg-slate-950 transition-colors duration-300`}
+        className={`font-sans h-screen w-full overflow-hidden antialiased bg-transparent transition-colors duration-300`}
       >
         <Providers>
           <LayoutContent>{children}</LayoutContent>

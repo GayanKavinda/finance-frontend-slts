@@ -251,9 +251,9 @@ export default function Navbar({
           className={`w-full transition-all duration-500 ${
             isTransparentPage
               ? scrolled
-                ? "bg-white/70 dark:bg-[#0F172A]/70 backdrop-blur-md border-b border-white/20 dark:border-white/10 shadow-lg"
+                ? "glass-effect"
                 : "bg-transparent border-transparent"
-              : "bg-white/70 dark:bg-[#0F172A]/70 backdrop-blur-md border-b border-white/20 dark:border-white/10 shadow-lg"
+              : "glass-effect"
           } px-4 md:px-6`}
         >
           <div className="w-full mx-auto h-16 flex items-center justify-between px-2">
