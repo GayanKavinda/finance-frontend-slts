@@ -75,8 +75,12 @@ export const invoiceActions = (invoice, permissions = []) => {
       break;
 
     case "Approved":
-      if (canMarkPaid(permissions)) actions.push("mark-paid");
+      if (canMarkBanked(permissions)) actions.push("mark-banked");
       if (canRejectInvoice(permissions)) actions.push("reject");
+      break;
+
+    case "Payment Received":
+      if (canMarkBanked(permissions)) actions.push("mark-banked");
       break;
 
     case "Rejected":
@@ -84,6 +88,7 @@ export const invoiceActions = (invoice, permissions = []) => {
       if (canEditInvoice(permissions)) actions.push("edit");
       break;
 
+    case "Banked":
     case "Paid":
       // Terminal state — no actions
       break;
@@ -112,7 +117,7 @@ export const getStatusMeta = (status) => {
     Rejected: { label: "Rejected", color: "red" },
     "Payment Received": { label: "Payment Received", color: "indigo" },
     Banked: { label: "Banked", color: "teal" },
-    Paid: { label: "Paid", color: "teal" },
+    Paid: { label: "Banked", color: "teal" },
   };
   return meta[status] || { label: status, color: "gray" };
 };

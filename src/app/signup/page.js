@@ -257,6 +257,7 @@ export default function Signup() {
             src="/images/Signup.png"
             alt="Signup Showcase"
             fill
+            sizes="(max-width: 1024px) 100vw, 50vw"
             className="object-cover transition-all duration-[1000ms] ease-out group-hover:scale-110 group-hover:brightness-110 group-hover:saturate-[1.2]"
             priority
           />

@@ -42,6 +42,9 @@ export default function CreateInvoicePage() {
     po_id: "",
     invoice_amount: "",
     invoice_date: new Date().toISOString().split("T")[0],
+    billing_address: "",
+    customer_po_number: "",
+    customer_po_description: "",
   });
 
   // Load all tenders on mount
@@ -106,12 +109,17 @@ export default function CreateInvoicePage() {
     }
   }, [form.job_id]);
 
-  // Auto-set amount when PO is selected
+  // Auto-set amount and details when PO is selected
   useEffect(() => {
     if (form.po_id) {
       const selectedPO = pos.find((p) => p.id == form.po_id);
       if (selectedPO) {
-        setForm((prev) => ({ ...prev, invoice_amount: selectedPO.po_amount }));
+        setForm((prev) => ({ 
+          ...prev, 
+          invoice_amount: selectedPO.po_amount,
+          customer_po_number: selectedPO.po_number,
+          customer_po_description: selectedPO.description || ""
+        }));
       }
     }
   }, [form.po_id, pos]);
@@ -290,6 +298,42 @@ export default function CreateInvoicePage() {
               onChange={handleChange}
               placeholder="0.00"
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="billing_address">Manual Billing Address</Label>
+            <textarea
+              id="billing_address"
+              name="billing_address"
+              rows={2}
+              value={form.billing_address}
+              onChange={handleChange}
+              placeholder="Enter manual billing address if different from customer default..."
+              className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="customer_po_number">Customer PO Number</Label>
+              <Input
+                id="customer_po_number"
+                name="customer_po_number"
+                value={form.customer_po_number}
+                onChange={handleChange}
+                placeholder="e.g. CUST-PO-123"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="customer_po_description">Customer PO Demand / Description</Label>
+              <Input
+                id="customer_po_description"
+                name="customer_po_description"
+                value={form.customer_po_description}
+                onChange={handleChange}
+                placeholder="e.g. Advance payment for milestone 1"
+              />
+            </div>
           </div>
 
           {form.customer_id && (

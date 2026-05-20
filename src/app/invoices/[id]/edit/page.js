@@ -54,6 +54,9 @@ export default function EditInvoicePage() {
         invoice_amount:
           invoice.invoice_amount === "" ? 0 : Number(invoice.invoice_amount),
         invoice_date: invoice.invoice_date,
+        billing_address: invoice.billing_address,
+        customer_po_number: invoice.customer_po_number,
+        customer_po_description: invoice.customer_po_description,
       });
       setModalOpen(false);
       router.push(`/invoices/${id}`);
@@ -187,6 +190,41 @@ export default function EditInvoicePage() {
               onChange={handleChange}
               required
             />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="billing_address">Manual Billing Address</Label>
+            <textarea
+              id="billing_address"
+              name="billing_address"
+              rows={2}
+              value={invoice.billing_address || ""}
+              onChange={handleChange}
+              placeholder="Enter manual billing address if different from customer default..."
+              className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="customer_po_number">Customer PO Number</Label>
+              <Input
+                id="customer_po_number"
+                name="customer_po_number"
+                value={invoice.customer_po_number || ""}
+                onChange={handleChange}
+                placeholder="e.g. CUST-PO-123"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="customer_po_description">Customer PO Demand / Description</Label>
+              <Input
+                id="customer_po_description"
+                name="customer_po_description"
+                value={invoice.customer_po_description || ""}
+                onChange={handleChange}
+                placeholder="e.g. Advance payment for milestone 1"
+              />
+            </div>
           </div>
         </div>
       </FormModal>

@@ -25,9 +25,22 @@ import {
   TrendingUp,
   CheckCircle,
   Clock,
+  FileText,
+  Download,
 } from "lucide-react";
+import { downloadTenderAwardLetter } from "@/lib/procurement";
 import StatusBadge from "@/components/ui/StatusBadge";
 import FormModal from "@/components/ui/FormModal";
+import WorkflowRoadmap from "@/components/ui/WorkflowRoadmap";
+import { DotmSquare12 } from "@/components/ui/dotm-square-12";
+import { LoadingOverlay } from "@/components/ui/LoadingOverlay";
+
+const TENDER_STEPS = [
+  { id: "Open", label: "Open", icon: Briefcase },
+  { id: "In Progress", label: "In Progress", icon: Clock },
+  { id: "Awarded", label: "Awarded", icon: CheckCircle },
+  { id: "Closed", label: "Closed", icon: CheckCircle },
+];
 
 // ── Status config ──────────────────────────────────────────────
 const STATUS_COLORS = {
@@ -56,7 +69,7 @@ const getStatus = (s) => STATUS_COLORS[s] || STATUS_COLORS.Open;
 
 const fmt = (n) => (n ? `LKR ${Number(n).toLocaleString()}` : "—");
 
-function TenderCard({ tender, onEdit, onDelete }) {
+function TenderCard({ tender, onEdit, onDelete, onDownloadAward }) {
   const st = getStatus(tender.status);
   const budget = Number(tender.budget || 0);
   const awarded = Number(tender.awarded_amount || 0);
@@ -98,12 +111,23 @@ function TenderCard({ tender, onEdit, onDelete }) {
             <button
               onClick={() => onEdit(tender)}
               className="p-1.5 hover:bg-blue-50 dark:hover:bg-blue-900/20 text-blue-500 rounded-lg transition-colors"
+              title="Edit"
             >
               <Edit2 className="w-3.5 h-3.5" />
             </button>
+            {tender.awarded_amount > 0 && (
+              <button
+                onClick={() => onDownloadAward(tender)}
+                className="p-1.5 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 text-emerald-500 rounded-lg transition-colors"
+                title="Award Letter"
+              >
+                <FileText className="w-3.5 h-3.5" />
+              </button>
+            )}
             <button
               onClick={() => onDelete(tender.id)}
               className="p-1.5 hover:bg-red-50 dark:hover:bg-red-900/20 text-red-500 rounded-lg transition-colors"
+              title="Delete"
             >
               <Trash2 className="w-3.5 h-3.5" />
             </button>
@@ -162,16 +186,14 @@ function TenderCard({ tender, onEdit, onDelete }) {
 
 function SkeletonCard() {
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 overflow-hidden animate-pulse">
-      <div className="h-1 bg-gray-200 dark:bg-gray-700" />
-      <div className="p-5 space-y-3">
+    <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 overflow-hidden relative min-h-[220px] flex flex-col">
+      <div className="h-1 bg-gray-200 dark:bg-gray-700 w-full" />
+      <div className="flex-1 flex items-center justify-center">
+        <DotmSquare12 size={40} dotSize={5} color="rgba(192, 132, 252, 0.2)" />
+      </div>
+      <div className="p-5 space-y-3 opacity-30">
         <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-24" />
         <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-4/5" />
-        <div className="h-1.5 bg-gray-100 dark:bg-gray-700 rounded" />
-        <div className="grid grid-cols-2 gap-2">
-          <div className="h-12 bg-gray-100 dark:bg-gray-700 rounded-xl" />
-          <div className="h-12 bg-gray-100 dark:bg-gray-700 rounded-xl" />
-        </div>
       </div>
     </div>
   );
@@ -302,12 +324,29 @@ export default function TendersPage() {
     }
   };
 
+  const handleDownloadAward = async (tender) => {
+    try {
+      const blob = await downloadTenderAwardLetter(tender.id);
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `Award-Letter-${tender.tender_number}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      toast.success("Award letter downloaded");
+    } catch (err) {
+      toast.error("Failed to download award letter");
+    }
+  };
+
   const totalBudget = tenders.reduce((s, t) => s + Number(t.budget || 0), 0);
   const openCount = tenders.filter((t) => t.status === "Open").length;
   const closedCount = tenders.filter((t) => t.status === "Closed").length;
 
   return (
     <>
+      <LoadingOverlay isLoading={saving} message={selectedTender ? "Updating Tender..." : "Creating Tender..."} />
       <div className="min-h-full p-6 space-y-6">
         {/* Hero */}
         <div className="relative bg-gradient-to-br from-teal-900 via-emerald-900 to-slate-900 rounded-3xl p-8 overflow-hidden">
@@ -345,6 +384,28 @@ export default function TendersPage() {
             </button>
           </div>
         </div>
+
+        {/* Selected Tender Contextual Roadmap */}
+        {selectedTender && (
+          <div className="bg-white/5 backdrop-blur-xl rounded-3xl p-6 border border-white/10 shadow-2xl">
+            <div className="flex items-center justify-between mb-4 px-2">
+              <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                <Target className="w-5 h-5 text-teal-400" />
+                Procurement Pipeline: {selectedTender.tender_number}
+              </h2>
+              <button 
+                onClick={() => setSelectedTender(null)}
+                className="text-xs text-teal-400 hover:text-teal-300 font-bold uppercase tracking-widest"
+              >
+                Clear Selection
+              </button>
+            </div>
+            <WorkflowRoadmap 
+              currentStatus={selectedTender.status} 
+              steps={TENDER_STEPS} 
+            />
+          </div>
+        )}
 
         {/* Stats */}
         <div className="grid grid-cols-3 gap-4">
@@ -440,6 +501,7 @@ export default function TendersPage() {
                 tender={t}
                 onEdit={openDrawer}
                 onDelete={(id) => setDeleteConfirm(id)}
+                onDownloadAward={handleDownloadAward}
               />
             ))
           )}

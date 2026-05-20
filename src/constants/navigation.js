@@ -28,12 +28,6 @@ export const navLinks = [
     requiredPermission: "manage-customers",
   },
   {
-    label: "Contractors",
-    href: "/contractors",
-    icon: Building2,
-    requiredPermission: "manage-contractors",
-  },
-  {
     label: "Tenders",
     href: "/tenders",
     icon: Briefcase,
@@ -44,12 +38,6 @@ export const navLinks = [
     href: "/jobs",
     icon: Target,
     requiredPermission: "manage-jobs",
-  },
-  {
-    label: "Contractor Bills",
-    href: "/contractor-bills",
-    icon: Banknote,
-    requiredPermission: "submit-contractor-bill",
   },
   {
     label: "Purchase Orders",

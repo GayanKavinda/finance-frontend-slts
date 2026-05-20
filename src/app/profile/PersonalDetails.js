@@ -90,6 +90,7 @@ export default function PersonalDetails({ user, refetch }) {
   const [showCropModal, setShowCropModal] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [tempImage, setTempImage] = useState(null);
+  const [tempImageData, setTempImageData] = useState(null);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
 
   const fileInputRef = useRef(null);
@@ -291,6 +292,7 @@ export default function PersonalDetails({ user, refetch }) {
                 src={avatarPreview}
                 alt="Profile Preview"
                 fill
+                sizes="(max-width: 768px) 100vw, 384px"
                 className="object-cover"
               />
               <button
@@ -309,6 +311,7 @@ export default function PersonalDetails({ user, refetch }) {
         {showCropModal && tempImage && (
           <ImageCropModal
             image={tempImage}
+            imageData={tempImageData}
             onComplete={handleCropComplete}
             onCancel={handleCropCancel}
           />
@@ -340,6 +343,7 @@ export default function PersonalDetails({ user, refetch }) {
                     src={avatarPreview}
                     alt="avatar"
                     fill
+                    sizes="80px"
                     className="object-cover"
                   />
 
@@ -391,6 +395,11 @@ export default function PersonalDetails({ user, refetch }) {
                     const reader = new FileReader();
                     reader.onload = () => {
                       setTempImage(reader.result);
+                      setTempImageData({
+                        name: f.name,
+                        size: f.size,
+                        type: f.type,
+                      });
                       setShowCropModal(true);
                     };
                     reader.readAsDataURL(f);

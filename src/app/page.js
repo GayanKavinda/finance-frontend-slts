@@ -68,6 +68,7 @@ export default function Home() {
                     src={slide.image}
                     alt={slide.title}
                     fill
+                    sizes="100vw"
                     className="object-cover"
                     priority={idx === 0}
                     quality={90}
@@ -130,6 +131,7 @@ export default function Home() {
                       src="/icons/slt_digital_icon.png"
                       alt="SLT Digital Services"
                       fill
+                      sizes="(max-width: 768px) 160px, 180px"
                       className="object-contain brightness-0 invert"
                       priority
                     />
