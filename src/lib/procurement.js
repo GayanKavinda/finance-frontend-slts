@@ -55,6 +55,13 @@ export const deleteTender = async (id) => {
   return res.data;
 };
 
+export const downloadTenderAwardLetter = async (id) => {
+  const res = await axios.get(`/tenders/${id}/award-customer`, {
+    responseType: "blob",
+  });
+  return res.data;
+};
+
 // Jobs
 export const fetchJobs = async ({
   page = 1,

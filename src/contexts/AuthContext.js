@@ -1,22 +1,25 @@
 // src/context/AuthContext.js
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState, useCallback } from "react";
 import axios from "@/lib/axios";
 import { fetchCsrf } from "@/lib/auth";
+import { useRouter } from "next/navigation";
 
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
+  const router = useRouter();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchUser = async () => {
+  const fetchUser = useCallback(async () => {
     console.log("[AuthContext] Fetching user...");
     try {
       const response = await axios.get("/user");
       console.log("[AuthContext] User fetched successfully:", response.data);
       setUser(response.data);
+      return response.data;
     } catch (error) {
       if (error.response?.status !== 401) {
         console.error(
@@ -28,23 +31,35 @@ export function AuthProvider({ children }) {
         console.log("[AuthContext] User not logged in (401)");
       }
       setUser(null);
+      return null;
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    console.log("[AuthContext] Initial check for user session...");
-    if (
-      window.location.pathname !== "/signin" &&
-      window.location.pathname !== "/signup"
-    ) {
-      fetchUser();
-    } else {
-      console.log("[AuthContext] On auth page, skipping initial fetchUser");
-      setLoading(false);
-    }
-  }, []);
+    let isMounted = true;
+
+    const initAuth = async () => {
+      console.log("[AuthContext] Initial check for user session...");
+      const currentUser = await fetchUser();
+      
+      if (!isMounted) return;
+
+      // If user is already logged in and on landing/signin/signup page, redirect to dashboard
+      const isAuthPage = ["/", "/signin", "/signup"].includes(window.location.pathname);
+      if (isAuthPage && currentUser) {
+        console.log("[AuthContext] User is already authenticated, redirecting to dashboard...");
+        router.push("/dashboard");
+      }
+    };
+
+    initAuth();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [fetchUser, router]);
 
   const logout = async () => {
     console.log("[AuthContext] Logout initiation started");

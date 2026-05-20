@@ -21,3 +21,13 @@ export const fetchExecutiveSummary = async () => {
   // This is the new endpoint we created in InvoiceController
   return res.data;
 };
+
+export const fetchApprovalVelocity = async () => {
+  const res = await axios.get("/invoices/approval-velocity");
+  return res.data;
+};
+
+export const fetchPerformanceMetrics = async () => {
+  const res = await axios.get("/invoices/performance-metrics");
+  return res.data;
+};

@@ -1,0 +1,82 @@
+.dmx-root {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  --dmx-cycle: 1500ms;
+  --dmx-opacity-base: 0.16;
+  --dmx-opacity-mid: 0.32;
+  --dmx-opacity-peak: 1;
+  --dmx-halo-level: 0;
+}
+
+.dmx-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-rows: repeat(5, minmax(0, 1fr));
+}
+
+.dmx-dot {
+  border-radius: 999px;
+  clip-path: none;
+  display: block;
+  background: var(--dmx-dot-fill, currentColor);
+  opacity: calc(0.5 * (var(--dmx-opacity-base) + var(--dmx-opacity-mid)));
+  --dmx-bloom-level: 0;
+  transform-origin: center;
+  transform: none;
+  will-change: opacity;
+}
+
+.dmx-root.dmx-dot-shape-circle .dmx-dot {
+  border-radius: 999px;
+}
+
+.dmx-root.dmx-dot-shape-square .dmx-dot {
+  border-radius: 0;
+}
+
+.dmx-bloom .dmx-dot {
+  filter:
+    drop-shadow(0 0 calc(var(--dmx-dot-size, 3px) * 0.75 * max(var(--dmx-bloom-level, 0), var(--dmx-halo-level, 0))) currentColor)
+    drop-shadow(0 0 calc(var(--dmx-dot-size, 3px) * 1.35 * max(var(--dmx-bloom-level, 0), var(--dmx-halo-level, 0))) currentColor);
+  will-change: opacity, filter;
+}
+
+.dmx-dot.dmx-inactive {
+  opacity: 0 !important;
+  --dmx-bloom-level: 0;
+  animation: none !important;
+  visibility: hidden;
+  pointer-events: none;
+  will-change: auto;
+  filter: none;
+}
+
+.dmx-center-origin-ripple {
+  animation: dmx-center-origin-ripple calc(var(--dmx-cycle) * var(--dmx-speed, 1)) ease-in-out infinite;
+  animation-delay: calc(var(--dmx-center-ripple-ring, 0) * 0.16 * var(--dmx-cycle) * var(--dmx-speed, 1));
+  will-change: opacity;
+}
+
+@keyframes dmx-center-origin-ripple {
+  0%, 100% {
+    opacity: calc(0.625 * var(--dmx-opacity-base));
+    --dmx-bloom-level: 0;
+  }
+  34% {
+    opacity: var(--dmx-opacity-peak);
+    --dmx-bloom-level: 1;
+  }
+  60% {
+    opacity: calc(0.5 * (var(--dmx-opacity-base) + var(--dmx-opacity-mid)));
+    --dmx-bloom-level: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dmx-dot, .dmx-center-origin-ripple {
+    animation: none !important;
+    transition: none !important;
+  }
+}

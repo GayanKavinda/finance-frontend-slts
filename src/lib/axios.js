@@ -1,9 +1,19 @@
-// src/lib/axios.js
-
 import Axios from "axios";
 
+/**
+ * Service Gateway Configuration
+ * In a full microservices architecture, these would point to different hosts.
+ * Example: PROCUREMENT: "https://procurement.api.finance.com"
+ */
+const SERVICE_URLS = {
+  DEFAULT: "/api",
+  BILLING: "/api", 
+  PROCUREMENT: "/api",
+  AUTH: "/api",
+};
+
 const axios = Axios.create({
-  baseURL: "/api", // Proxied via Next.js
+  baseURL: SERVICE_URLS.DEFAULT,
   withCredentials: true,
   xsrfCookieName: "XSRF-TOKEN",
   xsrfHeaderName: "X-XSRF-TOKEN",
@@ -11,6 +21,13 @@ const axios = Axios.create({
     Accept: "application/json",
   },
 });
+
+// Helper to switch service URLs dynamically if needed
+export const setServiceUrl = (service, url) => {
+  if (SERVICE_URLS[service]) {
+    SERVICE_URLS[service] = url;
+  }
+};
 
 // Add a request interceptor
 axios.interceptors.request.use(

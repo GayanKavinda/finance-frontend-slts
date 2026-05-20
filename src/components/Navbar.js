@@ -134,6 +134,7 @@ export default function Navbar({
                     src={user.avatar_url}
                     alt={user.name}
                     fill
+                    sizes="32px"
                     className="object-cover"
                   />
                 </div>
@@ -164,6 +165,7 @@ export default function Navbar({
                           src={user.avatar_url}
                           alt={user.name}
                           fill
+                          sizes="40px"
                           className="object-cover"
                         />
                       </div>
@@ -264,6 +266,7 @@ export default function Navbar({
                   src="/icons/slt_digital_icon.png"
                   alt="SLT Digital Logo"
                   fill
+                  sizes="100px"
                   className={`object-contain transition-all duration-300 ${
                     isLightContent
                       ? "brightness-0 invert"
@@ -360,6 +363,7 @@ export default function Navbar({
                       src="/icons/slt_digital_icon.png"
                       alt="Logo"
                       fill
+                      sizes="100px"
                       className="object-contain dark:brightness-0 dark:invert relative z-10"
                     />
                   </div>
@@ -394,6 +398,7 @@ export default function Navbar({
                             src={user.avatar_url}
                             alt={user.name}
                             fill
+                            sizes="56px"
                             className="object-cover"
                           />
                         </div>
