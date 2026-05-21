@@ -33,7 +33,7 @@ import {
   Building2,
   Download,
 } from "lucide-react";
-import { Card } from "@/components/ui/Card";
+import { Card } from "@/components/ui/card";
 import StatusBadge from "@/components/ui/StatusBadge";
 import { useAuth } from "@/contexts/AuthContext";
 
