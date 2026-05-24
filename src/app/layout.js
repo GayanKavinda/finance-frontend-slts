@@ -27,6 +27,7 @@ export default function RootLayout({ children }) {
       <body
         className={`font-sans h-screen w-full overflow-hidden antialiased bg-transparent transition-colors duration-300`}
       >
+        <div className="finance-gradient"></div>
         <Providers>
           <LayoutContent>{children}</LayoutContent>
         </Providers>
