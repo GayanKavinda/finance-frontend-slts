@@ -60,7 +60,7 @@ export default function Sidebar({
         initial={false}
         animate={{ width: isCollapsed ? 80 : 280 }}
         transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-        className="hidden lg:flex flex-col fixed left-0 top-16 h-[calc(100vh-4rem)] glass-effect z-30 shadow-lg"
+        className="hidden lg:flex flex-col fixed left-0 top-16 h-[calc(100vh-4rem)] bg-white/10 dark:bg-gray-900/10 backdrop-blur-md border border-white/20 dark:border-gray-800/20 z-30 shadow-lg"
       >
         {/* Toggle Button */}
         <motion.button
@@ -244,7 +244,7 @@ export default function Sidebar({
               animate={{ x: 0 }}
               exit={{ x: -280 }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="fixed left-0 top-0 h-full w-[280px] glass-effect z-50 lg:hidden flex flex-col shadow-2xl"
+              className="fixed left-0 top-0 h-full w-[280px] bg-white/10 dark:bg-gray-900/10 backdrop-blur-md z-50 lg:hidden flex flex-col shadow-2xl border border-white/20 dark:border-gray-800/20"
             >
               {/* Decorative Gradient */}
               <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
