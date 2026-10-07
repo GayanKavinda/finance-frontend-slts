@@ -29,12 +29,12 @@ function SectionHeader({ icon: Icon, title, iconColor = "text-primary" }) {
             <Icon size={18} className={iconColor} />
           </div>
         )}
-        <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+        <h3 className="text-sm font-medium text-slate-700 dark:text-slate-300 uppercase tracking-wider">
           {title}
         </h3>
       </div>
       <div
-        className={`h-0.5 w-16 bg-gradient-to-r ${iconColor.replace("text-", "from-").split(" ")[0]} to-transparent rounded-full`}
+        className={`h-0.5 w-16 bg-background ${iconColor.replace("text-", "from-").split(" ")[0]} to-transparent rounded-full`}
       ></div>
     </div>
   );
@@ -50,7 +50,7 @@ function Field({
 }) {
   return (
     <div className="flex flex-col gap-2">
-      <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 flex items-center gap-2 uppercase tracking-wider">
+      <label className="text-[10px] font-medium text-slate-500 dark:text-slate-400 flex items-center gap-2 uppercase tracking-wider">
         {Icon && <Icon size={12} className={iconColor} />} {label}{" "}
         {optional && (
           <span className="opacity-50 lowercase font-normal">(optional)</span>
@@ -214,7 +214,7 @@ export default function SecuritySettings() {
         <div className="w-full lg:col-span-2">
           <div className="relative rounded-2xl border border-slate-200 dark:border-slate-800 p-6 bg-white/60 dark:bg-slate-950/40 dark:shadow-[0_0_80px_-12px_rgba(0,180,235,0.15)]">
             {/* Glow effect for dark mode */}
-            <div className="absolute inset-0 -z-10 rounded-2xl bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 blur-2xl opacity-0 dark:opacity-60"></div>
+            <div className="absolute inset-0 -z-10 rounded-2xl bg-muted/50"></div>
 
             <SectionHeader
               icon={KeyRound}
@@ -264,7 +264,7 @@ export default function SecuritySettings() {
                   </div>
                   {passwordForm.watch("password") && (
                     <div className="space-y-1.5 mt-2">
-                      <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-wider">
+                      <div className="flex justify-between items-center text-[10px] font-medium uppercase tracking-wider">
                         <span className="text-slate-500">Strength</span>
                         <span
                           className={passwordStrength.color.replace(
@@ -310,9 +310,9 @@ export default function SecuritySettings() {
                   whileTap={{ scale: 0.95 }}
                   type="submit"
                   disabled={passwordForm.formState.isSubmitting}
-                  className="group relative flex items-center gap-2 overflow-hidden rounded-xl bg-primary px-5 py-2.5 text-xs font-bold text-primary-foreground shadow-lg shadow-primary/25 transition-all duration-300 hover:shadow-primary/40 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="group relative flex items-center gap-2 overflow-hidden rounded-xl bg-primary px-5 py-2.5 text-xs font-medium text-primary-foreground shadow-sm shadow-primary/25 transition-all duration-300 hover:shadow-primary/40 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 group-hover:animate-[shimmer_1.5s_infinite]"></div>
+                  <div className="absolute inset-0 -translate-x-full bg-transparent transition-transform duration-700 group-hover:animate-[shimmer_1.5s_infinite]"></div>
                   <span className="relative flex items-center gap-2">
                     {passwordForm.formState.isSubmitting ? (
                       <>
@@ -337,7 +337,7 @@ export default function SecuritySettings() {
 
         <div className="w-full lg:col-span-1">
           <div className="relative rounded-2xl border border-slate-200 dark:border-slate-800 p-6 bg-white/60 dark:bg-slate-950/40 dark:shadow-[0_0_80px_-12px_rgba(239,68,68,0.1)]">
-            <div className="absolute inset-0 -z-10 rounded-2xl bg-gradient-to-br from-red-500/5 via-transparent to-red-500/5 blur-2xl opacity-0 dark:opacity-40"></div>
+            <div className="absolute inset-0 -z-10 rounded-2xl bg-muted/50"></div>
 
             <SectionHeader
               icon={ShieldAlert}
@@ -352,9 +352,9 @@ export default function SecuritySettings() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={onDeactivate}
-              className="group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-gradient-to-r from-red-500 to-rose-600 px-4 py-2 text-xs font-bold text-white shadow-lg shadow-red-500/25 transition-all duration-300 hover:scale-[1.02] hover:shadow-red-500/40 active:scale-95 mb-3"
+              className="group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-destructive px-4 py-2 text-xs font-medium text-white shadow-sm shadow-red-500/25 transition-all duration-300 hover:scale-[1.02] hover:shadow-red-500/40 active:scale-95 mb-3"
             >
-              <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/10 to-transparent transition-transform duration-700 group-hover:animate-[shimmer_1.5s_infinite]"></div>
+              <div className="absolute inset-0 -translate-x-full bg-transparent transition-transform duration-700 group-hover:animate-[shimmer_1.5s_infinite]"></div>
               <Lock
                 size={16}
                 className="transition-transform duration-300 group-hover:rotate-12"
@@ -366,7 +366,7 @@ export default function SecuritySettings() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={onPermanentDelete}
-              className="group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl border border-red-200 dark:border-red-900/30 bg-white dark:bg-transparent px-4 py-2 text-xs font-bold text-red-600 dark:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 transition-all duration-300"
+              className="group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-xl border border-red-200 dark:border-red-900/30 bg-white dark:bg-transparent px-4 py-2 text-xs font-medium text-red-600 dark:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 transition-all duration-300"
             >
               <Trash2 size={16} />
               <span>Remove Account Permanently</span>

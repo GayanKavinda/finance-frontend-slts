@@ -83,10 +83,10 @@ export default function SystemLogsPage() {
             <div className="p-2 bg-primary/10 rounded-lg text-primary">
               <Terminal size={20} />
             </div>
-            <h1 className="text-2xl font-bold tracking-tight">
+            <h1 className="text-2xl font-medium tracking-tight">
               System Infrastructure
             </h1>
-            <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 text-[10px] font-bold uppercase tracking-wider border border-emerald-500/20">
+            <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 text-[10px] font-medium uppercase tracking-wider border border-emerald-500/20">
               <div
                 className={`w-1.5 h-1.5 rounded-full bg-emerald-500 ${
                   isLive ? "animate-pulse" : ""
@@ -100,7 +100,7 @@ export default function SystemLogsPage() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setIsLive(!isLive)}
-            className="flex items-center gap-2 px-3 py-2 text-xs font-bold rounded-lg border border-border bg-card hover:bg-muted transition-colors cursor-pointer"
+            className="flex items-center gap-2 px-3 py-2 text-xs font-medium rounded-lg border border-border bg-card hover:bg-muted transition-colors cursor-pointer"
           >
             {isLive ? <Pause size={14} /> : <Play size={14} />}
             {isLive ? "Pause Stream" : "Resume Stream"}
@@ -174,10 +174,10 @@ export default function SystemLogsPage() {
             />
           </div>
           <div className="flex items-center gap-2">
-            <button className="flex items-center gap-2 px-3 py-2 text-xs font-bold rounded-lg border border-border bg-background hover:bg-muted transition-colors cursor-pointer">
+            <button className="flex items-center gap-2 px-3 py-2 text-xs font-medium rounded-lg border border-border bg-background hover:bg-muted transition-colors cursor-pointer">
               <Filter size={14} /> Filter
             </button>
-            <button className="flex items-center gap-2 px-3 py-2 text-xs font-bold rounded-lg bg-primary text-white hover:opacity-90 transition-all cursor-pointer">
+            <button className="flex items-center gap-2 px-3 py-2 text-xs font-medium rounded-lg bg-primary text-white hover:opacity-90 transition-all cursor-pointer">
               <RefreshCcw size={14} /> Clear Logs
             </button>
           </div>
@@ -186,7 +186,7 @@ export default function SystemLogsPage() {
         <div className="flex-1 overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-muted/30 text-[10px] uppercase tracking-widest text-muted-foreground font-bold border-b border-border">
+              <tr className="bg-muted/30 text-[10px] uppercase tracking-widest text-muted-foreground font-medium border-b border-border">
                 <th className="px-6 py-3">Timestamp</th>
                 <th className="px-6 py-3">Level</th>
                 <th className="px-6 py-3">Source</th>
@@ -222,7 +222,7 @@ export default function SystemLogsPage() {
                     </td>
                     <td className="px-6 py-4">
                       <span
-                        className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase border ${
+                        className={`px-2 py-0.5 rounded text-[10px] font-medium uppercase border ${
                           log.type === "error"
                             ? "bg-red-500/10 text-red-500 border-red-500/20"
                             : log.type === "warning"
@@ -233,13 +233,13 @@ export default function SystemLogsPage() {
                         {log.type}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-xs font-bold text-foreground/80">
+                    <td className="px-6 py-4 text-xs font-medium text-foreground/80">
                       {log.title}
                     </td>
                     <td className="px-6 py-4 text-xs text-muted-foreground group-hover:text-foreground transition-colors max-w-md">
                       {log.description}
                     </td>
-                    <td className="px-6 py-4 text-xs text-right font-bold text-muted-foreground">
+                    <td className="px-6 py-4 text-xs text-right font-medium text-muted-foreground">
                       {log.latency ? `${log.latency}ms` : "--"}
                     </td>
                   </motion.tr>
@@ -273,17 +273,17 @@ function MetricCard({
         </div>
         {status && (
           <span
-            className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-widest ${statusColor || "text-emerald-500 bg-emerald-500/10"}`}
+            className={`text-[10px] font-medium px-2 py-0.5 rounded-full uppercase tracking-widest ${statusColor || "text-emerald-500 bg-emerald-500/10"}`}
           >
             {status}
           </span>
         )}
       </div>
       <div>
-        <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
+        <p className="text-xs font-medium text-muted-foreground uppercase tracking-widest">
           {label}
         </p>
-        <h3 className="text-2xl font-bold mt-1 tracking-tight">{value}</h3>
+        <h3 className="text-2xl font-medium mt-1 tracking-tight">{value}</h3>
       </div>
 
       {/* Small visualization based on type */}

@@ -5,14 +5,6 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { fetchInvoices, downloadInvoicePdf } from "@/lib/invoice";
 import { exportToCSV } from "@/lib/exportUtils";
-import StatusBadge from "@/components/ui/StatusBadge";
-import { DotmSquare12 } from "@/components/ui/dotm-square-12";
-import {
-  canEditInvoice,
-  canSubmitInvoice,
-  canApproveInvoice,
-  canRejectInvoice,
-} from "@/lib/permissions";
 import { usePermission } from "@/hooks/usePermission";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -23,78 +15,16 @@ import {
   ChevronLeft,
   ChevronRight,
   Receipt,
-  CheckCircle,
-  Clock,
-  DollarSign,
-  Filter,
+  Eye,
 } from "lucide-react";
-
-const INV_STATUS = {
-  Draft: {
-    pill: "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300",
-    dot: "bg-gray-400",
-  },
-  "Tax Generated": {
-    pill: "bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-400",
-    dot: "bg-violet-500",
-  },
-  Submitted: {
-    pill: "bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400",
-    dot: "bg-amber-500",
-  },
-  Approved: {
-    pill: "bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400",
-    dot: "bg-blue-500",
-  },
-  Rejected: {
-    pill: "bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400",
-    dot: "bg-red-400",
-  },
-  "Payment Received": {
-    pill: "bg-teal-50 dark:bg-teal-900/20 text-teal-700 dark:text-teal-400",
-    dot: "bg-teal-500",
-  },
-  Banked: {
-    pill: "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400",
-    dot: "bg-emerald-500",
-  },
-};
-const getInvStatus = (s) => INV_STATUS[s] || INV_STATUS.Draft;
-
-function InvoiceStatusPill({ status }) {
-  const cfg = getInvStatus(status);
-  return (
-    <span
-      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wide ${cfg.pill}`}
-    >
-      <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${cfg.dot}`} />
-      {status}
-    </span>
-  );
-}
-
-function SkeletonRow() {
-  return (
-    <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 p-5 flex items-center gap-4 relative overflow-hidden h-20">
-      <div className="w-10 h-10 rounded-xl bg-gray-200 dark:bg-gray-700 flex-shrink-0 flex items-center justify-center">
-        <DotmSquare12 size={24} dotSize={3} color="rgba(6, 182, 212, 0.2)" />
-      </div>
-      <div className="flex-1 space-y-2 opacity-30">
-        <div className="h-3.5 bg-gray-200 dark:bg-gray-700 rounded w-1/3" />
-        <div className="h-3 bg-gray-100 dark:bg-gray-600 rounded w-1/2" />
-      </div>
-      <div className="h-6 bg-gray-100 dark:bg-gray-700 rounded-full w-24 opacity-30" />
-    </div>
-  );
-}
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 const STATUS_FILTERS = [
   "",
   "Draft",
-  "Tax Generated",
   "Submitted",
   "Approved",
-  "Rejected",
   "Payment Received",
   "Banked",
 ];
@@ -134,6 +64,25 @@ export default function InvoicePage() {
   });
   const [loading, setLoading] = useState(true);
 
+  const loadInvoices = useCallback(async ({ page, status, search }) => {
+    try {
+      const res = await fetchInvoices({ page, status, search });
+      setInvoices(res.data || []);
+      setMeta(res.meta || {});
+    } catch (err) {
+      console.error("Failed to fetch invoices:", err);
+    }
+  }, []);
+
+  useEffect(() => {
+    const run = async () => {
+      setLoading(true);
+      await loadInvoices({ page, status, search });
+      setLoading(false);
+    };
+    run();
+  }, [loadInvoices, page, status, search]);
+
   useEffect(() => {
     const handlePopState = () => {
       const params = new URLSearchParams(window.location.search);
@@ -155,75 +104,32 @@ export default function InvoicePage() {
     if (status) params.set("status", status);
     if (search) params.set("search", search);
     const qs = params.toString();
-    const targetUrl = qs
-      ? `${window.location.pathname}?${qs}`
-      : window.location.pathname;
-    if (window.location.href !== targetUrl) {
+    const targetUrl = qs ? `/invoices?${qs}` : "/invoices";
+    if (window.location.pathname + window.location.search !== targetUrl) {
       router.replace(targetUrl, { scroll: false });
     }
   }, [page, status, search, router]);
 
-  const loadInvoices = useCallback(async () => {
-    setLoading(true);
-    try {
-      const res = await fetchInvoices({ page, status, search });
-      setInvoices(res.data || []);
-      setMeta(res.meta || {});
-    } catch (err) {
-      console.error("Failed to fetch invoices:", err);
-    } finally {
-      setLoading(false);
-    }
-  }, [page, status, search]);
-
-  useEffect(() => {
-    let mounted = true;
-    loadInvoices().then(() => {
-      if (!mounted) return;
-    });
-    return () => {
-      mounted = false;
-    };
-  }, [loadInvoices]);
-
-  const total = meta.total ?? invoices.length;
-  const banked = invoices.filter((i) => i.status === "Banked").length;
-  const pending = invoices.filter(
-    (i) => !["Banked", "Payment Received"].includes(i.status),
-  ).length;
+  const total = meta.total || invoices.length;
   const totalValue = invoices.reduce(
-    (s, i) => s + Number(i.invoice_amount || 0),
+    (sum, inv) => sum + Number(inv.invoice_amount || 0),
     0,
   );
 
   return (
-    <div className="min-h-full p-6 space-y-6">
-      {/* Hero */}
-      <div className="relative bg-gradient-to-br from-cyan-900 via-sky-900 to-slate-900 rounded-3xl p-8 overflow-hidden">
-        <div
-          className="absolute inset-0 opacity-10"
-          style={{
-            backgroundImage:
-              "radial-gradient(circle, #fff 1px, transparent 1px)",
-            backgroundSize: "24px 24px",
-          }}
-        />
-        <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <p className="text-cyan-300 text-xs font-bold uppercase tracking-widest mb-1">
-              Revenue Tracking
-            </p>
-            <h1
-              className="text-3xl font-black text-white tracking-tight"
-              style={{ fontFamily: "var(--font-display)" }}
-            >
-              Invoices
-            </h1>
-            <p className="text-cyan-200/60 text-sm mt-1">
-              {total} invoice{total !== 1 ? "s" : ""}
-            </p>
-          </div>
-          <button
+    <div className="min-h-full p-4 sm:p-6 space-y-4">
+      {/* Zen Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-border/50">
+        <div>
+          <h1 className="text-base font-semibold tracking-tight text-foreground">
+            Invoices
+          </h1>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Commercial invoicing ledger, billing life cycle, and clearance tracking.
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
             onClick={() =>
               exportToCSV(invoices, "invoices_export", [
                 { key: "invoice_number", label: "Invoice #" },
@@ -233,101 +139,53 @@ export default function InvoicePage() {
                 { key: "status", label: "Status" },
               ])
             }
-            className="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/20 backdrop-blur-md transition-all shadow-md"
+            size="sm"
+            variant="outline"
+            className="h-8 text-xs gap-1.5"
           >
-            <Download className="w-4 h-4 text-cyan-300" />
+            <Download className="w-3.5 h-3.5 text-muted-foreground" />
             Export CSV
-          </button>
+          </Button>
         </div>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        {[
-          {
-            icon: Receipt,
-            label: "Total",
-            value: total,
-            color: "bg-cyan-50 dark:bg-cyan-900/20 text-cyan-600",
-          },
-          {
-            icon: Clock,
-            label: "Pending",
-            value: pending,
-            color: "bg-amber-50 dark:bg-amber-900/20 text-amber-600",
-          },
-          {
-            icon: CheckCircle,
-            label: "Banked",
-            value: banked,
-            color: "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600",
-          },
-          {
-            icon: DollarSign,
-            label: "Total Value",
-            value:
-              totalValue > 0 ? `LKR ${(totalValue / 1e6).toFixed(1)}M` : "—",
-            color: "bg-blue-50 dark:bg-blue-900/20 text-blue-600",
-          },
-        ].map(({ icon: Icon, label, value, color }) => (
-          <div
-            key={label}
-            className="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm"
-          >
-            <div
-              className={`w-10 h-10 rounded-xl flex items-center justify-center mb-3 ${color}`}
-            >
-              <Icon className="w-5 h-5" />
-            </div>
-            <div
-              className="text-xl font-bold text-gray-900 dark:text-white"
-              style={{ fontFamily: "var(--font-display)" }}
-            >
-              {value}
-            </div>
-            <div className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mt-1">
-              {label}
-            </div>
+      {/* Compact Filters & Controls */}
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-2.5">
+        <div className="flex items-center gap-2 w-full sm:w-auto flex-1 max-w-md">
+          <div className="relative flex-1">
+            <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder="Search invoice number or customer…"
+              value={searchInput}
+              onChange={(e) => {
+                const val = e.target.value;
+                setSearchInput(val);
+                if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+                searchTimerRef.current = setTimeout(() => {
+                  setSearch(val);
+                  setPage(1);
+                }, 300);
+              }}
+              className="h-8 text-xs pl-8 bg-card border-border"
+            />
           </div>
-        ))}
-      </div>
-
-      {/* Filters */}
-      <div className="flex flex-wrap gap-3 items-center">
-        <div className="relative flex-1 min-w-[200px] max-w-sm">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Search invoice number…"
-            value={searchInput}
-            onChange={(e) => {
-              const val = e.target.value;
-              setSearchInput(val);
-              if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
-              searchTimerRef.current = setTimeout(() => {
-                setSearch(val);
-                setPage(1);
-              }, 300);
-            }}
-            className="w-full pl-11 pr-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-400 shadow-sm"
-          />
         </div>
-        <div className="flex flex-wrap gap-2">
-          {[
-            "",
-            "Draft",
-            "Submitted",
-            "Approved",
-            "Payment Received",
-            "Banked",
-          ].map((s) => (
+
+        {/* Status filter tabs */}
+        <div className="flex items-center gap-1 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0">
+          {STATUS_FILTERS.map((s) => (
             <button
               key={s}
               onClick={() => {
                 setStatus(s);
                 setPage(1);
               }}
-              className={`px-3.5 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${status === s ? "bg-cyan-600 text-white shadow-lg shadow-cyan-500/30" : "bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700"}`}
+              className={`px-2.5 py-1 text-xs rounded-md font-medium transition-colors ${
+                status === s
+                  ? "bg-foreground text-background"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted"
+              }`}
             >
               {s || "All"}
             </button>
@@ -335,112 +193,130 @@ export default function InvoicePage() {
         </div>
       </div>
 
-      {/* List */}
-      <div className="space-y-3">
-        {loading ? (
-          Array.from({ length: 5 }).map((_, i) => <SkeletonRow key={i} />)
-        ) : invoices.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 text-gray-400">
-            <Receipt className="w-12 h-12 mb-3 opacity-30" />
-            <p className="text-sm font-medium">No invoices found</p>
-          </div>
-        ) : (
-          invoices.map((inv) => (
-            <div
-              key={inv.id}
-              onClick={() => router.push(`/invoices/${inv.id}`)}
-              className="group bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 cursor-pointer overflow-hidden"
-            >
-              <div className="flex items-center gap-4 p-5">
-                {/* Icon */}
-                <div className="w-10 h-10 rounded-xl bg-cyan-50 dark:bg-cyan-900/20 flex items-center justify-center text-cyan-600 flex-shrink-0">
-                  <FileText className="w-5 h-5" />
-                </div>
-
-                {/* Main info */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-0.5">
-                    <span className="font-black text-gray-900 dark:text-white text-sm group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors">
+      {/* Zen Compact Data Table */}
+      <div className="bg-card border border-border rounded-lg overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs">
+            <thead>
+              <tr className="border-b border-border/60 bg-muted/30 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                <th className="py-2.5 px-3.5">Invoice #</th>
+                <th className="py-2.5 px-3">Customer</th>
+                <th className="py-2.5 px-3">Date</th>
+                <th className="py-2.5 px-3 text-right">Amount (LKR)</th>
+                <th className="py-2.5 px-3">Status</th>
+                <th className="py-2.5 px-3.5 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border/40">
+              {loading ? (
+                Array.from({ length: 6 }).map((_, i) => (
+                  <tr key={i} className="animate-pulse">
+                    <td className="py-2.5 px-3.5"><div className="h-3 w-20 bg-muted rounded" /></td>
+                    <td className="py-2.5 px-3"><div className="h-3 w-32 bg-muted rounded" /></td>
+                    <td className="py-2.5 px-3"><div className="h-3 w-16 bg-muted rounded" /></td>
+                    <td className="py-2.5 px-3 text-right"><div className="h-3 w-20 bg-muted rounded ml-auto" /></td>
+                    <td className="py-2.5 px-3"><div className="h-4 w-16 bg-muted rounded" /></td>
+                    <td className="py-2.5 px-3.5 text-right"><div className="h-4 w-12 bg-muted rounded ml-auto" /></td>
+                  </tr>
+                ))
+              ) : invoices.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="py-12 text-center text-muted-foreground">
+                    <Receipt className="w-8 h-8 mx-auto mb-2 opacity-30" />
+                    <p className="text-xs">No invoices found matching criteria</p>
+                  </td>
+                </tr>
+              ) : (
+                invoices.map((inv) => (
+                  <tr
+                    key={inv.id}
+                    onClick={() => router.push(`/invoices/${inv.id}`)}
+                    className="hover:bg-muted/20 cursor-pointer transition-colors"
+                  >
+                    <td className="py-2.5 px-3.5 font-medium text-foreground">
                       {inv.invoice_number}
-                    </span>
-                    <span className="text-[10px] text-gray-400 font-medium hidden sm:inline">
-                      {new Date(inv.invoice_date).toLocaleDateString()}
-                    </span>
-                  </div>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                    {inv.customer?.name}
-                    {inv.receipt_number && (
-                      <span className="ml-2 text-indigo-500 font-bold">
-                        {inv.receipt_number}
+                    </td>
+                    <td className="py-2.5 px-3 text-muted-foreground truncate max-w-[200px]">
+                      {inv.customer?.name || "—"}
+                    </td>
+                    <td className="py-2.5 px-3 text-muted-foreground">
+                      {inv.invoice_date ? new Date(inv.invoice_date).toLocaleDateString() : "—"}
+                    </td>
+                    <td className="py-2.5 px-3 text-right font-medium text-foreground">
+                      {Number(inv.invoice_amount || 0).toLocaleString(undefined, {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })}
+                    </td>
+                    <td className="py-2.5 px-3">
+                      <span className="inline-block px-1.5 py-0.5 text-[10px] font-medium bg-muted text-foreground rounded border border-border/50">
+                        {inv.status}
                       </span>
-                    )}
-                  </p>
-                </div>
-
-                {/* Amount */}
-                <div className="text-right hidden sm:block">
-                  <div
-                    className="font-black text-gray-900 dark:text-white text-sm"
-                    style={{ fontFamily: "var(--font-display)" }}
-                  >
-                    LKR{" "}
-                    {Number(inv.invoice_amount || 0).toLocaleString(undefined, {
-                      minimumFractionDigits: 2,
-                    })}
-                  </div>
-                </div>
-
-                {/* Status */}
-                <InvoiceStatusPill status={inv.status} />
-
-                {/* Actions */}
-                <div
-                  className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <button
-                    title="Download PDF"
-                    className="p-1.5 hover:bg-blue-50 dark:hover:bg-blue-900/20 text-blue-500 rounded-lg transition-colors"
-                    onClick={() => downloadInvoicePdf(inv.id)}
-                  >
-                    <Download className="w-3.5 h-3.5" />
-                  </button>
-                  {inv.status === "Draft" &&
-                    canEdit && (
-                      <button
-                        className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 rounded-lg transition-colors"
-                        onClick={() => router.push(`/invoices/${inv.id}/edit`)}
+                    </td>
+                    <td className="py-2.5 px-3.5 text-right">
+                      <div
+                        className="flex items-center justify-end gap-1"
+                        onClick={(e) => e.stopPropagation()}
                       >
-                        <Edit2 className="w-3.5 h-3.5" />
-                      </button>
-                    )}
-                </div>
-              </div>
-            </div>
-          ))
-        )}
+                        <button
+                          title="View Details"
+                          className="p-1 text-muted-foreground hover:text-foreground rounded hover:bg-muted"
+                          onClick={() => router.push(`/invoices/${inv.id}`)}
+                        >
+                          <Eye className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          title="Download PDF"
+                          className="p-1 text-muted-foreground hover:text-foreground rounded hover:bg-muted"
+                          onClick={() => downloadInvoicePdf(inv.id)}
+                        >
+                          <Download className="w-3.5 h-3.5" />
+                        </button>
+                        {inv.status === "Draft" && canEdit && (
+                          <button
+                            title="Edit"
+                            className="p-1 text-muted-foreground hover:text-foreground rounded hover:bg-muted"
+                            onClick={() => router.push(`/invoices/${inv.id}/edit`)}
+                          >
+                            <Edit2 className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
-      {/* Pagination */}
+      {/* Zen Pagination */}
       {meta.last_page > 1 && (
-        <div className="flex items-center justify-center gap-2 pt-4">
-          <button
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-            disabled={page === 1}
-            className="p-2 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 disabled:opacity-40 hover:bg-gray-50 dark:hover:bg-gray-700 shadow-sm"
-          >
-            <ChevronLeft className="w-4 h-4" />
-          </button>
-          <span className="text-sm font-bold text-gray-600 dark:text-gray-400 px-3">
-            Page {meta.current_page || page} of {meta.last_page || 1}
+        <div className="flex items-center justify-between text-xs text-muted-foreground pt-1">
+          <span>
+            Page {page} of {meta.last_page} ({total} items)
           </span>
-          <button
-            onClick={() => setPage((p) => Math.min(meta.last_page, p + 1))}
-            disabled={page >= meta.last_page}
-            className="p-2 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 disabled:opacity-40 hover:bg-gray-50 dark:hover:bg-gray-700 shadow-sm"
-          >
-            <ChevronRight className="w-4 h-4" />
-          </button>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page === 1}
+              className="h-7 w-7"
+            >
+              <ChevronLeft className="w-3.5 h-3.5" />
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => setPage((p) => Math.min(meta.last_page, p + 1))}
+              disabled={page === meta.last_page}
+              className="h-7 w-7"
+            >
+              <ChevronRight className="w-3.5 h-3.5" />
+            </Button>
+          </div>
         </div>
       )}
     </div>

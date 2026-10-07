@@ -75,8 +75,19 @@ export const navLinks = [
     icon: UserCircle,
     requiredPermission: "manage-users",
   },
+  {
+    href: "/admin/audit-logs",
+    label: "Audit Logs",
+    icon: History,
+    requiredPermission: "manage-users",
+  },
   { href: "/profile", label: "Profile", icon: UserCircle },
-  { href: "/system-logs", label: "System Logs", icon: Activity },
+  {
+    href: "/system-logs",
+    label: "System Logs",
+    icon: Activity,
+    requiredPermission: "manage-system",
+  },
   { label: "Settings", href: "/settings", icon: Settings },
   { label: "Help Center", href: "/help", icon: HelpCircle },
 ];

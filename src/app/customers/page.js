@@ -1,3 +1,4 @@
+// src/app/customers/page.js
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
@@ -13,188 +14,19 @@ import {
   Search,
   Edit2,
   Trash2,
-  X,
   Phone,
   Mail,
-  MapPin,
-  User as UserIcon,
-  Building2,
   Receipt,
   ChevronLeft,
   ChevronRight,
   Users,
-  TrendingUp,
-  FileText,
 } from "lucide-react";
 import FormModal from "@/components/ui/FormModal";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 
-// ─── helpers ────────────────────────────────────────────────────
-const avatarColor = (name = "") => {
-  const colors = [
-    ["from-violet-500 to-purple-600", "text-white"],
-    ["from-blue-500 to-cyan-600", "text-white"],
-    ["from-emerald-500 to-teal-600", "text-white"],
-    ["from-rose-500 to-pink-600", "text-white"],
-    ["from-amber-500 to-orange-600", "text-white"],
-    ["from-indigo-500 to-blue-600", "text-white"],
-  ];
-  return colors[name.charCodeAt(0) % colors.length];
-};
-
-// ─── StatCard ────────────────────────────────────────────────────
-function StatCard({ icon: Icon, label, value, color }) {
-  return (
-    <div className="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow">
-      <div className="flex items-center justify-between mb-3">
-        <div
-          className={`w-10 h-10 rounded-xl flex items-center justify-center ${color}`}
-        >
-          <Icon className="w-5 h-5" />
-        </div>
-      </div>
-      <div
-        className="text-2xl font-bold text-gray-900 dark:text-white"
-        style={{ fontFamily: "var(--font-display)" }}
-      >
-        {value}
-      </div>
-      <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mt-1 uppercase tracking-wider">
-        {label}
-      </div>
-    </div>
-  );
-}
-
-// ─── CustomerCard ───────────────────────────────────────────────
-function CustomerCard({ customer, onEdit, onDelete }) {
-  const [grad, textCls] = avatarColor(customer.name);
-  const initial = customer.name?.charAt(0)?.toUpperCase() || "?";
-
-  return (
-    <div className="group bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden">
-      {/* Top accent bar */}
-      <div className={`h-1 w-full bg-gradient-to-r ${grad}`} />
-      <div className="p-5">
-        {/* Header row */}
-        <div className="flex items-start justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <div
-              className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${grad} flex items-center justify-center text-lg font-black ${textCls} shadow-lg flex-shrink-0`}
-              style={{ fontFamily: "var(--font-display)" }}
-            >
-              {initial}
-            </div>
-            <div className="min-w-0">
-              <h3
-                className="font-bold text-gray-900 dark:text-white truncate text-sm leading-tight"
-                style={{ fontFamily: "var(--font-display)" }}
-              >
-                {customer.name}
-              </h3>
-              {customer.contact_person && (
-                <p className="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5">
-                  {customer.contact_person}
-                </p>
-              )}
-            </div>
-          </div>
-          <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-            <button
-              onClick={() => onEdit(customer)}
-              className="p-1.5 hover:bg-blue-50 dark:hover:bg-blue-900/20 text-blue-600 rounded-lg transition-colors"
-            >
-              <Edit2 className="w-3.5 h-3.5" />
-            </button>
-            <button
-              onClick={() => onDelete(customer.id)}
-              className="p-1.5 hover:bg-red-50 dark:hover:bg-red-900/20 text-red-500 rounded-lg transition-colors"
-            >
-              <Trash2 className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        </div>
-
-        {/* Info rows */}
-        <div className="space-y-2">
-          {customer.email && (
-            <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-              <Mail className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
-              <span className="truncate">{customer.email}</span>
-            </div>
-          )}
-          {customer.phone && (
-            <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-              <Phone className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
-              <span>{customer.phone}</span>
-            </div>
-          )}
-          {customer.billing_address && (
-            <div className="flex items-start gap-2 text-xs text-gray-500 dark:text-gray-400">
-              <MapPin className="w-3.5 h-3.5 text-gray-400 flex-shrink-0 mt-0.5" />
-              <span className="line-clamp-1">{customer.billing_address}</span>
-            </div>
-          )}
-        </div>
-
-        {/* Footer chips */}
-        <div className="flex items-center gap-2 mt-4 pt-3 border-t border-gray-50 dark:border-gray-700">
-          {customer.tax_number ? (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 text-[10px] font-bold uppercase tracking-wide">
-              <Receipt className="w-2.5 h-2.5" />
-              VAT Registered
-            </span>
-          ) : (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gray-50 dark:bg-gray-700 text-gray-500 text-[10px] font-bold uppercase tracking-wide">
-              No VAT
-            </span>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ─── Skeleton ───────────────────────────────────────────────────
-function SkeletonCard() {
-  return (
-    <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 overflow-hidden animate-pulse">
-      <div className="h-1 bg-gray-200 dark:bg-gray-700" />
-      <div className="p-5 space-y-4">
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-2xl bg-gray-200 dark:bg-gray-700" />
-          <div className="space-y-2 flex-1">
-            <div className="h-3.5 bg-gray-200 dark:bg-gray-700 rounded w-3/4" />
-            <div className="h-3 bg-gray-100 dark:bg-gray-600 rounded w-1/2" />
-          </div>
-        </div>
-        <div className="space-y-2">
-          <div className="h-3 bg-gray-100 dark:bg-gray-600 rounded w-full" />
-          <div className="h-3 bg-gray-100 dark:bg-gray-600 rounded w-2/3" />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ─── Field ──────────────────────────────────────────────────────
-function Field({ label, children }) {
-  return (
-    <div className="space-y-1.5">
-      <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500 ml-1">
-        {label}
-      </label>
-      {children}
-    </div>
-  );
-}
-
-const inputCls =
-  "w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 outline-none transition-all text-sm font-medium text-gray-800 dark:text-gray-200 placeholder-gray-400";
-
-// ─── Main Page ───────────────────────────────────────────────────
 export default function CustomersPage() {
   const [customers, setCustomers] = useState([]);
   const [meta, setMeta] = useState({});
@@ -292,249 +124,288 @@ export default function CustomersPage() {
   const vatCount = customers.filter((c) => c.tax_number).length;
 
   return (
-    <>
-      <div className="min-h-full p-6 space-y-6">
-        {/* ── Hero Header ── */}
-        <div className="relative bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 rounded-3xl p-8 overflow-hidden">
-          <div
-            className="absolute inset-0 opacity-10"
-            style={{
-              backgroundImage:
-                "radial-gradient(circle, #fff 1px, transparent 1px)",
-              backgroundSize: "24px 24px",
-            }}
-          />
-          <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <p className="text-blue-300 text-xs font-bold uppercase tracking-widest mb-1">
-                Client Registry
-              </p>
-              <h1
-                className="text-3xl font-black text-white tracking-tight"
-                style={{ fontFamily: "var(--font-display)" }}
-              >
-                Customers
-              </h1>
-              <p className="text-blue-200/60 text-sm mt-1">
-                {total} client{total !== 1 ? "s" : ""} registered
-              </p>
-            </div>
-            <button
-              onClick={() => openDrawer()}
-              className="flex items-center gap-2 bg-white hover:bg-blue-50 text-slate-900 px-5 py-3 rounded-2xl font-bold text-sm transition-all shadow-xl hover:shadow-blue-500/20 hover:scale-105"
-              style={{ fontFamily: "var(--font-display)" }}
-            >
-              <Plus className="w-4 h-4" />
-              Add Customer
-            </button>
-          </div>
+    <div className="min-h-full p-4 sm:p-6 space-y-4">
+      {/* Zen Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-border/50">
+        <div>
+          <h1 className="text-base font-semibold tracking-tight text-foreground">
+            Customer Directory
+          </h1>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Commercial client relationships, billing information, and tax registrations.
+          </p>
         </div>
-
-        {/* ── KPI Stats ── */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-          <StatCard
-            icon={Users}
-            label="Total Clients"
-            value={total}
-            color="bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400"
-          />
-          <StatCard
-            icon={Receipt}
-            label="VAT Registered"
-            value={vatCount}
-            color="bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400"
-          />
-          <StatCard
-            icon={TrendingUp}
-            label="This Page"
-            value={customers.length}
-            color="bg-violet-50 dark:bg-violet-900/20 text-violet-600 dark:text-violet-400"
-          />
+        <div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            onClick={() => openDrawer()}
+            className="h-8 text-xs gap-1.5"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            Add Customer
+          </Button>
         </div>
+      </div>
 
-        {/* ── Search ── */}
-        <div className="relative max-w-md">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <input
+      {/* Control Strip */}
+      <div className="flex items-center justify-between gap-2.5">
+        <div className="relative flex-1 max-w-sm">
+          <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <Input
             type="text"
-            placeholder="Search customers…"
+            placeholder="Search client by name or contact…"
             value={search}
             onChange={(e) => {
               setSearch(e.target.value);
               setPage(1);
             }}
-            className="w-full pl-11 pr-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all shadow-sm"
+            className="h-8 text-xs pl-8 bg-card border-border"
           />
         </div>
-
-        {/* ── Grid ── */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {loading ? (
-            Array.from({ length: 8 }).map((_, i) => <SkeletonCard key={i} />)
-          ) : customers.length === 0 ? (
-            <div className="col-span-full flex flex-col items-center justify-center py-20 text-gray-400">
-              <Users className="w-12 h-12 mb-3 opacity-30" />
-              <p className="text-sm font-medium">No customers found</p>
-              <button
-                onClick={() => openDrawer()}
-                className="mt-3 text-blue-600 text-sm font-medium hover:underline"
-              >
-                Add your first customer
-              </button>
-            </div>
-          ) : (
-            customers.map((c) => (
-              <CustomerCard
-                key={c.id}
-                customer={c}
-                onEdit={openDrawer}
-                onDelete={(id) => setDeleteConfirm(id)}
-              />
-            ))
-          )}
+        <div className="text-xs text-muted-foreground hidden sm:block">
+          <span>{total} clients</span>
+          <span className="mx-1.5">·</span>
+          <span className="text-foreground font-medium">{vatCount} VAT registered</span>
         </div>
-
-        {/* ── Pagination ── */}
-        {meta.last_page > 1 && (
-          <div className="flex items-center justify-center gap-2 pt-4">
-            <button
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              disabled={page === 1}
-              className="p-2 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 disabled:opacity-40 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all shadow-sm"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-            {Array.from({ length: meta.last_page }, (_, i) => i + 1).map(
-              (p) => (
-                <button
-                  key={p}
-                  onClick={() => setPage(p)}
-                  className={`w-9 h-9 rounded-xl text-sm font-bold transition-all ${page === p ? "bg-blue-600 text-white shadow-lg shadow-blue-500/30" : "bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"}`}
-                >
-                  {p}
-                </button>
-              ),
-            )}
-            <button
-              onClick={() => setPage((p) => Math.min(meta.last_page, p + 1))}
-              disabled={page === meta.last_page}
-              className="p-2 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 disabled:opacity-40 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all shadow-sm"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
-        )}
       </div>
 
-      {/* ── Customer Form Modal ── */}
+      {/* Zen Compact Data Table */}
+      <div className="bg-card border border-border rounded-lg overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs">
+            <thead>
+              <tr className="border-b border-border/60 bg-muted/30 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                <th className="py-2.5 px-3.5">Customer / Company</th>
+                <th className="py-2.5 px-3">Contact Person</th>
+                <th className="py-2.5 px-3">Contact Info</th>
+                <th className="py-2.5 px-3">Billing Address</th>
+                <th className="py-2.5 px-3">Tax status</th>
+                <th className="py-2.5 px-3.5 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border/40">
+              {loading ? (
+                Array.from({ length: 6 }).map((_, i) => (
+                  <tr key={i} className="animate-pulse">
+                    <td className="py-2.5 px-3.5"><div className="h-3 w-32 bg-muted rounded" /></td>
+                    <td className="py-2.5 px-3"><div className="h-3 w-24 bg-muted rounded" /></td>
+                    <td className="py-2.5 px-3"><div className="h-3 w-36 bg-muted rounded" /></td>
+                    <td className="py-2.5 px-3"><div className="h-3 w-40 bg-muted rounded" /></td>
+                    <td className="py-2.5 px-3"><div className="h-4 w-14 bg-muted rounded" /></td>
+                    <td className="py-2.5 px-3.5 text-right"><div className="h-4 w-12 bg-muted rounded ml-auto" /></td>
+                  </tr>
+                ))
+              ) : customers.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="py-12 text-center text-muted-foreground">
+                    <Users className="w-8 h-8 mx-auto mb-2 opacity-30" />
+                    <p className="text-xs">No customer records found</p>
+                  </td>
+                </tr>
+              ) : (
+                customers.map((c) => (
+                  <tr key={c.id} className="hover:bg-muted/20 transition-colors">
+                    <td className="py-2.5 px-3.5 font-medium text-foreground">
+                      {c.name}
+                    </td>
+                    <td className="py-2.5 px-3 text-muted-foreground">
+                      {c.contact_person || "—"}
+                    </td>
+                    <td className="py-2.5 px-3 text-muted-foreground">
+                      <div className="space-y-0.5 text-[11px]">
+                        {c.email && (
+                          <div className="flex items-center gap-1 truncate max-w-[180px]">
+                            <Mail className="w-3 h-3 flex-shrink-0" />
+                            <span className="truncate">{c.email}</span>
+                          </div>
+                        )}
+                        {c.phone && (
+                          <div className="flex items-center gap-1">
+                            <Phone className="w-3 h-3 flex-shrink-0" />
+                            <span>{c.phone}</span>
+                          </div>
+                        )}
+                        {!c.email && !c.phone && <span>—</span>}
+                      </div>
+                    </td>
+                    <td className="py-2.5 px-3 text-muted-foreground truncate max-w-[220px]">
+                      {c.billing_address || "—"}
+                    </td>
+                    <td className="py-2.5 px-3">
+                      {c.tax_number ? (
+                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-muted text-foreground border border-border/50">
+                          <Receipt className="w-2.5 h-2.5" />
+                          VAT {c.tax_number}
+                        </span>
+                      ) : (
+                        <span className="text-muted-foreground text-[11px]">—</span>
+                      )}
+                    </td>
+                    <td className="py-2.5 px-3.5 text-right">
+                      <div className="flex items-center justify-end gap-1">
+                        <button
+                          onClick={() => openDrawer(c)}
+                          className="p-1 text-muted-foreground hover:text-foreground rounded hover:bg-muted transition-colors"
+                          title="Edit"
+                        >
+                          <Edit2 className="w-3 h-3" />
+                        </button>
+                        <button
+                          onClick={() => setDeleteConfirm(c.id)}
+                          className="p-1 text-muted-foreground hover:text-destructive rounded hover:bg-destructive/10 transition-colors"
+                          title="Delete"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Pagination */}
+      {meta.last_page > 1 && (
+        <div className="flex items-center justify-between text-xs text-muted-foreground pt-1">
+          <span>
+            Page {page} of {meta.last_page} ({total} clients)
+          </span>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page === 1}
+              className="h-7 w-7"
+            >
+              <ChevronLeft className="w-3.5 h-3.5" />
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => setPage((p) => Math.min(meta.last_page, p + 1))}
+              disabled={page === meta.last_page}
+              className="h-7 w-7"
+            >
+              <ChevronRight className="w-3.5 h-3.5" />
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Form Modal */}
       <FormModal
         isOpen={drawerOpen}
         onClose={() => setDrawerOpen(false)}
-        title={selectedCustomer ? "Update Customer" : "Add Customer"}
-        description={selectedCustomer ? "Edit customer information" : "Create a new customer"}
+        title={selectedCustomer ? "Edit Customer" : "New Customer"}
+        description="Enter client company and contact credentials"
         onSubmit={handleSubmit}
-        submitText={selectedCustomer ? "Update" : "Create"}
+        submitText={selectedCustomer ? "Update Client" : "Save Client"}
         isSubmitting={saving}
-        size="lg"
+        size="md"
       >
-        <div className="space-y-2">
-          <Label htmlFor="name">Customer Name *</Label>
-          <Input
-            id="name"
-            required
-            value={form.name}
-            onChange={(e) => setF("name", e.target.value)}
-            placeholder="e.g. Acme Corp"
-          />
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+        <div className="space-y-3">
+          <div>
+            <Label className="text-[11px] text-muted-foreground uppercase">Company Name *</Label>
             <Input
-              id="email"
-              type="email"
-              value={form.email}
-              onChange={(e) => setF("email", e.target.value)}
-              placeholder="email@company.com"
+              required
+              value={form.name}
+              onChange={(e) => setF("name", e.target.value)}
+              placeholder="e.g. Apex Infrastructures Ltd"
+              className="h-8 text-xs mt-1"
             />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="phone">Phone</Label>
-            <Input
-              id="phone"
-              value={form.phone}
-              onChange={(e) => setF("phone", e.target.value)}
-              placeholder="+94 77 …"
+          <div className="grid grid-cols-2 gap-2.5">
+            <div>
+              <Label className="text-[11px] text-muted-foreground uppercase">Contact Person</Label>
+              <Input
+                value={form.contact_person}
+                onChange={(e) => setF("contact_person", e.target.value)}
+                placeholder="e.g. Jane Doe"
+                className="h-8 text-xs mt-1"
+              />
+            </div>
+            <div>
+              <Label className="text-[11px] text-muted-foreground uppercase">Tax / VAT Number</Label>
+              <Input
+                value={form.tax_number}
+                onChange={(e) => setF("tax_number", e.target.value)}
+                placeholder="e.g. VAT-89472"
+                className="h-8 text-xs mt-1"
+              />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-2.5">
+            <div>
+              <Label className="text-[11px] text-muted-foreground uppercase">Email</Label>
+              <Input
+                type="email"
+                value={form.email}
+                onChange={(e) => setF("email", e.target.value)}
+                placeholder="billing@apex.lk"
+                className="h-8 text-xs mt-1"
+              />
+            </div>
+            <div>
+              <Label className="text-[11px] text-muted-foreground uppercase">Phone</Label>
+              <Input
+                value={form.phone}
+                onChange={(e) => setF("phone", e.target.value)}
+                placeholder="+94 11 234 5678"
+                className="h-8 text-xs mt-1"
+              />
+            </div>
+          </div>
+          <div>
+            <Label className="text-[11px] text-muted-foreground uppercase">Billing Address</Label>
+            <Textarea
+              value={form.billing_address}
+              onChange={(e) => setF("billing_address", e.target.value)}
+              rows={2}
+              placeholder="Enter official registered office address"
+              className="text-xs mt-1"
             />
           </div>
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="contact_person">Contact Person</Label>
-          <Input
-            id="contact_person"
-            value={form.contact_person}
-            onChange={(e) => setF("contact_person", e.target.value)}
-            placeholder="Full name"
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="billing_address">Billing Address *</Label>
-          <Textarea
-            id="billing_address"
-            required
-            rows={3}
-            value={form.billing_address}
-            onChange={(e) => setF("billing_address", e.target.value)}
-            placeholder="Full postal address"
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="tax_number">Tax / VAT Number</Label>
-          <Input
-            id="tax_number"
-            value={form.tax_number}
-            onChange={(e) => setF("tax_number", e.target.value)}
-            placeholder="e.g. VAT-123456789"
-          />
         </div>
       </FormModal>
 
-      {/* ── Delete Confirm Modal ── */}
+      {/* Delete Confirmation */}
       {deleteConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden">
-            <div className="p-6 text-center space-y-3">
-              <div className="w-14 h-14 rounded-2xl bg-red-50 dark:bg-red-900/20 flex items-center justify-center mx-auto">
-                <Trash2 className="w-6 h-6 text-red-500" />
-              </div>
-              <h3
-                className="font-black text-gray-900 dark:text-white text-lg"
-                style={{ fontFamily: "var(--font-display)" }}
-              >
-                Delete Customer?
-              </h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                This action cannot be undone. All associated data will be
-                removed.
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-[1px] p-4">
+          <div className="w-full max-w-xs bg-card border border-border rounded-lg p-4 shadow-xl space-y-3 text-center">
+            <div className="w-8 h-8 rounded-full bg-destructive/10 text-destructive flex items-center justify-center mx-auto">
+              <Trash2 className="w-4 h-4" />
+            </div>
+            <div>
+              <h3 className="text-xs font-semibold text-foreground">Delete Customer?</h3>
+              <p className="text-[11px] text-muted-foreground mt-1">
+                This record and associated contracts will be affected.
               </p>
             </div>
-            <div className="px-6 pb-6 flex gap-3">
-              <button
+            <div className="flex gap-2 pt-2">
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={() => setDeleteConfirm(null)}
-                className="flex-1 py-3 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-bold text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                className="flex-1 h-8 text-xs"
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="destructive"
+                size="sm"
                 onClick={() => handleDelete(deleteConfirm)}
-                className="flex-1 py-3 rounded-xl bg-red-600 hover:bg-red-700 text-white text-sm font-black transition-colors shadow-lg shadow-red-500/30"
+                className="flex-1 h-8 text-xs"
               >
                 Delete
-              </button>
+              </Button>
             </div>
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 }

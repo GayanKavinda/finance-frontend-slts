@@ -41,7 +41,7 @@ export default function StatCard({
       initial={{ opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay }}
-      className="glass-effect rounded-xl p-4 shadow-sm hover:shadow-md transition-all duration-200"
+      className="bg-card border border-border rounded-xl p-4 shadow-soft hover:shadow-medium transition-all duration-200"
     >
       <div className="flex items-center gap-3 mb-3">
         <div className={`p-2 rounded-lg ${color}`}>{icon}</div>

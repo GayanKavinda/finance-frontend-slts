@@ -10,18 +10,8 @@ import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 
 /**
- * Clean minimal form dialog using shadcn components
- * @param {Object} props
- * @param {boolean} props.isOpen - Controls dialog visibility
- * @param {function} props.onClose - Callback when dialog closes
- * @param {string} props.title - Dialog title
- * @param {string} props.description - Optional description
- * @param {React.ReactNode} props.children - Form fields content
- * @param {function} props.onSubmit - Form submit handler
- * @param {string} props.submitText - Submit button text
- * @param {string} props.cancelText - Cancel button text
- * @param {boolean} props.isSubmitting - Loading state for submit button
- * @param {string} props.size - Dialog size (sm, md, lg, xl, 2xl)
+ * Clean minimal form dialog using shadcn components.
+ * Fully responsive with internal scroll for tall content.
  */
 export default function FormModal({
   isOpen,
@@ -41,26 +31,37 @@ export default function FormModal({
   };
 
   const sizeClasses = {
-    sm: "sm:max-w-sm",
-    md: "sm:max-w-md",
-    lg: "sm:max-w-lg",
-    xl: "sm:max-w-xl",
+    sm:  "sm:max-w-sm",
+    md:  "sm:max-w-md",
+    lg:  "sm:max-w-lg",
+    xl:  "sm:max-w-xl",
     "2xl": "sm:max-w-2xl",
+    "3xl": "sm:max-w-3xl",
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className={sizeClasses[size]}>
-        <DialogHeader>
+      <DialogContent
+        className={`${sizeClasses[size] ?? sizeClasses.lg} max-h-[90vh] flex flex-col overflow-hidden p-0`}
+      >
+        {/* Fixed header */}
+        <DialogHeader className="px-6 pt-6 pb-2 flex-shrink-0">
           <DialogTitle>{title}</DialogTitle>
-          {description && <DialogDescription>{description}</DialogDescription>}
+          {description && (
+            <DialogDescription>{description}</DialogDescription>
+          )}
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-4">{children}</div>
+        {/* Scrollable form body + footer */}
+        <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden min-h-0">
+          {/* Scrollable content */}
+          <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
+            {children}
+          </div>
 
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={onClose}>
+          {/* Fixed footer */}
+          <DialogFooter className="px-6 py-4 border-t border-border bg-muted/30 flex-shrink-0">
+            <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting}>
               {cancelText}
             </Button>
             <Button type="submit" disabled={isSubmitting}>

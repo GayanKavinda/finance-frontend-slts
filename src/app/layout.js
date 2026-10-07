@@ -25,9 +25,8 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`font-sans h-screen w-full overflow-hidden antialiased bg-transparent transition-colors duration-300`}
+        className={`font-sans h-screen w-full overflow-hidden antialiased bg-background transition-colors duration-300`}
       >
-        <div className="finance-gradient"></div>
         <Providers>
           <LayoutContent>{children}</LayoutContent>
         </Providers>

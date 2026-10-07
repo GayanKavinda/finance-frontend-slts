@@ -25,35 +25,24 @@ import {
   Shield,
   Award,
 } from "lucide-react";
-import FormModal from "@/components/ui/FormModal";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import FormModal from "@/components/ui/FormModal";
+import { Card } from "@/components/ui/Card";
+import { CardContent } from "@/components/ui/Card";
+import { Separator } from "@/components/ui/Separator";
+import { Badge } from "@/components/ui/Badge";
 
-// ── helpers ─────────────────────────────────────────────────────
 const STATUS_CONFIG = {
   Active: {
-    bg: "bg-emerald-50 dark:bg-emerald-900/20",
-    text: "text-emerald-700 dark:text-emerald-400",
-    dot: "bg-emerald-500",
+    label: "Active",
   },
   Blacklisted: {
-    bg: "bg-red-50 dark:bg-red-900/20",
-    text: "text-red-700 dark:text-red-400",
-    dot: "bg-red-500",
+    label: "Blacklisted",
   },
 };
-
-const avatarGrads = [
-  "from-orange-500 to-rose-500",
-  "from-violet-500 to-purple-700",
-  "from-teal-500 to-cyan-600",
-  "from-amber-500 to-orange-500",
-  "from-blue-500 to-indigo-600",
-  "from-emerald-500 to-green-600",
-];
-const getGrad = (name = "") =>
-  avatarGrads[name.charCodeAt(0) % avatarGrads.length];
 
 function StarRating({ rating, onChange }) {
   return (
@@ -63,7 +52,9 @@ function StarRating({ rating, onChange }) {
           key={s}
           type="button"
           onClick={() => onChange && onChange(s)}
-          className={`p-1.5 rounded-lg transition-all ${rating >= s ? "bg-amber-100 dark:bg-amber-900/30 text-amber-500" : "bg-gray-100 dark:bg-gray-700 text-gray-300"}`}
+          className={`p-1.5 rounded-md transition-colors ${
+            rating >= s ? "text-primary" : "text-muted-foreground"
+          }`}
         >
           <Star className={`w-4 h-4 ${rating >= s ? "fill-current" : ""}`} />
         </button>
@@ -73,96 +64,83 @@ function StarRating({ rating, onChange }) {
 }
 
 function ContractorCard({ contractor, onEdit, onDelete }) {
-  const grad = getGrad(contractor.name);
-  const status = STATUS_CONFIG[contractor.status] || STATUS_CONFIG.Active;
+  const isBlacklisted = contractor.status === "Blacklisted";
+
   return (
-    <div className="group bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden">
-      <div className={`h-1 w-full bg-gradient-to-r ${grad}`} />
-      <div className="p-5">
-        {/* Header */}
-        <div className="flex items-start justify-between mb-4">
-          <div className="flex items-center gap-3 min-w-0">
-            <div
-              className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${grad} flex items-center justify-center text-white text-lg font-black flex-shrink-0 shadow-lg`}
-              style={{ fontFamily: "var(--font-display)" }}
-            >
-              {contractor.name?.charAt(0)?.toUpperCase()}
-            </div>
-            <div className="min-w-0">
-              <h3
-                className="font-bold text-gray-900 dark:text-white text-sm truncate"
-                style={{ fontFamily: "var(--font-display)" }}
-              >
+    <div className="p-3 bg-card border border-border rounded-lg hover:border-border/80 transition-colors flex flex-col justify-between">
+      <div>
+        <div className="flex items-start justify-between gap-2 mb-2">
+          <div className="min-w-0">
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <span className="text-xs font-semibold text-foreground truncate">
                 {contractor.name}
-              </h3>
-              <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                {contractor.contact_person || "No contact"}
-              </p>
+              </span>
+              {isBlacklisted ? (
+                <span className="text-[10px] px-1 py-0.2 bg-destructive/10 text-destructive rounded">
+                  Blacklisted
+                </span>
+              ) : (
+                <span className="text-[10px] px-1 py-0.2 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded">
+                  Active
+                </span>
+              )}
             </div>
+            <p className="text-[11px] text-muted-foreground truncate">
+              {contractor.contact_person || "No contact person specified"}
+            </p>
           </div>
-          <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+          <div className="flex items-center gap-0.5 flex-shrink-0">
             <button
               onClick={() => onEdit(contractor)}
-              className="p-1.5 hover:bg-blue-50 dark:hover:bg-blue-900/20 text-blue-500 rounded-lg transition-colors"
+              className="p-1 text-muted-foreground hover:text-foreground rounded hover:bg-muted"
+              title="Edit"
             >
-              <Edit2 className="w-3.5 h-3.5" />
+              <Edit2 className="w-3 h-3" />
             </button>
             <button
               onClick={() => onDelete(contractor.id)}
-              className="p-1.5 hover:bg-red-50 dark:hover:bg-red-900/20 text-red-500 rounded-lg transition-colors"
+              className="p-1 text-muted-foreground hover:text-destructive rounded hover:bg-destructive/10"
+              title="Delete"
             >
-              <Trash2 className="w-3.5 h-3.5" />
+              <Trash2 className="w-3 h-3" />
             </button>
           </div>
         </div>
 
-        {/* Rating */}
-        <div className="flex items-center gap-1 mb-3">
+        <div className="flex items-center gap-1 mb-2 text-[10px] text-muted-foreground">
           {[1, 2, 3, 4, 5].map((i) => (
             <Star
               key={i}
-              className={`w-3 h-3 ${i <= (contractor.rating || 0) ? "text-amber-400 fill-current" : "text-gray-200 dark:text-gray-700"}`}
+              className={`w-3 h-3 ${
+                i <= (contractor.rating || 0)
+                  ? "text-amber-500 fill-current"
+                  : "text-muted"
+              }`}
             />
           ))}
-          <span className="text-xs text-gray-400 ml-1">
-            ({contractor.rating || 0}/5)
+          <span className="ml-1 font-medium text-foreground">
+            {contractor.rating ? `${contractor.rating}/5` : "Unrated"}
           </span>
         </div>
 
-        {/* Details */}
-        <div className="space-y-1.5 text-xs text-gray-500 dark:text-gray-400">
+        <div className="space-y-1 text-[11px] text-muted-foreground">
           {contractor.email && (
-            <div className="flex items-center gap-2">
-              <Mail className="w-3.5 h-3.5 flex-shrink-0 text-gray-400" />
+            <div className="flex items-center gap-1.5 truncate">
+              <Mail className="w-3 h-3 flex-shrink-0" />
               <span className="truncate">{contractor.email}</span>
             </div>
           )}
           {contractor.phone && (
-            <div className="flex items-center gap-2">
-              <Phone className="w-3.5 h-3.5 flex-shrink-0 text-gray-400" />
+            <div className="flex items-center gap-1.5 truncate">
+              <Phone className="w-3 h-3 flex-shrink-0" />
               <span>{contractor.phone}</span>
             </div>
           )}
           {contractor.bank_name && (
-            <div className="flex items-center gap-2">
-              <Banknote className="w-3.5 h-3.5 flex-shrink-0 text-gray-400" />
+            <div className="flex items-center gap-1.5 truncate text-[10px]">
+              <Banknote className="w-3 h-3 flex-shrink-0" />
               <span className="truncate">{contractor.bank_name}</span>
             </div>
-          )}
-        </div>
-
-        {/* Footer */}
-        <div className="mt-4 pt-3 border-t border-gray-50 dark:border-gray-700 flex items-center justify-between">
-          <span
-            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wide ${status.bg} ${status.text}`}
-          >
-            <span className={`w-1.5 h-1.5 rounded-full ${status.dot}`} />
-            {contractor.status || "Active"}
-          </span>
-          {contractor.notes && (
-            <span className="text-[10px] text-gray-400 italic truncate ml-2 max-w-[100px]">
-              {contractor.notes}
-            </span>
           )}
         </div>
       </div>
@@ -172,34 +150,19 @@ function ContractorCard({ contractor, onEdit, onDelete }) {
 
 function SkeletonCard() {
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 overflow-hidden animate-pulse">
-      <div className="h-1 bg-gray-200 dark:bg-gray-700" />
-      <div className="p-5 space-y-3">
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-2xl bg-gray-200 dark:bg-gray-700 flex-shrink-0" />
-          <div className="space-y-2 flex-1">
-            <div className="h-3.5 bg-gray-200 dark:bg-gray-700 rounded w-3/4" />
-            <div className="h-3 bg-gray-100 dark:bg-gray-600 rounded w-1/2" />
-          </div>
+    <Card className="p-5 animate-pulse">
+      <div className="flex items-center gap-3 mb-4">
+        <div className="w-12 h-12 rounded-xl bg-muted flex-shrink-0" />
+        <div className="space-y-2 flex-1">
+          <div className="h-3.5 bg-muted rounded w-3/4" />
+          <div className="h-3 bg-muted rounded w-1/2" />
         </div>
-        <div className="h-3 bg-gray-100 dark:bg-gray-600 rounded" />
-        <div className="h-3 bg-gray-100 dark:bg-gray-600 rounded w-4/5" />
       </div>
-    </div>
-  );
-}
-
-const inputCls =
-  "w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 outline-none transition-all text-sm font-medium text-gray-800 dark:text-gray-200 placeholder-gray-400";
-
-function Field({ label, children, col2 }) {
-  return (
-    <div className={`space-y-1.5 ${col2 ? "col-span-2" : ""}`}>
-      <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500 ml-1">
-        {label}
-      </label>
-      {children}
-    </div>
+      <div className="space-y-2">
+        <div className="h-3 bg-muted rounded w-full" />
+        <div className="h-3 bg-muted rounded w-4/5" />
+      </div>
+    </Card>
   );
 }
 
@@ -227,21 +190,24 @@ export default function ContractorsPage() {
   });
   const setF = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
-  const loadContractors = useCallback(async () => {
-    setLoading(true);
-    try {
-      const data = await fetchContractors();
-      setContractors(data || []);
-    } catch {
-      toast.error("Failed to load contractors");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
   useEffect(() => {
-    loadContractors();
-  }, [loadContractors]);
+    let cancelled = false;
+    const load = async () => {
+      setLoading(true);
+      try {
+        const data = await fetchContractors();
+        if (!cancelled) setContractors(data || []);
+      } catch {
+        if (!cancelled) toast.error("Failed to load contractors");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const openDrawer = (c = null) => {
     setSelectedContractor(c);
@@ -289,7 +255,16 @@ export default function ContractorsPage() {
         toast.success("Contractor created");
       }
       setDrawerOpen(false);
-      loadContractors();
+      let cancelled = false;
+      setLoading(true);
+      try {
+        const data = await fetchContractors();
+        if (!cancelled) setContractors(data || []);
+      } catch {
+        if (!cancelled) toast.error("Failed to load contractors");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed to save contractor");
     } finally {
@@ -302,7 +277,16 @@ export default function ContractorsPage() {
       await deleteContractor(id);
       toast.success("Contractor deleted");
       setDeleteConfirm(null);
-      loadContractors();
+      let cancelled = false;
+      setLoading(true);
+      try {
+        const data = await fetchContractors();
+        if (!cancelled) setContractors(data || []);
+      } catch {
+        if (!cancelled) toast.error("Failed to load contractors");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
     } catch (err) {
       toast.error(err.response?.data?.message || "Delete failed");
     }
@@ -331,120 +315,99 @@ export default function ContractorsPage() {
 
   return (
     <>
-      <div className="min-h-full p-6 space-y-6">
-        {/* Hero */}
-        <div className="relative bg-gradient-to-br from-orange-900 via-rose-900 to-slate-900 rounded-3xl p-8 overflow-hidden">
-          <div
-            className="absolute inset-0 opacity-10"
-            style={{
-              backgroundImage:
-                "radial-gradient(circle, #fff 1px, transparent 1px)",
-              backgroundSize: "24px 24px",
-            }}
-          />
-          <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <p className="text-orange-300 text-xs font-bold uppercase tracking-widest mb-1">
-                Contractor Registry
-              </p>
-              <h1
-                className="text-3xl font-black text-white tracking-tight"
-                style={{ fontFamily: "var(--font-display)" }}
-              >
-                Contractors
-              </h1>
-              <p className="text-orange-200/60 text-sm mt-1">
-                {contractors.length} service provider
-                {contractors.length !== 1 ? "s" : ""}
-              </p>
-            </div>
-            <button
-              onClick={() => openDrawer()}
-              className="flex items-center gap-2 bg-white hover:bg-orange-50 text-slate-900 px-5 py-3 rounded-2xl font-bold text-sm shadow-xl hover:scale-105 transition-all"
-              style={{ fontFamily: "var(--font-display)" }}
-            >
-              <Plus className="w-4 h-4" />
-              Add Contractor
-            </button>
+      <div className="min-h-full bg-background p-4 sm:p-6 space-y-6">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-xl font-medium tracking-tight text-foreground">
+              Contractors
+            </h1>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {contractors.length} service provider
+              {contractors.length !== 1 ? "s" : ""}
+            </p>
           </div>
+          <Button
+            onClick={() => openDrawer()}
+            className="flex items-center gap-2"
+          >
+            <Plus className="w-4 h-4" />
+            Add Contractor
+          </Button>
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-3 gap-3">
           {[
             {
               icon: HardHat,
               label: "Total",
               value: contractors.length,
-              color: "bg-orange-50 dark:bg-orange-900/20 text-orange-600",
             },
             {
               icon: Shield,
               label: "Active",
               value: activeCount,
-              color: "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600",
             },
             {
               icon: Award,
               label: "Avg Rating",
-              value: `${avgRating}★`,
-              color: "bg-amber-50 dark:bg-amber-900/20 text-amber-600",
+              value: `${avgRating}\u2605`,
             },
-          ].map(({ icon: Icon, label, value, color }) => (
-            <div
-              key={label}
-              className="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm"
-            >
-              <div
-                className={`w-10 h-10 rounded-xl flex items-center justify-center mb-3 ${color}`}
-              >
-                <Icon className="w-5 h-5" />
-              </div>
-              <div
-                className="text-2xl font-bold text-gray-900 dark:text-white"
-                style={{ fontFamily: "var(--font-display)" }}
-              >
-                {value}
-              </div>
-              <div className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mt-1">
-                {label}
-              </div>
-            </div>
+          ].map(({ icon: Icon, label, value }) => (
+            <Card key={label}>
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted">
+                    <Icon className="w-4 h-4 text-foreground" />
+                  </div>
+                  <div>
+                    <p className="text-lg font-medium tracking-tight text-foreground">
+                      {value}
+                    </p>
+                    <p className="text-[11px] font-medium text-muted-foreground">
+                      {label}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           ))}
         </div>
 
         {/* Controls */}
         <div className="flex flex-wrap gap-3 items-center">
           <div className="relative flex-1 min-w-[200px] max-w-sm">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <input
               type="text"
               placeholder="Search contractors…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-11 pr-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-400 shadow-sm"
+              className="w-full pl-10 pr-4 py-2.5 bg-background border border-border rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
             />
           </div>
           <div className="flex gap-2">
             {["", "Active", "Blacklisted"].map((s) => (
-              <button
+              <Button
                 key={s}
+                variant={statusFilter === s ? "default" : "outline"}
                 onClick={() => setStatusFilter(s)}
-                className={`px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${statusFilter === s ? "bg-orange-600 text-white shadow-lg shadow-orange-500/30" : "bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700"}`}
+                className="text-xs"
               >
                 {s || "All"}
-              </button>
+              </Button>
             ))}
           </div>
         </div>
 
         {/* Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
           {loading ? (
             Array.from({ length: 8 }).map((_, i) => <SkeletonCard key={i} />)
           ) : filtered.length === 0 ? (
-            <div className="col-span-full flex flex-col items-center justify-center py-20 text-gray-400">
-              <HardHat className="w-12 h-12 mb-3 opacity-30" />
+            <div className="col-span-full flex flex-col items-center justify-center py-16 text-muted-foreground">
+              <HardHat className="w-10 h-10 mb-3 opacity-40" />
               <p className="text-sm font-medium">No contractors found</p>
             </div>
           ) : (
@@ -461,7 +424,6 @@ export default function ContractorsPage() {
       </div>
 
       {/* Drawer */}
-      {/* Contractor Form Modal */}
       <FormModal
         isOpen={drawerOpen}
         onClose={() => setDrawerOpen(false)}
@@ -590,37 +552,36 @@ export default function ContractorsPage() {
 
       {/* Delete Confirm */}
       {deleteConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-sm p-6 space-y-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <Card className="w-full max-w-sm p-6 space-y-4">
             <div className="text-center space-y-2">
-              <div className="w-14 h-14 rounded-2xl bg-red-50 dark:bg-red-900/20 flex items-center justify-center mx-auto">
-                <Trash2 className="w-6 h-6 text-red-500" />
+              <div className="w-14 h-14 rounded-xl bg-destructive/10 flex items-center justify-center mx-auto">
+                <Trash2 className="w-6 h-6 text-destructive" />
               </div>
-              <h3
-                className="font-black text-gray-900 dark:text-white text-lg"
-                style={{ fontFamily: "var(--font-display)" }}
-              >
+              <h3 className="text-lg font-medium text-foreground">
                 Delete Contractor?
               </h3>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-muted-foreground">
                 This action cannot be undone.
               </p>
             </div>
             <div className="flex gap-3">
-              <button
+              <Button
+                variant="outline"
                 onClick={() => setDeleteConfirm(null)}
-                className="flex-1 py-3 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-bold text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                className="flex-1"
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="destructive"
                 onClick={() => handleDelete(deleteConfirm)}
-                className="flex-1 py-3 rounded-xl bg-red-600 hover:bg-red-700 text-white text-sm font-black transition-colors shadow-lg shadow-red-500/30"
+                className="flex-1"
               >
                 Delete
-              </button>
+              </Button>
             </div>
-          </div>
+          </Card>
         </div>
       )}
     </>

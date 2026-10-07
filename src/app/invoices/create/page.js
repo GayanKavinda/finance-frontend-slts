@@ -6,7 +6,6 @@ import axios from "@/lib/axios";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 import { ArrowLeft, Save, Loader2, Info, Plus } from "lucide-react";
-// Removed duplicate Layout wrapper
 import Link from "next/link";
 import {
   fetchTenders,
@@ -23,13 +22,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 
 export default function CreateInvoicePage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
 
-  // Cascading data
   const [tenders, setTenders] = useState([]);
   const [jobs, setJobs] = useState([]);
   const [pos, setPos] = useState([]);
@@ -47,78 +46,69 @@ export default function CreateInvoicePage() {
     customer_po_description: "",
   });
 
-  // Load all tenders on mount
   useEffect(() => {
     const loadTenders = async () => {
       try {
         const res = await fetchTenders();
         setTenders(res.data || []);
-      } catch (error) {
+      } catch {
         toast.error("Failed to load tenders");
       }
     };
     loadTenders();
   }, []);
 
-  // Cascading Effect: When Tender changes, load Jobs and set Customer
   useEffect(() => {
-    if (form.tender_id) {
-      const selectedTender = tenders.find((t) => t.id == form.tender_id);
-      if (selectedTender) {
-        setForm((prev) => ({
-          ...prev,
-          customer_id: selectedTender.customer_id,
-        }));
-
-        const loadJobsForTender = async () => {
+    const run = async () => {
+      if (form.tender_id) {
+        const selectedTender = tenders.find((t) => t.id == form.tender_id);
+        if (selectedTender) {
+          setForm((prev) => ({
+            ...prev,
+            customer_id: selectedTender.customer_id,
+          }));
           try {
-            // In a real app, you might want a specific endpoint or filter
-            // Our fetchJobs takes search or you can filter.
-            // Let's assume the API returns enough or we filter.
             const res = await fetchJobs({ tender_id: form.tender_id });
-            // If API doesn't support tender_id filter yet, we'd need to fix it or filter client-side
-            // Our Job model has tender_id, so let's assume it works.
             setJobs(res.data || []);
-          } catch (error) {
+          } catch {
             console.error("Failed to load jobs");
           }
-        };
-        loadJobsForTender();
+        }
+      } else {
+        setJobs([]);
+        setForm((prev) => ({ ...prev, job_id: "", customer_id: "" }));
       }
-    } else {
-      setJobs([]);
-      setForm((prev) => ({ ...prev, job_id: "", customer_id: "" }));
-    }
+    };
+    run();
   }, [form.tender_id, tenders]);
 
-  // Cascading Effect: When Job changes, load POs
   useEffect(() => {
-    if (form.job_id) {
-      const loadPOsForJob = async () => {
+    const run = async () => {
+      if (form.job_id) {
         try {
           const res = await fetchPurchaseOrders({ job_id: form.job_id });
           setPos(res.data || []);
-        } catch (error) {
+        } catch {
           console.error("Failed to load POs");
         }
-      };
-      loadPOsForJob();
-    } else {
-      setPos([]);
-      setForm((prev) => ({ ...prev, po_id: "" }));
-    }
+      } else {
+        setPos([]);
+        setForm((prev) => ({ ...prev, po_id: "" }));
+      }
+    };
+    run();
   }, [form.job_id]);
 
-  // Auto-set amount and details when PO is selected
   useEffect(() => {
     if (form.po_id) {
       const selectedPO = pos.find((p) => p.id == form.po_id);
       if (selectedPO) {
-        setForm((prev) => ({ 
-          ...prev, 
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setForm((prev) => ({
+          ...prev,
           invoice_amount: selectedPO.po_amount,
           customer_po_number: selectedPO.po_number,
-          customer_po_description: selectedPO.description || ""
+          customer_po_description: selectedPO.description || "",
         }));
       }
     }
@@ -141,8 +131,8 @@ export default function CreateInvoicePage() {
       await axios.post("/invoices", payload);
       toast.success("Invoice created as draft successfully");
       router.push("/invoices");
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to create invoice");
+    } catch {
+      toast.error("Failed to create invoice");
     } finally {
       setLoading(false);
     }
@@ -150,42 +140,38 @@ export default function CreateInvoicePage() {
 
   return (
     <>
-      <div className="space-y-8">
+      <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Link
               href="/invoices"
-              className="p-3 rounded-2xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+              className="p-3 rounded-xl bg-muted hover:bg-muted/80 transition-colors"
             >
               <ArrowLeft className="w-5 h-5" />
             </Link>
             <div>
-              <h1 className="text-3xl font-black text-gray-900 dark:text-white">
-                Invoices
+              <h1 className="text-xl font-medium tracking-tight text-foreground">
+                Create Invoice
               </h1>
-              <p className="text-gray-500 font-medium">
-                Manage revenue invoices for clients
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Draft a new revenue invoice
               </p>
             </div>
           </div>
 
-          <button
-            onClick={() => setModalOpen(true)}
-            className="flex items-center gap-2 px-6 py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl font-bold shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 transition-all hover:scale-105 active:scale-95"
-          >
-            <Plus className="w-5 h-5" />
+          <Button onClick={() => setModalOpen(true)} className="gap-2">
+            <Plus className="w-4 h-4" />
             Create Invoice
-          </button>
+          </Button>
         </div>
 
-        <div className="bg-white dark:bg-gray-800 rounded-3xl p-8 shadow-sm border border-gray-100 dark:border-gray-700">
-          <p className="text-gray-500 text-center py-12">
-            Click "Create Invoice" to draft a new revenue invoice
+        <div className="bg-card rounded-2xl p-6 shadow-sm border border-border">
+          <p className="text-sm text-muted-foreground text-center py-8">
+            Click &quot;Create Invoice&quot; to draft a new revenue invoice
           </p>
         </div>
       </div>
 
-      {/* Create Invoice Modal */}
       <FormModal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
@@ -205,7 +191,7 @@ export default function CreateInvoicePage() {
               name="tender_id"
               value={form.tender_id}
               onChange={handleChange}
-              className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20"
             >
               <option value="">Choose a Tender...</option>
               {tenders.map((t) => (
@@ -226,7 +212,7 @@ export default function CreateInvoicePage() {
                 value={form.job_id}
                 onChange={handleChange}
                 disabled={!form.tender_id}
-                className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <option value="">Choose a Job...</option>
                 {jobs.map((j) => (
@@ -237,15 +223,14 @@ export default function CreateInvoicePage() {
               </select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="po_id">Linked PO *</Label>
+              <Label htmlFor="po_id">Select PO</Label>
               <select
                 id="po_id"
-                required
                 name="po_id"
                 value={form.po_id}
                 onChange={handleChange}
                 disabled={!form.job_id}
-                className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <option value="">Choose a PO...</option>
                 {pos.map((p) => (
@@ -257,21 +242,29 @@ export default function CreateInvoicePage() {
             </div>
           </div>
 
+          <div className="space-y-2">
+            <Label htmlFor="invoice_number">Invoice Number *</Label>
+            <Input
+              id="invoice_number"
+              required
+              name="invoice_number"
+              value={form.invoice_number}
+              onChange={handleChange}
+              placeholder="INV-001"
+            />
+          </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="invoice_number">Invoice Number *</Label>
+              <Label htmlFor="invoice_amount">Amount (LKR) *</Label>
               <Input
-                id="invoice_number"
+                id="invoice_amount"
+                type="number"
                 required
-                name="invoice_number"
-                value={form.invoice_number}
-                onChange={(e) =>
-                  setForm({
-                    ...form,
-                    invoice_number: e.target.value.toUpperCase(),
-                  })
-                }
-                placeholder="e.g. SLT-INV-001"
+                name="invoice_amount"
+                value={form.invoice_amount}
+                onChange={handleChange}
+                placeholder="0.00"
               />
             </div>
             <div className="space-y-2">
@@ -288,68 +281,41 @@ export default function CreateInvoicePage() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="invoice_amount">Invoice Amount (LKR) *</Label>
-            <Input
-              id="invoice_amount"
-              type="number"
-              required
-              name="invoice_amount"
-              value={form.invoice_amount}
+            <Label htmlFor="billing_address">Billing Address</Label>
+            <textarea
+              id="billing_address"
+              name="billing_address"
+              value={form.billing_address}
               onChange={handleChange}
-              placeholder="0.00"
+              rows={3}
+              className="w-full px-3 py-2 bg-background border border-input rounded-md text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20"
+              placeholder="Customer billing address..."
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="billing_address">Manual Billing Address</Label>
-            <textarea
-              id="billing_address"
-              name="billing_address"
-              rows={2}
-              value={form.billing_address}
+            <Label htmlFor="customer_po_number">Customer PO Number</Label>
+            <Input
+              id="customer_po_number"
+              name="customer_po_number"
+              value={form.customer_po_number}
               onChange={handleChange}
-              placeholder="Enter manual billing address if different from customer default..."
-              className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              placeholder="Customer PO reference"
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="customer_po_number">Customer PO Number</Label>
-              <Input
-                id="customer_po_number"
-                name="customer_po_number"
-                value={form.customer_po_number}
-                onChange={handleChange}
-                placeholder="e.g. CUST-PO-123"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="customer_po_description">Customer PO Demand / Description</Label>
-              <Input
-                id="customer_po_description"
-                name="customer_po_description"
-                value={form.customer_po_description}
-                onChange={handleChange}
-                placeholder="e.g. Advance payment for milestone 1"
-              />
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="customer_po_description">Description / Notes</Label>
+            <textarea
+              id="customer_po_description"
+              name="customer_po_description"
+              value={form.customer_po_description}
+              onChange={handleChange}
+              rows={3}
+              className="w-full px-3 py-2 bg-background border border-input rounded-md text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20"
+              placeholder="Invoice details or terms..."
+            />
           </div>
-
-          {form.customer_id && (
-            <div className="rounded-lg border bg-card text-card-foreground p-4">
-              <div className="flex items-start gap-3">
-                <Info className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                <div className="space-y-1">
-                  <p className="text-sm font-medium">Selected Customer</p>
-                  <p className="text-sm text-muted-foreground">
-                    {tenders.find((t) => t.id == form.tender_id)?.customer
-                      ?.name || "Customer Identified"}
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       </FormModal>
     </>

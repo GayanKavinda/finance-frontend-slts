@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import api from "@/lib/axios";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   Shield,
   Plus,
@@ -9,149 +10,42 @@ import {
   Trash2,
   Check,
   X,
-  ShieldCheck,
   Lock,
   Key,
+  Crown,
+  Search,
+  Layers,
 } from "lucide-react";
 import { toast } from "react-hot-toast";
-
-const ROLE_ACCENT = {
-  Admin: "from-amber-500 to-orange-500",
-  Procurement: "from-blue-500 to-indigo-500",
-  Finance: "from-emerald-500 to-teal-500",
-  Viewer: "from-gray-400 to-slate-400",
-};
-const getRoleAccent = (name) =>
-  ROLE_ACCENT[name] || "from-violet-500 to-purple-500";
-
-function RoleCard({ role, onEdit, onDelete }) {
-  const accent = getRoleAccent(role.name);
-  const isProtected = role.name === "Admin";
-  const perms = role.permissions || [];
-
-  return (
-    <div className="group bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden">
-      <div className={`h-1 w-full bg-gradient-to-r ${accent}`} />
-      <div className="p-5">
-        {/* Header */}
-        <div className="flex items-start justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <div
-              className={`w-10 h-10 rounded-xl bg-gradient-to-br ${accent} flex items-center justify-center shadow-sm`}
-            >
-              <Shield className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <h3
-                className="font-black text-gray-900 dark:text-white text-sm"
-                style={{ fontFamily: "var(--font-display)" }}
-              >
-                {role.name}
-                {isProtected && (
-                  <Lock className="inline w-3 h-3 text-amber-500 ml-1.5 mb-0.5" />
-                )}
-              </h3>
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                {perms.length} permission{perms.length !== 1 ? "s" : ""}
-              </p>
-            </div>
-          </div>
-          <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-            <button
-              onClick={() => onEdit(role)}
-              className="p-1.5 hover:bg-blue-50 dark:hover:bg-blue-900/20 text-blue-500 rounded-lg transition-colors"
-            >
-              <Edit2 className="w-3.5 h-3.5" />
-            </button>
-            {!isProtected && (
-              <button
-                onClick={() => onDelete(role.id)}
-                className="p-1.5 hover:bg-red-50 dark:hover:bg-red-900/20 text-red-500 rounded-lg transition-colors"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Permissions */}
-        {perms.length > 0 ? (
-          <div className="flex flex-wrap gap-1.5">
-            {perms.slice(0, 6).map((p) => (
-              <span
-                key={p.id}
-                className="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-[10px] font-bold rounded-lg uppercase tracking-tight border border-gray-100 dark:border-gray-600"
-              >
-                {p.name.replace(/-/g, " ")}
-              </span>
-            ))}
-            {perms.length > 6 && (
-              <span className="inline-flex items-center px-2 py-0.5 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-500 text-[10px] font-bold rounded-lg">
-                +{perms.length - 6} more
-              </span>
-            )}
-          </div>
-        ) : (
-          <p className="text-xs text-gray-400 italic">
-            No permissions assigned
-          </p>
-        )}
-
-        {/* Edit button */}
-        <div className="mt-4 pt-3 border-t border-gray-50 dark:border-gray-700">
-          <button
-            onClick={() => onEdit(role)}
-            className="w-full py-2 text-xs font-black text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 flex items-center justify-center gap-1.5 rounded-xl hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-all"
-          >
-            <Edit2 className="w-3 h-3" /> Edit Role & Permissions
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function SkeletonCard() {
-  return (
-    <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 overflow-hidden animate-pulse">
-      <div className="h-1 bg-gray-200 dark:bg-gray-700" />
-      <div className="p-5 space-y-3">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gray-200 dark:bg-gray-700" />
-          <div className="space-y-1.5 flex-1">
-            <div className="h-3.5 bg-gray-200 dark:bg-gray-700 rounded w-1/3" />
-            <div className="h-2.5 bg-gray-100 dark:bg-gray-600 rounded w-1/4" />
-          </div>
-        </div>
-        <div className="flex flex-wrap gap-1.5">
-          {[1, 2, 3].map((i) => (
-            <div
-              key={i}
-              className="h-5 w-20 bg-gray-100 dark:bg-gray-700 rounded-lg"
-            />
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-const inputCls =
-  "w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 outline-none transition-all text-sm font-medium text-gray-800 dark:text-gray-200 placeholder-gray-400";
+import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export default function RoleManagementPage() {
+  const { user } = useAuth();
+  const isSuperAdmin = user?.roles?.includes("Super Admin");
+
   const [roles, setRoles] = useState([]);
   const [permissions, setPermissions] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // Drawer for Role create/edit
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [editingRole, setEditingRole] = useState(null);
-  const [saving, setSaving] = useState(false);
-  const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [formData, setFormData] = useState({ name: "", permissions: [] });
+  const [saving, setSaving] = useState(false);
   const [permSearch, setPermSearch] = useState("");
 
-  const loadData = async () => {
-    setLoading(true);
+  // Modal for new permission creation
+  const [permModalOpen, setPermModalOpen] = useState(false);
+  const [newPermName, setNewPermName] = useState("");
+  const [permCreating, setPermCreating] = useState(false);
+
+  // Deletion confirm
+  const [deleteConfirm, setDeleteConfirm] = useState(null);
+
+  const loadData = useCallback(async () => {
     try {
       const [r, p] = await Promise.all([
         api.get("/admin/roles"),
@@ -161,14 +55,17 @@ export default function RoleManagementPage() {
       setPermissions(p.data);
     } catch {
       toast.error("Failed to load roles/permissions");
-    } finally {
-      setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    loadData();
-  }, []);
+    const run = async () => {
+      setLoading(true);
+      await loadData();
+      setLoading(false);
+    };
+    run();
+  }, [loadData]);
 
   const openDrawer = (role = null) => {
     setEditingRole(role);
@@ -177,32 +74,36 @@ export default function RoleManagementPage() {
       role
         ? {
             name: role.name,
-            permissions: role.permissions?.map((p) => p.slug) || [],
+            permissions: role.permissions?.map((p) => p.name) || [],
           }
         : { name: "", permissions: [] },
     );
     setDrawerOpen(true);
   };
 
-  const togglePermission = (slug) => {
+  const togglePermission = (permName) => {
     setFormData((prev) => ({
       ...prev,
-      permissions: prev.permissions.includes(slug)
-        ? prev.permissions.filter((p) => p !== slug)
-        : [...prev.permissions, slug],
+      permissions: prev.permissions.includes(permName)
+        ? prev.permissions.filter((p) => p !== permName)
+        : [...prev.permissions, permName],
     }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleRoleSubmit = async (e) => {
     e.preventDefault();
+    if (!formData.name.trim()) {
+      toast.error("Role name is required");
+      return;
+    }
     setSaving(true);
     try {
       if (editingRole) {
         await api.put(`/admin/roles/${editingRole.id}`, formData);
-        toast.success("Role updated");
+        toast.success("Role updated successfully");
       } else {
         await api.post("/admin/roles", formData);
-        toast.success("Role created");
+        toast.success("Role created successfully");
       }
       setDrawerOpen(false);
       loadData();
@@ -213,303 +114,463 @@ export default function RoleManagementPage() {
     }
   };
 
-  const handleDelete = async (id) => {
+  const handleDeleteRole = async (id) => {
     try {
       await api.delete(`/admin/roles/${id}`);
       toast.success("Role deleted");
       setDeleteConfirm(null);
       loadData();
-    } catch {
-      toast.error("Delete failed");
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Delete failed");
+    }
+  };
+
+  const handleCreatePermission = async (e) => {
+    e.preventDefault();
+    if (!newPermName.trim()) {
+      toast.error("Permission name is required");
+      return;
+    }
+    setPermCreating(true);
+    try {
+      await api.post("/admin/permissions", { name: newPermName.trim() });
+      toast.success("Permission created");
+      setNewPermName("");
+      setPermModalOpen(false);
+      loadData();
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to create permission");
+    } finally {
+      setPermCreating(false);
     }
   };
 
   const filteredPerms = permissions.filter((p) =>
     p.name.toLowerCase().includes(permSearch.toLowerCase()),
   );
-  const totalPerms = permissions.length;
-  const protectedCount = roles.filter((r) => r.name === "Admin").length;
 
   return (
-    <>
-      <div className="min-h-full p-6 space-y-6">
-        {/* Hero */}
-        <div className="relative bg-gradient-to-br from-indigo-900 via-violet-900 to-slate-900 rounded-3xl p-8 overflow-hidden">
-          <div
-            className="absolute inset-0 opacity-10"
-            style={{
-              backgroundImage:
-                "radial-gradient(circle, #fff 1px, transparent 1px)",
-              backgroundSize: "24px 24px",
-            }}
-          />
-          <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <p className="text-indigo-300 text-xs font-bold uppercase tracking-widest mb-1">
-                Admin Panel
-              </p>
-              <h1
-                className="text-3xl font-black text-white tracking-tight"
-                style={{ fontFamily: "var(--font-display)" }}
-              >
-                Access Control
-              </h1>
-              <p className="text-indigo-200/60 text-sm mt-1">
-                Manage roles &amp; granular permissions
-              </p>
-            </div>
-            <button
-              onClick={() => openDrawer()}
-              className="flex items-center gap-2 bg-white hover:bg-indigo-50 text-slate-900 px-5 py-3 rounded-2xl font-bold text-sm shadow-xl hover:scale-105 transition-all"
-              style={{ fontFamily: "var(--font-display)" }}
-            >
-              <Plus className="w-4 h-4" />
-              Create Role
-            </button>
-          </div>
+    <div className="min-h-full p-4 sm:p-6 space-y-5">
+      {/* Zen Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-border/50">
+        <div>
+          <h1 className="text-base font-semibold tracking-tight text-foreground">
+            Roles & Permissions
+          </h1>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Configure system roles, access boundaries, and granular operational privileges.
+          </p>
         </div>
-
-        {/* Stats */}
-        <div className="grid grid-cols-3 gap-4">
-          {[
-            {
-              icon: Shield,
-              label: "Total Roles",
-              value: roles.length,
-              color: "bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600",
-            },
-            {
-              icon: Key,
-              label: "Total Permissions",
-              value: totalPerms,
-              color: "bg-violet-50 dark:bg-violet-900/20 text-violet-600",
-            },
-            {
-              icon: Lock,
-              label: "Protected",
-              value: protectedCount,
-              color: "bg-amber-50 dark:bg-amber-900/20 text-amber-600",
-            },
-          ].map(({ icon: Icon, label, value, color }) => (
-            <div
-              key={label}
-              className="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm"
-            >
-              <div
-                className={`w-10 h-10 rounded-xl flex items-center justify-center mb-3 ${color}`}
-              >
-                <Icon className="w-5 h-5" />
-              </div>
-              <div
-                className="text-xl font-bold text-gray-900 dark:text-white"
-                style={{ fontFamily: "var(--font-display)" }}
-              >
-                {value}
-              </div>
-              <div className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mt-1">
-                {label}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Role Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {loading
-            ? Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)
-            : roles.map((role) => (
-                <RoleCard
-                  key={role.id}
-                  role={role}
-                  onEdit={openDrawer}
-                  onDelete={(id) => setDeleteConfirm(id)}
-                />
-              ))}
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setPermModalOpen(true)}
+            className="h-8 text-xs gap-1.5"
+          >
+            <Key className="w-3.5 h-3.5 text-muted-foreground" />
+            New Permission
+          </Button>
+          <Button
+            size="sm"
+            onClick={() => openDrawer()}
+            className="h-8 text-xs gap-1.5"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            Create Role
+          </Button>
         </div>
       </div>
 
-      {/* Slide-in Drawer */}
+      {/* Compact Status Strip */}
+      <div className="grid grid-cols-3 gap-3">
+        <div className="p-3 bg-card border border-border rounded-lg flex items-center justify-between">
+          <div>
+            <span className="text-[11px] text-muted-foreground font-medium uppercase tracking-wider block">
+              Configured Roles
+            </span>
+            <span className="text-lg font-semibold text-foreground">
+              {roles.length}
+            </span>
+          </div>
+          <Shield className="w-4 h-4 text-muted-foreground" />
+        </div>
+        <div className="p-3 bg-card border border-border rounded-lg flex items-center justify-between">
+          <div>
+            <span className="text-[11px] text-muted-foreground font-medium uppercase tracking-wider block">
+              Active Permissions
+            </span>
+            <span className="text-lg font-semibold text-foreground">
+              {permissions.length}
+            </span>
+          </div>
+          <Key className="w-4 h-4 text-muted-foreground" />
+        </div>
+        <div className="p-3 bg-card border border-border rounded-lg flex items-center justify-between">
+          <div>
+            <span className="text-[11px] text-muted-foreground font-medium uppercase tracking-wider block">
+              Protected Archetypes
+            </span>
+            <span className="text-lg font-semibold text-foreground">
+              {roles.filter((r) => r.is_protected || r.name === "Admin" || r.name === "Super Admin").length}
+            </span>
+          </div>
+          <Lock className="w-4 h-4 text-amber-500" />
+        </div>
+      </div>
+
+      {/* Roles Grid (Zen Minimalist cards) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
+        {loading ? (
+          Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="p-4 bg-card border border-border rounded-lg animate-pulse space-y-3">
+              <div className="h-4 bg-muted rounded w-1/3" />
+              <div className="h-3 bg-muted rounded w-1/2" />
+              <div className="flex gap-1.5 pt-2">
+                <div className="h-4 w-12 bg-muted rounded" />
+                <div className="h-4 w-16 bg-muted rounded" />
+              </div>
+            </div>
+          ))
+        ) : (
+          roles.map((role) => {
+            const isProtected =
+              role.is_protected || role.name === "Admin" || role.name === "Super Admin";
+            const perms = role.permissions || [];
+
+            return (
+              <div
+                key={role.id}
+                className="p-3.5 bg-card border border-border rounded-lg hover:border-border/80 transition-all flex flex-col justify-between"
+              >
+                <div>
+                  <div className="flex items-start justify-between gap-2 mb-2">
+                    <div className="flex items-center gap-2">
+                      <div className="w-7 h-7 rounded-md bg-muted flex items-center justify-center flex-shrink-0">
+                        {role.name === "Super Admin" ? (
+                          <Crown className="w-3.5 h-3.5 text-amber-500" />
+                        ) : (
+                          <Shield className="w-3.5 h-3.5 text-muted-foreground" />
+                        )}
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-xs font-semibold text-foreground">
+                            {role.name}
+                          </span>
+                          {isProtected && (
+                            <Lock className="w-3 h-3 text-amber-500 flex-shrink-0" />
+                          )}
+                        </div>
+                        <span className="text-[10px] text-muted-foreground">
+                          {perms.length} permission{perms.length !== 1 ? "s" : ""}
+                          {role.users_count > 0 && ` · ${role.users_count} user${role.users_count !== 1 ? "s" : ""}`}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Super Admin can edit Admin. Only Super Admin itself is strictly immutable */}
+                    {role.name !== "Super Admin" && (isSuperAdmin || !isProtected) && (
+                      <div className="flex items-center gap-0.5">
+                        <button
+                          onClick={() => openDrawer(role)}
+                          title="Edit Permissions"
+                          className="p-1 text-muted-foreground hover:text-foreground rounded hover:bg-muted transition-colors"
+                        >
+                          <Edit2 className="w-3 h-3" />
+                        </button>
+                        {role.name !== "Admin" && (
+                          <button
+                            onClick={() => setDeleteConfirm(role.id)}
+                            title="Delete"
+                            className="p-1 text-muted-foreground hover:text-destructive rounded hover:bg-destructive/10 transition-colors"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Permissions pills */}
+                  <div className="flex flex-wrap gap-1 mt-2.5">
+                    {perms.length > 0 ? (
+                      perms.slice(0, 5).map((p) => (
+                        <span
+                          key={p.id}
+                          className="inline-block px-1.5 py-0.5 text-[10px] bg-muted text-muted-foreground rounded border border-border/50"
+                        >
+                          {p.name.replace(/-/g, " ")}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="text-[11px] text-muted-foreground italic">
+                        No privileges assigned
+                      </span>
+                    )}
+                    {perms.length > 5 && (
+                      <span className="inline-block px-1.5 py-0.5 text-[10px] bg-muted/60 text-muted-foreground rounded">
+                        +{perms.length - 5}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="pt-3 mt-3 border-t border-border/50 flex items-center justify-between text-[11px]">
+                  {role.name === "Super Admin" ? (
+                    <span className="text-muted-foreground text-[10px] flex items-center gap-1">
+                      <Lock className="w-2.5 h-2.5" /> Immutable root archetype
+                    </span>
+                  ) : role.name === "Admin" && !isSuperAdmin ? (
+                    <span className="text-muted-foreground text-[10px] flex items-center gap-1">
+                      <Lock className="w-2.5 h-2.5" /> Protected by Super Admin
+                    </span>
+                  ) : (
+                    <button
+                      onClick={() => openDrawer(role)}
+                      className="text-primary hover:underline text-[11px] font-medium flex items-center gap-1"
+                    >
+                      <Edit2 className="w-2.5 h-2.5" /> Configure permissions
+                    </button>
+                  )}
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+
+      {/* Drawer: Role Edit/Create */}
       {drawerOpen && (
         <div className="fixed inset-0 z-50 flex">
           <div
-            className="flex-1 bg-black/40 backdrop-blur-sm"
+            className="flex-1 bg-black/40 backdrop-blur-[1px]"
             onClick={() => setDrawerOpen(false)}
           />
-          <div className="w-full max-w-md bg-white dark:bg-gray-900 shadow-2xl flex flex-col h-full overflow-hidden animate-in slide-in-from-right duration-300">
-            {/* Drawer Header */}
-            <div className="bg-gradient-to-r from-indigo-600 to-violet-600 px-6 py-6 flex-shrink-0">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-indigo-200 text-[10px] font-black uppercase tracking-widest mb-1">
-                    {editingRole ? "Edit" : "Create New"}
-                  </p>
-                  <h2
-                    className="text-xl font-black text-white"
-                    style={{ fontFamily: "var(--font-display)" }}
-                  >
-                    {editingRole
-                      ? `Edit: ${editingRole.name}`
-                      : "New Custom Role"}
-                  </h2>
-                  {editingRole && (
-                    <p className="text-indigo-200/70 text-xs mt-1">
-                      {formData.permissions.length} permissions selected
-                    </p>
-                  )}
-                </div>
-                <button
-                  onClick={() => setDrawerOpen(false)}
-                  className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white"
-                >
-                  <X className="w-5 h-5" />
-                </button>
+          <div className="w-full max-w-sm bg-card border-l border-border shadow-xl flex flex-col h-full overflow-hidden">
+            <div className="p-4 border-b border-border flex items-center justify-between">
+              <div>
+                <h2 className="text-sm font-semibold text-foreground">
+                  {editingRole ? `Edit ${editingRole.name}` : "Create New Role"}
+                </h2>
+                <p className="text-[11px] text-muted-foreground">
+                  {formData.permissions.length} of {permissions.length} permissions assigned
+                </p>
               </div>
+              <button
+                onClick={() => setDrawerOpen(false)}
+                className="p-1 rounded-md text-muted-foreground hover:text-foreground"
+              >
+                <X className="w-4 h-4" />
+              </button>
             </div>
 
-            <form
-              onSubmit={handleSubmit}
-              className="flex-1 overflow-y-auto flex flex-col"
-            >
-              <div className="p-6 space-y-5 flex-1">
-                {/* Role name */}
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500 ml-1">
+            <form onSubmit={handleRoleSubmit} className="flex-1 overflow-y-auto flex flex-col">
+              <div className="p-4 space-y-4 flex-1">
+                <div>
+                  <Label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider block mb-1">
                     Role Name *
-                  </label>
-                  <input
+                  </Label>
+                  <Input
                     required
                     value={formData.name}
                     onChange={(e) =>
                       setFormData((prev) => ({ ...prev, name: e.target.value }))
                     }
-                    placeholder="e.g. Finance Manager"
-                    className={inputCls}
+                    placeholder="e.g. Compliance Officer"
+                    className="h-8 text-xs"
                   />
                 </div>
 
-                {/* Permissions */}
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between mb-1">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500 ml-1">
-                      Permissions
-                    </label>
-                    <span className="text-[10px] font-black text-indigo-500">
-                      {formData.permissions.length}/{permissions.length}{" "}
-                      selected
-                    </span>
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <Label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                      Privileges
+                    </Label>
+                    <div className="flex gap-2 text-[10px]">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            permissions: filteredPerms.map((p) => p.name),
+                          }))
+                        }
+                        className="text-primary hover:underline font-medium"
+                      >
+                        Select all
+                      </button>
+                      <span className="text-muted-foreground">·</span>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setFormData((prev) => ({ ...prev, permissions: [] }))
+                        }
+                        className="text-muted-foreground hover:text-foreground font-medium"
+                      >
+                        Clear
+                      </button>
+                    </div>
                   </div>
 
-                  {/* Permission search */}
-                  <input
-                    placeholder="Filter permissions…"
-                    value={permSearch}
-                    onChange={(e) => setPermSearch(e.target.value)}
-                    className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl text-xs outline-none focus:ring-2 focus:ring-indigo-500/20 font-medium"
-                  />
+                  <div className="relative mb-2">
+                    <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                      placeholder="Filter privileges…"
+                      value={permSearch}
+                      onChange={(e) => setPermSearch(e.target.value)}
+                      className="h-8 text-xs pl-8"
+                    />
+                  </div>
 
-                  {/* Permission toggles — simple pill list */}
-                  <div className="space-y-1 max-h-72 overflow-y-auto pr-1">
+                  <div className="space-y-1 max-h-80 overflow-y-auto pr-1">
                     {filteredPerms.map((p) => {
-                      const active = formData.permissions.includes(p.slug);
+                      const active = formData.permissions.includes(p.name);
                       return (
                         <button
                           key={p.id}
                           type="button"
-                          onClick={() => togglePermission(p.slug)}
-                          className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-left transition-all ${
+                          onClick={() => togglePermission(p.name)}
+                          className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded text-left transition-colors border text-xs ${
                             active
-                              ? "bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-700"
-                              : "bg-gray-50 dark:bg-gray-800 border border-transparent hover:border-gray-200 dark:hover:border-gray-600"
+                              ? "bg-primary/5 border-primary/20 text-foreground font-medium"
+                              : "bg-background border-border/60 text-muted-foreground hover:bg-muted"
                           }`}
                         >
-                          <span
-                            className={`text-xs font-bold capitalize ${active ? "text-indigo-700 dark:text-indigo-300" : "text-gray-600 dark:text-gray-400"}`}
-                          >
+                          <span className="capitalize text-[11px]">
                             {p.name.replace(/-/g, " ")}
                           </span>
                           <span
-                            className={`w-5 h-5 rounded-md flex items-center justify-center flex-shrink-0 transition-colors ${
+                            className={`w-4 h-4 rounded flex items-center justify-center flex-shrink-0 text-[10px] ${
                               active
-                                ? "bg-indigo-600 text-white"
-                                : "bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-500"
+                                ? "bg-primary text-primary-foreground"
+                                : "border border-input"
                             }`}
                           >
-                            {active && <Check className="w-3 h-3 stroke-[3]" />}
+                            {active && <Check className="w-2.5 h-2.5 stroke-[3]" />}
                           </span>
                         </button>
                       );
                     })}
-                    {filteredPerms.length === 0 && (
-                      <p className="text-center text-xs text-gray-400 py-4">
-                        No permissions match
-                      </p>
-                    )}
                   </div>
                 </div>
               </div>
 
-              {/* Footer */}
-              <div className="px-6 py-4 bg-gray-50 dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700 flex gap-3 flex-shrink-0">
-                <button
+              <div className="p-3 border-t border-border bg-muted/30 flex gap-2">
+                <Button
                   type="button"
+                  variant="outline"
+                  size="sm"
                   onClick={() => setDrawerOpen(false)}
-                  className="flex-1 py-3 rounded-xl bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-sm font-bold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                  className="flex-1 h-8 text-xs"
                 >
                   Cancel
-                </button>
-                <button
+                </Button>
+                <Button
                   type="submit"
+                  size="sm"
                   disabled={saving}
-                  className="flex-[2] py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white text-sm font-black shadow-lg shadow-indigo-500/30 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-60"
-                  style={{ fontFamily: "var(--font-display)" }}
+                  className="flex-1 h-8 text-xs"
                 >
-                  {saving
-                    ? "Saving…"
-                    : editingRole
-                      ? "Save Changes"
-                      : "Create Role"}
-                </button>
+                  {saving ? "Saving…" : editingRole ? "Save Changes" : "Create"}
+                </Button>
               </div>
             </form>
           </div>
         </div>
       )}
 
-      {/* Delete Confirm */}
-      {deleteConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-sm p-6 space-y-4">
-            <div className="text-center space-y-2">
-              <div className="w-14 h-14 rounded-2xl bg-red-50 dark:bg-red-900/20 flex items-center justify-center mx-auto">
-                <Trash2 className="w-6 h-6 text-red-500" />
-              </div>
-              <h3
-                className="font-black text-gray-900 dark:text-white text-lg"
-                style={{ fontFamily: "var(--font-display)" }}
-              >
-                Delete Role?
+      {/* Modal: New Permission */}
+      {permModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-[1px] p-4">
+          <div className="w-full max-w-sm bg-card border border-border rounded-lg shadow-xl p-4 space-y-3">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-semibold text-foreground uppercase tracking-wider">
+                Create Permission
               </h3>
-              <p className="text-sm text-gray-500">
-                Users assigned this role will lose their access.
+              <button
+                onClick={() => setPermModalOpen(false)}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Define a new granular permission slug (e.g. export-audit-data).
+            </p>
+            <form onSubmit={handleCreatePermission} className="space-y-3 pt-1">
+              <div>
+                <Label className="text-[11px] text-muted-foreground uppercase">
+                  Name / Identifier
+                </Label>
+                <Input
+                  required
+                  value={newPermName}
+                  onChange={(e) => setNewPermName(e.target.value)}
+                  placeholder="e.g. view-financial-reports"
+                  className="h-8 text-xs mt-1"
+                />
+              </div>
+              <div className="flex gap-2 pt-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPermModalOpen(false)}
+                  className="flex-1 h-8 text-xs"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  size="sm"
+                  disabled={permCreating}
+                  className="flex-1 h-8 text-xs"
+                >
+                  {permCreating ? "Creating…" : "Save Permission"}
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div className="w-full max-w-xs bg-card border border-border rounded-lg p-4 shadow-xl space-y-3 text-center">
+            <div className="w-8 h-8 rounded-full bg-destructive/10 text-destructive flex items-center justify-center mx-auto">
+              <Trash2 className="w-4 h-4" />
+            </div>
+            <div>
+              <h3 className="text-xs font-semibold text-foreground">
+                Delete this role?
+              </h3>
+              <p className="text-[11px] text-muted-foreground mt-1">
+                Ensure all assigned users have been reassigned prior to removal.
               </p>
             </div>
-            <div className="flex gap-3">
-              <button
+            <div className="flex gap-2 pt-2">
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={() => setDeleteConfirm(null)}
-                className="flex-1 py-3 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-bold text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                className="flex-1 h-8 text-xs"
               >
                 Cancel
-              </button>
-              <button
-                onClick={() => handleDelete(deleteConfirm)}
-                className="flex-1 py-3 rounded-xl bg-red-600 hover:bg-red-700 text-white text-sm font-black transition-colors shadow-lg shadow-red-500/30"
+              </Button>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => handleDeleteRole(deleteConfirm)}
+                className="flex-1 h-8 text-xs"
               >
                 Delete
-              </button>
+              </Button>
             </div>
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 }

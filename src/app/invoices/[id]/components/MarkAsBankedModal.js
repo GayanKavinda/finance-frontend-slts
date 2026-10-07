@@ -10,12 +10,12 @@ export default function MarkAsBankedModal({ onConfirm, onClose, loading }) {
   });
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-sm overflow-hidden">
-        <div className="bg-teal-50 dark:bg-teal-900/10 p-8 text-center space-y-2">
-          <div className="w-16 h-16 bg-teal-100 dark:bg-teal-900/30 rounded-full flex items-center justify-center text-teal-600 mx-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+      <div className="bg-white dark:bg-gray-800 w-full max-w-sm rounded-2xl shadow-strong overflow-hidden border border-border">
+        <div className="bg-primary/5 p-6 text-center space-y-2">
+          <div className="w-14 h-14 bg-primary/10 rounded-full flex items-center justify-center text-primary mx-auto">
             <svg
-              className="w-8 h-8"
+              className="w-7 h-7"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -28,27 +28,27 @@ export default function MarkAsBankedModal({ onConfirm, onClose, loading }) {
               />
             </svg>
           </div>
-          <h3 className="font-black text-teal-900 dark:text-teal-400 uppercase tracking-tighter text-xl">
+          <h3 className="text-lg font-medium text-foreground">
             Mark as Banked
           </h3>
-          <p className="text-xs text-teal-600/70 font-medium">
+          <p className="text-xs text-muted-foreground">
             Verify that the funds are cleared in the corporate account
           </p>
         </div>
-        <div className="p-8 space-y-4">
+        <div className="p-6 space-y-4">
           <div className="space-y-1">
-            <label className="text-[10px] font-black uppercase text-gray-400 ml-1">
+            <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
               Banking Date
             </label>
             <input
               type="date"
               value={form.banked_at}
               onChange={(e) => setForm({ ...form, banked_at: e.target.value })}
-              className="w-full bg-gray-50 dark:bg-gray-900 p-4 rounded-xl border-none outline-none focus:ring-2 focus:ring-teal-100 font-bold"
+              className="w-full bg-background border border-input p-3 rounded-xl text-sm font-medium text-foreground outline-none focus:ring-2 focus:ring-primary/20"
             />
           </div>
           <div className="space-y-1">
-            <label className="text-[10px] font-black uppercase text-gray-400 ml-1">
+            <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
               Bank Reference (Optional)
             </label>
             <input
@@ -57,21 +57,21 @@ export default function MarkAsBankedModal({ onConfirm, onClose, loading }) {
                 setForm({ ...form, bank_reference: e.target.value })
               }
               placeholder="DEPOSIT-REF-..."
-              className="w-full bg-gray-50 dark:bg-gray-900 p-4 rounded-xl border-none outline-none focus:ring-2 focus:ring-teal-100 font-bold"
+              className="w-full bg-background border border-input p-3 rounded-xl text-sm font-medium text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/20"
             />
           </div>
         </div>
-        <div className="p-8 pt-0 flex gap-3">
+        <div className="px-6 pb-6 flex gap-3">
           <button
             onClick={onClose}
-            className="flex-1 py-4 bg-gray-100 dark:bg-gray-700 rounded-2xl font-bold"
+            className="flex-1 py-2.5 bg-muted rounded-xl font-medium transition-colors text-sm"
           >
             Cancel
           </button>
           <button
             onClick={() => onConfirm(form)}
             disabled={loading}
-            className="flex-[2] py-4 bg-teal-600 text-white rounded-2xl font-black uppercase tracking-widest text-xs shadow-lg shadow-teal-200 transition-all disabled:opacity-50"
+            className="flex-[2] py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl font-medium transition-colors disabled:opacity-50 text-sm"
           >
             Confirm Banking
           </button>

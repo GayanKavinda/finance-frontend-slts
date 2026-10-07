@@ -17,12 +17,12 @@ function SectionHeader({ icon: Icon, title, iconColor = "text-primary" }) {
             <Icon size={18} className={iconColor} />
           </div>
         )}
-        <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+        <h3 className="text-sm font-medium text-slate-700 dark:text-slate-300 uppercase tracking-wider">
           {title}
         </h3>
       </div>
       <div
-        className={`h-0.5 w-16 bg-gradient-to-r ${iconColor.replace("text-", "from-").split(" ")[0]} to-transparent rounded-full`}
+        className={`h-0.5 w-16 bg-background ${iconColor.replace("text-", "from-").split(" ")[0]} to-transparent rounded-full`}
       ></div>
     </div>
   );
@@ -67,7 +67,10 @@ export default function ActivityLog() {
   }, []);
 
   useEffect(() => {
-    fetchSecurityData();
+    const run = async () => {
+      fetchSecurityData();
+    };
+    run();
   }, [fetchSecurityData]);
 
   const filterLoginHistory = (history, filter) => {
@@ -170,7 +173,7 @@ export default function ActivityLog() {
     >
       <div className="relative rounded-2xl border border-slate-200 dark:border-slate-800 p-6 bg-white/60 dark:bg-slate-950/40 dark:shadow-[0_0_80px_-12px_rgba(0,180,235,0.15)]">
         {/* Glow effect for dark mode */}
-        <div className="absolute inset-0 -z-10 rounded-2xl bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 blur-2xl opacity-0 dark:opacity-60"></div>
+        <div className="absolute inset-0 -z-10 rounded-2xl bg-muted/50"></div>
 
         <div className="flex items-center justify-between mb-2">
           <SectionHeader
@@ -178,7 +181,7 @@ export default function ActivityLog() {
             title="Active Sessions"
             iconColor="text-primary"
           />
-          <span className="text-[10px] bg-primary/10 text-primary px-2 py-1 rounded-md font-bold uppercase tracking-wider -mt-6">
+          <span className="text-[10px] bg-primary/10 text-primary px-2 py-1 rounded-md font-medium uppercase tracking-wider -mt-6">
             {activeSessions.length} active
           </span>
         </div>
@@ -198,7 +201,7 @@ export default function ActivityLog() {
                     />
                   </div>
                   <div>
-                    <div className="flex items-center gap-2 text-sm font-bold text-slate-900 dark:text-slate-200">
+                    <div className="flex items-center gap-2 text-sm font-medium text-slate-900 dark:text-slate-200">
                       <span className="truncate max-w-[120px] font-mono text-[11px]">
                         {session.ip_address}
                       </span>
@@ -219,7 +222,7 @@ export default function ActivityLog() {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => onRevokeSession(session.id)}
-                    className="group px-3 py-2 text-xs font-bold text-red-600 dark:text-red-400 bg-red-500/10 dark:bg-red-950/20 backdrop-blur-md rounded-xl transition-all duration-300 border border-red-200 dark:border-red-800 hover:bg-red-500/20 cursor-pointer flex items-center gap-1.5"
+                    className="group px-3 py-2 text-xs font-medium text-red-600 dark:text-red-400 bg-red-500/10 dark:bg-red-950/20  rounded-xl transition-all duration-300 border border-red-200 dark:border-red-800 hover:bg-red-500/20 cursor-pointer flex items-center gap-1.5"
                   >
                     <XCircle className="w-3.5 h-3.5 group-hover:scale-110 transition-transform duration-300" />
                     <span>Revoke</span>
@@ -237,7 +240,7 @@ export default function ActivityLog() {
 
       <div className="relative rounded-2xl border border-slate-200 dark:border-slate-800 p-6 bg-white/60 dark:bg-slate-950/40 dark:shadow-[0_0_80px_-12px_rgba(0,180,235,0.15)]">
         {/* Glow effect for dark mode */}
-        <div className="absolute inset-0 -z-10 rounded-2xl bg-gradient-to-br from-secondary/5 via-transparent to-primary/5 blur-2xl opacity-0 dark:opacity-60"></div>
+        <div className="absolute inset-0 -z-10 rounded-2xl bg-muted/50"></div>
 
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
           <div className="flex flex-col gap-1">
@@ -267,9 +270,9 @@ export default function ActivityLog() {
                   setTimeFilter(filter.value);
                   setShowDatePicker(false);
                 }}
-                className={`px-3 py-1.5 text-xs font-bold rounded-xl transition-all duration-300 cursor-pointer backdrop-blur-md ${
+                className={`px-3 py-1.5 text-xs font-medium rounded-xl transition-all duration-300 cursor-pointer  ${
                   timeFilter === filter.value
-                    ? "bg-primary/20 text-primary border border-primary/40 shadow-lg"
+                    ? "bg-primary/20 text-primary border border-primary/40 shadow-sm"
                     : "bg-white/10 dark:bg-white/5 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:bg-white/20"
                 }`}
               >
@@ -288,9 +291,9 @@ export default function ActivityLog() {
                     setTimeFilter("custom");
                   }
                 }}
-                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl transition-all duration-300 cursor-pointer backdrop-blur-md ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-xl transition-all duration-300 cursor-pointer  ${
                   timeFilter === "custom"
-                    ? "bg-secondary/20 text-secondary border border-secondary/40 shadow-lg"
+                    ? "bg-secondary/20 text-secondary border border-secondary/40 shadow-sm"
                     : "bg-white/10 dark:bg-white/5 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 hover:bg-white/20"
                 }`}
               >
@@ -316,11 +319,11 @@ export default function ActivityLog() {
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
-                  className="absolute right-0 top-full mt-2 p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xl z-50 min-w-[280px]"
+                  className="absolute right-0 top-full mt-2 p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm z-50 min-w-[280px]"
                 >
                   <div className="space-y-3">
                     <div>
-                      <label className="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider block mb-1.5">
+                      <label className="text-xs font-medium text-slate-600 dark:text-slate-300 uppercase tracking-wider block mb-1.5">
                         Start Date
                       </label>
                       <input
@@ -333,7 +336,7 @@ export default function ActivityLog() {
                       />
                     </div>
                     <div>
-                      <label className="text-xs font-bold text-slate-600 dark:text-slate-300 uppercase tracking-wider block mb-1.5">
+                      <label className="text-xs font-medium text-slate-600 dark:text-slate-300 uppercase tracking-wider block mb-1.5">
                         End Date
                       </label>
                       <input
@@ -353,7 +356,7 @@ export default function ActivityLog() {
                           setTimeFilter("all");
                           setShowDatePicker(false);
                         }}
-                        className="flex-1 px-3 py-2 text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-all cursor-pointer"
+                        className="flex-1 px-3 py-2 text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-all cursor-pointer"
                       >
                         Clear
                       </button>
@@ -367,7 +370,7 @@ export default function ActivityLog() {
                           }
                         }}
                         disabled={!dateRange.start || !dateRange.end}
-                        className="flex-1 px-3 py-2 text-xs font-bold bg-secondary/20 text-secondary border border-secondary/30 rounded-lg hover:bg-secondary/30 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="flex-1 px-3 py-2 text-xs font-medium bg-secondary/20 text-secondary border border-secondary/30 rounded-lg hover:bg-secondary/30 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         Apply
                       </motion.button>
@@ -381,7 +384,7 @@ export default function ActivityLog() {
         <div className="overflow-x-auto -mx-6 px-6 sm:mx-0 sm:px-0">
           <table className="w-full text-left text-sm min-w-[600px]">
             <thead>
-              <tr className="text-slate-500 dark:text-slate-400 font-bold border-b border-slate-100 dark:border-slate-800">
+              <tr className="text-slate-500 dark:text-slate-400 font-medium border-b border-slate-100 dark:border-slate-800">
                 <th className="pb-4 pr-4 uppercase text-[10px] tracking-wider whitespace-nowrap">
                   Device / OS
                 </th>
@@ -418,7 +421,7 @@ export default function ActivityLog() {
                     </td>
                     <td className="py-4 pr-4">
                       <span
-                        className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                        className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium ${
                           login.status === "failed"
                             ? "bg-red-100 dark:bg-red-500/10 text-red-600 dark:text-red-400"
                             : "bg-emerald-100 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
@@ -460,7 +463,7 @@ export default function ActivityLog() {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={loadMoreHistory}
-                className="group px-6 py-2.5 text-xs font-bold text-slate-600 dark:text-slate-400 bg-white/10 dark:bg-white/5 backdrop-blur-md border border-slate-200 dark:border-slate-800 rounded-xl hover:bg-white/20 transition-all uppercase tracking-wider cursor-pointer active:shadow-inner"
+                className="group px-6 py-2.5 text-xs font-medium text-slate-600 dark:text-slate-400 bg-white/10 dark:bg-white/5  border border-slate-200 dark:border-slate-800 rounded-xl hover:bg-white/20 transition-all uppercase tracking-wider cursor-pointer active:shadow-inner"
               >
                 <span className="flex items-center gap-2">
                   Load More History
@@ -498,7 +501,7 @@ export default function ActivityLog() {
                     activities.
                     <button
                       onClick={() => setTimeFilter("all")}
-                      className="ml-1 underline hover:no-underline cursor-pointer font-bold"
+                      className="ml-1 underline hover:no-underline cursor-pointer font-medium"
                     >
                       Load all
                     </button>{" "}

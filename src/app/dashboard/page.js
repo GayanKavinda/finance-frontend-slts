@@ -8,9 +8,9 @@ import {
   CheckCircle,
   Clock,
   DollarSign,
-  ArrowRight,
-  TrendingUp,
-  TrendingDown,
+  ArrowUpRight,
+  ArrowDownRight,
+  Minus,
   Briefcase,
   ShoppingBag,
   Receipt,
@@ -23,21 +23,15 @@ import {
   Zap,
   Wallet,
   AlertTriangle,
-  ChevronRight,
-  ArrowUpRight,
-  ArrowDownRight,
-  Minus,
-  Layers,
-  Target,
-  Percent,
   Calendar,
   Users,
   CreditCard,
-  Banknote,
   CircleDollarSign,
   Timer,
   ShieldCheck,
   RefreshCw,
+  Target,
+  Percent,
 } from "lucide-react";
 import {
   AreaChart,
@@ -63,8 +57,10 @@ import {
   PolarRadiusAxis,
 } from "recharts";
 import { useAuth } from "@/contexts/AuthContext";
-import { useTheme } from "next-themes";
-import { fetchMonthlyInvoiceTrend } from "@/lib/invoice";
+import { useTheme } from "@/contexts/ThemeContext";
+import {
+  fetchMonthlyInvoiceTrend,
+} from "@/lib/invoice";
 import {
   fetchInvoiceSummary,
   fetchRecentInvoices,
@@ -74,97 +70,24 @@ import {
   fetchPerformanceMetrics,
 } from "@/lib/invoiceSummary";
 import StatusBadge from "@/components/ui/StatusBadge";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/Card";
+import { Button } from "@/components/ui/button";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableHead,
+  TableRow,
+  TableCell,
+} from "@/components/ui/Table";
+import { Separator } from "@/components/ui/Separator";
 import Link from "next/link";
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// DESIGN TOKENS — Zen Bento Aesthetic
-// ═══════════════════════════════════════════════════════════════════════════════
-const TOKENS = {
-  radius: {
-    sm: "10px",
-    md: "16px",
-    lg: "24px",
-    xl: "32px",
-  },
-  colors: {
-    slate: {
-      50: "#F8FAFC",
-      100: "#F1F5F9",
-      200: "#E2E8F0",
-      300: "#CBD5E1",
-      400: "#94A3B8",
-      500: "#64748B",
-      600: "#475569",
-      700: "#334155",
-      800: "#1E293B",
-      900: "#0F172A",
-    },
-    emerald: {
-      50: "#ECFDF5",
-      100: "#D1FAE5",
-      400: "#34D399",
-      500: "#10B981",
-      600: "#059669",
-    },
-    blue: {
-      50: "#EFF6FF",
-      100: "#DBEAFE",
-      400: "#60A5FA",
-      500: "#3B82F6",
-      600: "#2563EB",
-    },
-    violet: {
-      50: "#F5F3FF",
-      100: "#EDE9FE",
-      400: "#A78BFA",
-      500: "#8B5CF6",
-      600: "#7C3AED",
-    },
-    amber: {
-      50: "#FFFBEB",
-      100: "#FEF3C7",
-      400: "#FBBF24",
-      500: "#F59E0B",
-      600: "#D97706",
-    },
-    rose: {
-      50: "#FFF1F2",
-      100: "#FFE4E6",
-      400: "#FB7185",
-      500: "#F43F5E",
-      600: "#E11D48",
-    },
-    teal: {
-      50: "#F0FDFA",
-      100: "#CCFBF1",
-      400: "#2DD4BF",
-      500: "#14B8A6",
-      600: "#0D9488",
-    },
-  },
-};
-
-const STATUS_COLORS = {
-  Banked: "#0D9488",
-  "Payment Received": "#6366F1",
-  Approved: "#059669",
-  Submitted: "#D97706",
-  Rejected: "#DC2626",
-  Draft: "#6B7280",
-  Overdue: "#991B1B",
-  Pending: "#7C3AED",
-};
-
-const CHART_PALETTE = [
-  "#3B82F6",
-  "#10B981",
-  "#F59E0B",
-  "#8B5CF6",
-  "#EC4899",
-  "#06B6D4",
-  "#F43F5E",
-  "#14B8A6",
-];
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // UTILITIES
@@ -187,12 +110,11 @@ const formatCompact = (value) => {
 
 const formatPercent = (value) => `${Number(value).toFixed(1)}%`;
 
-// ─── Animated count-up ───────────────────────────────────────────────────────
-function useCountUp(target, duration = 1800) {
+function useCountUp(target, duration = 1500) {
   const [count, setCount] = useState(0);
   useEffect(() => {
     if (!target && target !== 0) return;
-    const steps = 75;
+    const steps = 60;
     const inc = target / steps;
     let current = 0;
     const timer = setInterval(() => {
@@ -210,7 +132,7 @@ function useCountUp(target, duration = 1800) {
 }
 
 // ─── Sparkline mini chart ────────────────────────────────────────────────────
-function Sparkline({ data, color = "#3B82F6", height = 32 }) {
+function Sparkline({ data, color = "hsl(var(--primary))", height = 32 }) {
   if (!data || data.length < 2) return <div style={{ height }} />;
   const min = Math.min(...data);
   const max = Math.max(...data);
@@ -237,7 +159,7 @@ function Sparkline({ data, color = "#3B82F6", height = 32 }) {
         strokeLinecap="round"
         strokeLinejoin="round"
         points={points}
-        opacity={0.7}
+        opacity="0.6"
       />
       <circle
         cx="100"
@@ -249,9 +171,58 @@ function Sparkline({ data, color = "#3B82F6", height = 32 }) {
   );
 }
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// COMPONENTS
-// ═══════════════════════════════════════════════════════════════════════════════
+// ─── Trend Indicator ─────────────────────────────────────────────────────────
+function TrendIndicator({ value, label }) {
+  const num = Number(value);
+  const isPositive = num > 0;
+  const isNeutral = num === 0;
+
+  return (
+    <div className="flex items-center gap-1">
+      {isNeutral ? (
+        <Minus className="h-3 w-3 text-muted-foreground" />
+      ) : isPositive ? (
+        <ArrowUpRight className="h-3 w-3 text-primary" />
+      ) : (
+        <ArrowDownRight className="h-3 w-3 text-destructive" />
+      )}
+      <span
+        className={`text-xs font-medium ${
+          isNeutral ? "text-muted-foreground" : isPositive ? "text-primary" : "text-destructive"
+        }`}
+      >
+        {Math.abs(num).toFixed(1)}%
+      </span>
+      {label && <span className="text-[11px] text-muted-foreground">{label}</span>}
+    </div>
+  );
+}
+
+// ─── Chart Tooltip ────────────────────────────────────────────────────────────
+function ChartTooltip({ active, payload, label }) {
+  if (!active || !payload?.length) return null;
+  return (
+    <div className="rounded-lg border border-border bg-popover px-3 py-2 shadow-soft">
+      <p className="mb-1.5 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+        {label}
+      </p>
+      {payload.map((entry, i) => (
+        <div key={i} className="mb-0.5 flex items-center gap-2 text-xs">
+          <span
+            className="h-1.5 w-1.5 shrink-0 rounded-full"
+            style={{ backgroundColor: entry.color }}
+          />
+          <span className="text-muted-foreground">{entry.name}:</span>
+          <span className="font-medium text-foreground">
+            {typeof entry.value === "number"
+              ? formatCompact(entry.value)
+              : entry.value}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 // ─── Welcome Popup ───────────────────────────────────────────────────────────
 function WelcomePopup({ user, onClose }) {
@@ -269,483 +240,94 @@ function WelcomePopup({ user, onClose }) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.3 }}
+      transition={{ duration: 0.25 }}
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
       style={{
-        backgroundColor: "rgba(2,6,23,0.5)",
-        backdropFilter: "blur(12px)",
+        backgroundColor: "rgba(0,0,0,0.3)",
       }}
       onClick={onClose}
     >
       <motion.div
-        initial={{ opacity: 0, scale: 0.85, y: 30 }}
+        initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.9, y: 10 }}
-        transition={{ type: "spring", damping: 28, stiffness: 350 }}
-        className="relative w-full max-w-sm overflow-hidden rounded-3xl border border-slate-200/60 bg-white p-0 shadow-2xl dark:border-slate-700/60 dark:bg-slate-900"
+        exit={{ opacity: 0, scale: 0.95, y: 10 }}
+        transition={{ type: "spring", damping: 24, stiffness: 300 }}
+        className="relative w-full max-w-sm overflow-hidden rounded-xl border border-border bg-background shadow-strong"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Top gradient accent */}
-        <div className="h-1.5 w-full bg-gradient-to-r from-blue-500 via-violet-500 to-emerald-500" />
-
-        <div className="p-8">
+        <div className="p-6">
           <button
             onClick={onClose}
-            className="absolute right-4 top-5 rounded-full p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-300"
+            className="absolute right-4 top-4 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted"
           >
             <X className="h-4 w-4" />
           </button>
 
-          <div className="mb-6 flex items-center gap-4">
-            <div className="relative">
-              {user?.avatar_url ||
-              user?.avatar ||
-              user?.profile_pic ||
-              user?.image ? (
-                <img
-                  src={
-                    user.avatar_url ||
-                    user.avatar ||
-                    user.profile_pic ||
-                    user.image
-                  }
-                  alt={user?.name}
-                  className="h-16 w-16 rounded-2xl object-cover shadow-lg ring-2 ring-white dark:ring-slate-900"
-                  onError={(e) => {
-                    e.target.style.display = "none";
-                    e.target.nextSibling.style.display = "flex";
-                  }}
-                />
-              ) : null}
-              <div
-                className={`h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-violet-600 text-2xl font-bold text-white shadow-lg ${user?.avatar_url || user?.avatar || user?.profile_pic || user?.image ? "hidden" : "flex"}`}
-              >
+          <div className="mb-5 flex items-center gap-3.5">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
+              <span className="text-lg font-medium text-primary">
                 {user?.name?.charAt(0)}
-              </div>
-              <div className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500 ring-2 ring-white dark:ring-slate-900">
-                <div className="h-2 w-2 rounded-full bg-white" />
-              </div>
+              </span>
             </div>
             <div>
-              <h2 className="text-xl font-bold text-slate-900 dark:text-white">
+              <h2 className="text-base font-medium text-foreground">
                 Welcome back
               </h2>
-              <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+              <p className="text-sm text-muted-foreground">
                 {firstName}
               </p>
             </div>
           </div>
 
-          <div className="space-y-3 rounded-2xl bg-slate-50 p-5 dark:bg-slate-800/50">
-            <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-              {greeting}! Here&apos;s your overview
+          <div className="rounded-lg border border-border bg-muted/30 p-4">
+            <p className="text-sm text-foreground">
+              {greeting}. Heres your overview.
             </p>
-            <div className="flex items-center gap-2.5 text-xs text-slate-500 dark:text-slate-400">
-              <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-emerald-100 dark:bg-emerald-500/15">
-                <Sparkles className="h-3 w-3 text-emerald-600 dark:text-emerald-400" />
-              </div>
+            <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
+              <CheckCircle className="h-3.5 w-3.5 text-primary" />
               <span>All systems operational</span>
             </div>
-            <div className="flex items-center gap-2.5 text-xs text-slate-500 dark:text-slate-400">
-              <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-500/15">
-                <RefreshCw className="h-3 w-3 text-blue-600 dark:text-blue-400" />
-              </div>
+            <div className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
+              <RefreshCw className="h-3.5 w-3.5 text-primary" />
               <span>Data refreshed just now</span>
             </div>
           </div>
 
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
+          <Button
             onClick={onClose}
-            className="mt-6 w-full rounded-xl bg-slate-900 py-3 text-sm font-semibold text-white shadow-lg shadow-slate-900/20 transition-colors hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100"
+            className="mt-5 w-full"
+            variant="default"
           >
-            Continue to Dashboard
-          </motion.button>
+            Continue
+          </Button>
         </div>
       </motion.div>
     </motion.div>
   );
 }
 
-// ─── Bento Card Base ─────────────────────────────────────────────────────────
-function BentoCard({
-  children,
-  className = "",
-  delay = 0,
-  colSpan = 1,
-  rowSpan = 1,
-  hover = true,
-}) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 24 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, delay, ease: [0.22, 1, 0.36, 1] }}
-      className={`
-        relative overflow-hidden rounded-3xl border border-slate-200/60 bg-white
-        dark:border-slate-700/40 dark:bg-slate-900/80
-        ${hover ? "transition-all duration-500 hover:border-slate-300/80 hover:shadow-xl hover:shadow-slate-200/50 dark:hover:border-slate-600/60 dark:hover:shadow-slate-950/50" : ""}
-        ${className}
-      `}
-      style={{ gridColumn: `span ${colSpan}`, gridRow: `span ${rowSpan}` }}
-    >
-      {children}
-    </motion.div>
-  );
-}
-
-// ─── Trend Indicator ─────────────────────────────────────────────────────────
-function TrendIndicator({ value, label }) {
-  const num = Number(value);
-  const isPositive = num > 0;
-  const isNeutral = num === 0;
-
-  return (
-    <div className="flex items-center gap-1">
-      {isNeutral ? (
-        <Minus className="h-3 w-3 text-slate-400" />
-      ) : isPositive ? (
-        <ArrowUpRight className="h-3 w-3 text-emerald-500" />
-      ) : (
-        <ArrowDownRight className="h-3 w-3 text-rose-500" />
-      )}
-      <span
-        className={`text-xs font-semibold ${isNeutral ? "text-slate-400" : isPositive ? "text-emerald-500" : "text-rose-500"}`}
-      >
-        {Math.abs(num).toFixed(1)}%
-      </span>
-      {label && <span className="text-[11px] text-slate-400">{label}</span>}
-    </div>
-  );
-}
-
-// ─── KPI Bento Card ──────────────────────────────────────────────────────────
-function KpiBento({
-  icon: Icon,
-  label,
-  value,
-  subValue,
-  trend,
-  color,
-  delay,
-  sparklineData,
-}) {
-  const colorMap = {
-    blue: {
-      bg: "bg-blue-50 dark:bg-blue-500/10",
-      text: "text-blue-600 dark:text-blue-400",
-      accent: "#3B82F6",
-    },
-    emerald: {
-      bg: "bg-emerald-50 dark:bg-emerald-500/10",
-      text: "text-emerald-600 dark:text-emerald-400",
-      accent: "#10B981",
-    },
-    violet: {
-      bg: "bg-violet-50 dark:bg-violet-500/10",
-      text: "text-violet-600 dark:text-violet-400",
-      accent: "#8B5CF6",
-    },
-    teal: {
-      bg: "bg-teal-50 dark:bg-teal-500/10",
-      text: "text-teal-600 dark:text-teal-400",
-      accent: "#14B8A6",
-    },
-    amber: {
-      bg: "bg-amber-50 dark:bg-amber-500/10",
-      text: "text-amber-600 dark:text-amber-400",
-      accent: "#F59E0B",
-    },
-    rose: {
-      bg: "bg-rose-50 dark:bg-rose-500/10",
-      text: "text-rose-600 dark:text-rose-400",
-      accent: "#F43F5E",
-    },
-    slate: {
-      bg: "bg-slate-100 dark:bg-slate-700/30",
-      text: "text-slate-600 dark:text-slate-400",
-      accent: "#64748B",
-    },
-  };
-
-  const c = colorMap[color] || colorMap.slate;
-
-  return (
-    <BentoCard delay={delay} className="flex flex-col justify-between p-6">
-      <div className="flex items-start justify-between">
-        <div
-          className={`flex h-11 w-11 items-center justify-center rounded-2xl ${c.bg}`}
-        >
-          <Icon className={`h-5 w-5 ${c.text}`} />
-        </div>
-        {trend !== undefined && <TrendIndicator value={trend} />}
-      </div>
-
-      <div className="mt-4">
-        <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
-          {label}
-        </p>
-        <p className="mt-1 text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-          {value}
-        </p>
-        {subValue && (
-          <p className="mt-1 text-xs font-medium text-slate-400 dark:text-slate-500">
-            {subValue}
-          </p>
-        )}
-      </div>
-
-      {sparklineData && (
-        <div className="mt-3 -mx-1">
-          <Sparkline data={sparklineData} color={c.accent} height={28} />
-        </div>
-      )}
-    </BentoCard>
-  );
-}
-
-// ─── Wide Metric Bento ───────────────────────────────────────────────────────
-function WideMetricBento({
-  icon: Icon,
-  label,
-  value,
-  breakdown,
-  color,
-  delay,
-}) {
-  const colorMap = {
-    blue: {
-      bg: "bg-blue-50 dark:bg-blue-500/10",
-      text: "text-blue-600 dark:text-blue-400",
-      bar: "bg-blue-500",
-    },
-    emerald: {
-      bg: "bg-emerald-50 dark:bg-emerald-500/10",
-      text: "text-emerald-600 dark:text-emerald-400",
-      bar: "bg-emerald-500",
-    },
-    rose: {
-      bg: "bg-rose-50 dark:bg-rose-500/10",
-      text: "text-rose-600 dark:text-rose-400",
-      bar: "bg-rose-500",
-    },
-  };
-
-  const c = colorMap[color] || colorMap.blue;
-
-  return (
-    <BentoCard delay={delay} className="flex flex-col justify-between p-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div
-            className={`flex h-10 w-10 items-center justify-center rounded-xl ${c.bg}`}
-          >
-            <Icon className={`h-5 w-5 ${c.text}`} />
-          </div>
-          <p className="text-sm font-semibold text-slate-600 dark:text-slate-400">
-            {label}
-          </p>
-        </div>
-      </div>
-
-      <div className="mt-5">
-        <p className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
-          {value}
-        </p>
-
-        {breakdown && (
-          <div className="mt-4 space-y-3">
-            {breakdown.map((item, i) => (
-              <div key={i}>
-                <div className="mb-1.5 flex items-center justify-between text-xs">
-                  <span className="font-medium text-slate-600 dark:text-slate-400">
-                    {item.label}
-                  </span>
-                  <span className="font-bold text-slate-900 dark:text-slate-200">
-                    {item.value}
-                  </span>
-                </div>
-                <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: `${item.percent}%` }}
-                    transition={{
-                      duration: 1,
-                      delay: delay + 0.3 + i * 0.1,
-                      ease: "easeOut",
-                    }}
-                    className={`h-full rounded-full ${c.bar}`}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </BentoCard>
-  );
-}
-
-// ─── Mini Stat Pill ──────────────────────────────────────────────────────────
-function StatPill({ icon: Icon, label, value, color, delay }) {
-  const colorMap = {
-    blue: "bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400",
-    emerald:
-      "bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400",
-    amber:
-      "bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400",
-    violet:
-      "bg-violet-50 text-violet-600 dark:bg-violet-500/10 dark:text-violet-400",
-    rose: "bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-400",
-    slate:
-      "bg-slate-100 text-slate-600 dark:bg-slate-700/30 dark:text-slate-400",
-  };
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.9 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.4, delay }}
-      className="flex items-center gap-3 rounded-2xl border border-slate-200/50 bg-white/80 px-4 py-3 backdrop-blur-sm dark:border-slate-700/30 dark:bg-slate-800/60"
-    >
-      <div
-        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${colorMap[color] || colorMap.slate}`}
-      >
-        <Icon className="h-4 w-4" />
-      </div>
-      <div className="min-w-0">
-        <p className="truncate text-[11px] font-medium text-slate-500 dark:text-slate-400">
-          {label}
-        </p>
-        <p className="text-base font-bold text-slate-900 dark:text-white">
-          {value}
-        </p>
-      </div>
-    </motion.div>
-  );
-}
-
-// ─── Chart Tooltip ────────────────────────────────────────────────────────────
-function ChartTooltip({ active, payload, label }) {
-  if (!active || !payload?.length) return null;
-  return (
-    <div className="rounded-2xl border border-slate-200/80 bg-white/95 px-4 py-3 shadow-2xl shadow-slate-900/10 backdrop-blur-md dark:border-slate-700/80 dark:bg-slate-900/95">
-      <p className="mb-2 text-[11px] font-bold uppercase tracking-wider text-slate-400">
-        {label}
-      </p>
-      {payload.map((entry, i) => (
-        <div key={i} className="mb-1 flex items-center gap-2 text-xs">
-          <span
-            className="h-2 w-2 shrink-0 rounded-full"
-            style={{ backgroundColor: entry.color }}
-          />
-          <span className="text-slate-500 dark:text-slate-400">
-            {entry.name}:
-          </span>
-          <span className="font-bold text-slate-900 dark:text-white">
-            {typeof entry.value === "number"
-              ? formatCompact(entry.value)
-              : entry.value}
-          </span>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-// ─── Invoice Table Row ───────────────────────────────────────────────────────
-function InvoiceTableRow({ inv }) {
-  return (
-    <tr className="group border-b border-slate-100 transition-colors hover:bg-slate-50/80 dark:border-slate-800 dark:hover:bg-slate-800/40">
-      <td className="px-5 py-4">
-        <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-500/10">
-            <FileText className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-          </div>
-          <div className="min-w-0">
-            <p className="truncate text-sm font-bold text-slate-900 dark:text-white">
-              {inv.invoice_number}
-            </p>
-            <p className="truncate text-xs text-slate-500 dark:text-slate-400">
-              {inv.customer?.name}
-            </p>
-          </div>
-        </div>
-      </td>
-      <td className="hidden px-5 py-4 md:table-cell">
-        <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
-          <Calendar className="h-3.5 w-3.5" />
-          {new Date(inv.invoice_date).toLocaleDateString("en-US", {
-            month: "short",
-            day: "numeric",
-            year: "numeric",
-          })}
-        </div>
-      </td>
-      <td className="px-5 py-4 text-right">
-        <p className="text-sm font-bold text-slate-900 dark:text-white">
-          {formatCurrency(inv.invoice_amount)}
-        </p>
-      </td>
-      <td className="px-5 py-4">
-        <StatusBadge status={inv.status} />
-      </td>
-    </tr>
-  );
-}
-
-// ─── Mobile Invoice Card ─────────────────────────────────────────────────────
-function InvoiceCard({ inv }) {
-  return (
-    <div className="border-b border-slate-100 p-4 last:border-b-0 dark:border-slate-800">
-      <div className="mb-2 flex items-start justify-between gap-2">
-        <div className="min-w-0">
-          <p className="truncate text-sm font-bold text-slate-900 dark:text-white">
-            {inv.invoice_number}
-          </p>
-          <p className="mt-0.5 truncate text-xs text-slate-500 dark:text-slate-400">
-            {inv.customer?.name}
-          </p>
-        </div>
-        <StatusBadge status={inv.status} />
-      </div>
-      <div className="mt-2 flex items-center justify-between">
-        <p className="text-xs text-slate-500 dark:text-slate-400">
-          {new Date(inv.invoice_date).toLocaleDateString("en-US", {
-            month: "short",
-            day: "numeric",
-            year: "numeric",
-          })}
-        </p>
-        <p className="text-sm font-bold text-slate-900 dark:text-white">
-          {formatCurrency(inv.invoice_amount)}
-        </p>
-      </div>
-    </div>
-  );
-}
-
 // ─── Loading Skeleton ────────────────────────────────────────────────────────
-function DashboardSkeleton() {
-  const SkeletonCard = ({ className = "" }) => (
+function SkeletonCard({ className = "" }) {
+  return (
     <div
-      className={`animate-pulse rounded-3xl bg-slate-100 dark:bg-slate-800 ${className}`}
+      className={`animate-pulse rounded-xl bg-muted ${className}`}
     />
   );
+}
 
+function DashboardSkeleton() {
   return (
-    <div className="min-h-screen bg-slate-50/50 px-4 py-8 dark:bg-slate-950 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-[1440px] space-y-8">
-        <SkeletonCard className="h-16 w-64" />
+    <div className="min-h-screen bg-background px-4 py-8 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-[1280px] space-y-8">
+        <SkeletonCard className="h-16 w-48" />
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {[...Array(4)].map((_, i) => (
-            <SkeletonCard key={i} className="h-40" />
+            <SkeletonCard key={i} className="h-32" />
           ))}
         </div>
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
-          <SkeletonCard className="h-96 lg:col-span-2" />
-          <SkeletonCard className="h-96" />
+          <SkeletonCard className="h-80 lg:col-span-2" />
+          <SkeletonCard className="h-80" />
         </div>
       </div>
     </div>
@@ -755,11 +337,11 @@ function DashboardSkeleton() {
 // ─── Empty State ─────────────────────────────────────────────────────────────
 function EmptyState({ message, icon: Icon = AlertTriangle }) {
   return (
-    <div className="flex flex-col items-center justify-center py-16 text-center">
-      <div className="mb-4 rounded-2xl bg-slate-100 p-4 dark:bg-slate-800">
-        <Icon className="h-6 w-6 text-slate-400" />
+    <div className="flex flex-col items-center justify-center py-12 text-center">
+      <div className="mb-3 rounded-lg bg-muted p-3">
+        <Icon className="h-5 w-5 text-muted-foreground" />
       </div>
-      <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+      <p className="text-sm text-muted-foreground">
         {message}
       </p>
     </div>
@@ -783,12 +365,11 @@ export default function Dashboard() {
   const [velocity, setVelocity] = useState([]);
   const [performance, setPerformance] = useState([]);
 
-  // ── Welcome popup ─────────────────────────────────────────────────────────
   useEffect(() => {
     if (user) {
       const seen = sessionStorage.getItem("dashboard_welcome_seen");
       if (!seen) {
-        const timer = setTimeout(() => setShowWelcome(true), 500);
+        const timer = setTimeout(() => setShowWelcome(true), 400);
         return () => clearTimeout(timer);
       }
     }
@@ -799,7 +380,6 @@ export default function Dashboard() {
     sessionStorage.setItem("dashboard_welcome_seen", "1");
   }, []);
 
-  // ── Data fetching ─────────────────────────────────────────────────────────
   useEffect(() => {
     const loadData = async () => {
       if (!user) return;
@@ -842,7 +422,7 @@ export default function Dashboard() {
     loadData();
   }, [user]);
 
-  // ── Derived data ──────────────────────────────────────────────────────────
+  // Derived data
   const monthlyChartData = useMemo(
     () =>
       monthlyTrend.map((item) => ({
@@ -859,7 +439,6 @@ export default function Dashboard() {
       statusBreakdown.map((item) => ({
         name: item.status,
         count: Number(item.count) || 0,
-        fill: STATUS_COLORS[item.status] || "#6B7280",
       })),
     [statusBreakdown],
   );
@@ -869,21 +448,18 @@ export default function Dashboard() {
       statusBreakdown.map((item) => ({
         name: item.status,
         value: Number(item.count) || 0,
-        fill: STATUS_COLORS[item.status] || "#6B7280",
       })),
     [statusBreakdown],
   );
 
-  // Real data for additional charts
   const velocityData = useMemo(() => {
     if (velocity.length > 0) {
       return velocity.map((item) => ({
         day: item.day,
         hours: Number(item.hours) || 0,
-        target: 18, // Fixed target for benchmark
+        target: 18,
       }));
     }
-    // Default fallback if no data
     return [
       { day: "Mon", hours: 0, target: 18 },
       { day: "Tue", hours: 0, target: 18 },
@@ -913,30 +489,13 @@ export default function Dashboard() {
     const pending = Number(execSummary?.pending_amount) || 0;
 
     return [
-      {
-        name: "Tender Value",
-        value: Number(execSummary?.total_tender_value) || 0,
-        fill: CHART_PALETTE[0],
-      },
-      {
-        name: "PO Total",
-        value: Number(execSummary?.total_po_value) || 0,
-        fill: CHART_PALETTE[1],
-      },
-      {
-        name: "Banked",
-        value: banked,
-        fill: CHART_PALETTE[2],
-      },
-      {
-        name: "Pending",
-        value: pending,
-        fill: CHART_PALETTE[3],
-      },
+      { name: "Tender Value", value: Number(execSummary?.total_tender_value) || 0 },
+      { name: "PO Total", value: Number(execSummary?.total_po_value) || 0 },
+      { name: "Banked", value: banked },
+      { name: "Pending", value: pending },
     ];
   }, [execSummary]);
 
-  // Sparkline data for KPI cards
   const sparkData1 = [
     1200000, 1350000, 1280000, 1500000, 1450000, 1600000, 1750000,
   ];
@@ -950,10 +509,15 @@ export default function Dashboard() {
     1500000, 1600000, 1550000, 1800000, 1750000, 2000000, 2200000,
   ];
 
-  const axisColor = theme === "dark" ? "#334155" : "#E2E8F0";
-  const tickColor = theme === "dark" ? "#94A3B8" : "#64748B";
+  const axisColor = theme === "dark" ? "hsl(var(--border))" : "hsl(var(--border))";
+  const tickColor = theme === "dark" ? "hsl(var(--muted-foreground))" : "hsl(var(--muted-foreground))";
 
-  // ── Count-up values ───────────────────────────────────────────────────────
+  const primaryColor = "hsl(var(--primary))";
+  const primaryFill = "hsl(var(--primary))";
+  const mutedColor = "hsl(var(--muted-foreground))";
+  const foregroundColor = "hsl(var(--foreground))";
+
+  // Count-up values
   const tenderValue = useCountUp(Number(execSummary?.total_tender_value) || 0);
   const poValue = useCountUp(Number(execSummary?.total_po_value) || 0);
   const grossAmount = useCountUp(Number(execSummary?.gross_amount) || 0);
@@ -961,7 +525,6 @@ export default function Dashboard() {
     Number(execSummary?.bank_amount || execSummary?.banked_amount) || 0,
   );
 
-  // Collection efficiency
   const collectionRate = execSummary?.gross_amount
     ? ((execSummary?.banked_amount || 0) / execSummary.gross_amount) * 100
     : 0;
@@ -970,53 +533,50 @@ export default function Dashboard() {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-slate-50/50 dark:bg-slate-950">
-      {/* Welcome Popup */}
+    <div className="min-h-screen bg-background">
       <AnimatePresence>
         {showWelcome && (
           <WelcomePopup user={user} onClose={handleCloseWelcome} />
         )}
       </AnimatePresence>
 
-      <div className="mx-auto max-w-[1440px] space-y-8 px-4 py-8 sm:px-6 lg:px-8">
-        {/* ═══════════════════════════════════════════════════════════════ */}
-        {/* HEADER */}
-        {/* ═══════════════════════════════════════════════════════════════ */}
+      <div className="mx-auto max-w-[1280px] space-y-4 px-4 py-6 sm:px-6 lg:px-8">
+        {/* Header */}
         <motion.div
-          initial={{ opacity: 0, y: -12 }}
+          initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"
+          transition={{ duration: 0.35 }}
+          className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between"
         >
           <div>
-            <div className="mb-2 flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-violet-600 text-sm font-bold text-white">
+            <div className="mb-1.5 flex items-center gap-2.5">
+              <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary/10 text-[10px] font-medium text-primary">
                 {user?.name?.charAt(0)}
               </div>
-              <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+              <span className="text-[11px] font-medium text-muted-foreground">
                 {user.roles?.[0]?.name ?? "Administrator"}
               </span>
             </div>
-            <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-4xl">
+            <h1 className="text-xl font-medium tracking-tight text-foreground sm:text-2xl">
               Dashboard
             </h1>
-            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-              Financial overview and real-time performance metrics
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              Financial overview and performance
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 rounded-full border border-slate-200/60 bg-white px-4 py-2 shadow-sm dark:border-slate-700/40 dark:bg-slate-900">
-              <div className="h-2 w-2 animate-pulse rounded-full bg-emerald-500" />
-              <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 rounded-md border border-border bg-card px-2.5 py-1">
+              <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary" />
+              <span className="text-[11px] font-medium text-muted-foreground">
                 Live
               </span>
             </div>
-            <div className="flex items-center gap-2 rounded-full border border-slate-200/60 bg-white px-4 py-2 shadow-sm dark:border-slate-700/40 dark:bg-slate-900">
-              <Calendar className="h-3.5 w-3.5 text-slate-400" />
-              <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">
+            <div className="flex items-center gap-1.5 rounded-md border border-border bg-card px-2.5 py-1">
+              <Calendar className="h-3 w-3 text-muted-foreground" />
+              <span className="text-[11px] font-medium text-muted-foreground">
                 {new Date().toLocaleDateString("en-US", {
-                  month: "long",
+                  month: "short",
                   day: "numeric",
                   year: "numeric",
                 })}
@@ -1025,703 +585,528 @@ export default function Dashboard() {
           </div>
         </motion.div>
 
-        {/* ═══════════════════════════════════════════════════════════════ */}
-        {/* BENTO GRID — KPI CARDS (4 columns) */}
-        {/* ═══════════════════════════════════════════════════════════════ */}
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          <KpiBento
-            icon={Briefcase}
-            label="Total Tender Portfolio"
-            value={formatCurrency(tenderValue)}
-            subValue="All active tenders"
-            trend={12.5}
-            color="blue"
-            delay={0}
-            sparklineData={sparkData1}
-          />
-          <KpiBento
-            icon={ShoppingBag}
-            label="Committed PO Value"
-            value={formatCurrency(poValue)}
-            subValue="Purchase orders"
-            trend={8.3}
-            color="violet"
-            delay={0.08}
-            sparklineData={sparkData2}
-          />
-          <KpiBento
-            icon={Receipt}
-            label="Invoiced Revenue"
-            value={formatCurrency(grossAmount)}
-            subValue="Gross amount"
-            trend={-2.1}
-            color="emerald"
-            delay={0.16}
-            sparklineData={sparkData3}
-          />
-          <KpiBento
-            icon={Building2}
-            label="Cleared (Banked)"
-            value={formatCurrency(bankedAmount)}
-            subValue="Realized revenue"
-            trend={15.7}
-            color="teal"
-            delay={0.24}
-            sparklineData={sparkData4}
-          />
-        </div>
-
-        {/* ═══════════════════════════════════════════════════════════════ */}
-        {/* BENTO GRID — WIDE METRICS + STAT PILLS */}
-        {/* ═══════════════════════════════════════════════════════════════ */}
-        <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
-          <WideMetricBento
-            icon={Target}
-            label="Collection Efficiency"
-            value={formatPercent(collectionRate)}
-            color="emerald"
-            delay={0.1}
-            breakdown={[
-              {
-                label: "Banked",
-                value: formatCurrency(execSummary?.banked_amount || 0),
-                percent: collectionRate,
-              },
-              {
-                label: "Outstanding",
-                value: formatCurrency(execSummary?.pending_amount || 0),
-                percent: 100 - collectionRate,
-              },
-            ]}
-          />
-
-          <div className="lg:col-span-2">
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-              <StatPill
-                icon={FileText}
-                label="Total Invoices"
-                value={execSummary?.total_invoices ?? 0}
-                color="blue"
-                delay={0.15}
-              />
-              <StatPill
-                icon={CheckCircle}
-                label="Banked / Closed"
-                value={execSummary?.paid_count ?? 0}
-                color="emerald"
-                delay={0.2}
-              />
-              <StatPill
-                icon={Clock}
-                label="Pending Approval"
-                value={execSummary?.pending_approval_count ?? 0}
-                color="amber"
-                delay={0.25}
-              />
-              <StatPill
-                icon={Timer}
-                label="Avg. Approval"
-                value={`${Math.round(execSummary?.avg_approval_time_hours || 0)}h`}
-                color="violet"
-                delay={0.3}
-              />
-            </div>
-
-            <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
-              <StatPill
-                icon={Percent}
-                label="Success Rate"
-                value={formatPercent(
-                  ((execSummary?.paid_count || 0) /
-                    (execSummary?.total_invoices || 1)) *
-                    100,
-                )}
-                color="teal"
-                delay={0.35}
-              />
-              <StatPill
-                icon={ShieldCheck}
-                label="Compliance"
-                value="98.2%"
-                color="emerald"
-                delay={0.4}
-              />
-              <StatPill
-                icon={Users}
-                label="Active Customers"
-                value={recentInvoices.length > 0 ? "24" : "0"}
-                color="violet"
-                delay={0.45}
-              />
-              <StatPill
-                icon={CreditCard}
-                label="Avg. Invoice"
-                value={formatCurrency(
-                  (execSummary?.gross_amount || 0) /
-                    (execSummary?.total_invoices || 1),
-                )}
-                color="blue"
-                delay={0.5}
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* ═══════════════════════════════════════════════════════════════ */}
-        {/* BENTO GRID — CHARTS ROW 1 */}
-        {/* ═══════════════════════════════════════════════════════════════ */}
-        <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
-          {/* Monthly Revenue Trend — Large */}
-          <BentoCard delay={0.2} colSpan={2} className="p-6">
-            <div className="mb-6 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-500/10">
-                  <Activity className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                </div>
-                <div>
-                  <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                    Monthly Revenue Trend
-                  </h3>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">
-                    Invoice performance over time
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                {["Total", "Banked", "Pending"].map((label, i) => (
-                  <div key={label} className="flex items-center gap-1.5">
-                    <div
-                      className="h-2 w-2 rounded-full"
-                      style={{ backgroundColor: CHART_PALETTE[i] }}
-                    />
-                    <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
-                      {label}
-                    </span>
+        {/* BENTO ROW 1 — Primary KPIs */}
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            {
+              icon: Briefcase,
+              label: "Total Tender Portfolio",
+              value: formatCurrency(tenderValue),
+              trend: 12.5,
+              sparkData: sparkData1,
+              delay: 0,
+            },
+            {
+              icon: ShoppingBag,
+              label: "Committed PO Value",
+              value: formatCurrency(poValue),
+              trend: 8.3,
+              sparkData: sparkData2,
+              delay: 0.04,
+            },
+            {
+              icon: Receipt,
+              label: "Invoiced Revenue",
+              value: formatCurrency(grossAmount),
+              trend: -2.1,
+              sparkData: sparkData3,
+              delay: 0.08,
+            },
+            {
+              icon: Building2,
+              label: "Cleared (Banked)",
+              value: formatCurrency(bankedAmount),
+              trend: 15.7,
+              sparkData: sparkData4,
+              delay: 0.12,
+            },
+          ].map((kpi) => (
+            <motion.div
+              key={kpi.label}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.35, delay: kpi.delay, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <Card className="h-full">
+                <CardContent className="p-4">
+                  <div className="flex items-start justify-between">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted">
+                      <kpi.icon className="h-3.5 w-3.5 text-foreground" />
+                    </div>
+                    {kpi.trend !== undefined && <TrendIndicator value={kpi.trend} />}
                   </div>
-                ))}
-              </div>
-            </div>
+                  <p className="mt-3 text-[11px] font-medium text-muted-foreground">
+                    {kpi.label}
+                  </p>
+                  <p className="mt-0.5 text-lg font-medium tracking-tight text-foreground">
+                    {kpi.value}
+                  </p>
+                  {kpi.sparkData && (
+                    <div className="mt-2 -mx-1">
+                      <Sparkline data={kpi.sparkData} color={primaryColor} height={20} />
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </motion.div>
+          ))}
+        </div>
 
-            {monthlyChartData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={300}>
-                <AreaChart
-                  data={monthlyChartData}
-                  margin={{ top: 5, right: 5, left: 0, bottom: 0 }}
-                >
-                  <defs>
-                    <linearGradient id="gTotal" x1="0" y1="0" x2="0" y2="1">
-                      <stop
-                        offset="0%"
-                        stopColor="#3B82F6"
-                        stopOpacity={0.15}
-                      />
-                      <stop offset="100%" stopColor="#3B82F6" stopOpacity={0} />
-                    </linearGradient>
-                    <linearGradient id="gPaid" x1="0" y1="0" x2="0" y2="1">
-                      <stop
-                        offset="0%"
-                        stopColor="#10B981"
-                        stopOpacity={0.15}
-                      />
-                      <stop offset="100%" stopColor="#10B981" stopOpacity={0} />
-                    </linearGradient>
-                    <linearGradient id="gPending" x1="0" y1="0" x2="0" y2="1">
-                      <stop
-                        offset="0%"
-                        stopColor="#F59E0B"
-                        stopOpacity={0.15}
-                      />
-                      <stop offset="100%" stopColor="#F59E0B" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid
-                    strokeDasharray="3 3"
-                    stroke={axisColor}
-                    opacity={0.4}
-                    vertical={false}
+        {/* BENTO ROW 2 — Health + Action */}
+        <div className="grid grid-cols-1 gap-3 lg:grid-cols-4">
+          {/* Collection Efficiency — wide */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35, delay: 0.15 }}
+            className="lg:col-span-3"
+          >
+            <Card>
+              <CardHeader className="pb-3 pt-5">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted">
+                    <Target className="h-3.5 w-3.5 text-foreground" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-sm font-medium text-foreground">
+                      Collection Efficiency
+                    </CardTitle>
+                    <CardDescription className="text-[11px] text-muted-foreground">
+                      Banked vs outstanding
+                    </CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-end justify-between mb-4">
+                  <p className="text-2xl font-medium tracking-tight text-foreground">
+                    {formatPercent(collectionRate)}
+                  </p>
+                  <div className="flex gap-4 text-[11px] text-muted-foreground">
+                    <span>Banked {formatCurrency(execSummary?.banked_amount || 0)}</span>
+                    <span>Outstanding {formatCurrency(execSummary?.pending_amount || 0)}</span>
+                  </div>
+                </div>
+                <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${collectionRate}%` }}
+                    transition={{ duration: 1, delay: 0.3, ease: "easeOut" }}
+                    className="h-full rounded-full bg-primary"
                   />
-                  <XAxis
-                    dataKey="month"
-                    tick={{ fill: tickColor, fontSize: 11, fontWeight: 500 }}
-                    axisLine={false}
-                    tickLine={false}
-                    dy={8}
-                    interval="preserveStartEnd"
-                  />
-                  <YAxis
-                    tick={{ fill: tickColor, fontSize: 11 }}
-                    axisLine={false}
-                    tickLine={false}
-                    tickFormatter={formatCompact}
-                    width={45}
-                  />
-                  <Tooltip content={<ChartTooltip />} />
-                  <Area
-                    type="monotone"
-                    dataKey="total"
-                    stroke="#3B82F6"
-                    strokeWidth={2.5}
-                    fill="url(#gTotal)"
-                    name="Total"
-                    dot={false}
-                    activeDot={{ r: 5, strokeWidth: 0, fill: "#3B82F6" }}
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="paid"
-                    stroke="#10B981"
-                    strokeWidth={2.5}
-                    fill="url(#gPaid)"
-                    name="Banked"
-                    dot={false}
-                    activeDot={{ r: 5, strokeWidth: 0, fill: "#10B981" }}
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="pending"
-                    stroke="#F59E0B"
-                    strokeWidth={2.5}
-                    fill="url(#gPending)"
-                    name="Pending"
-                    dot={false}
-                    activeDot={{ r: 5, strokeWidth: 0, fill: "#F59E0B" }}
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            ) : (
-              <EmptyState message="No monthly trend data available" />
-            )}
-          </BentoCard>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
 
-          {/* Status Breakdown */}
-          <BentoCard delay={0.3} className="p-6">
-            <div className="mb-6 flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 dark:bg-emerald-500/10">
-                <BarChart2 className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
-              </div>
-              <div>
-                <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                  Status Breakdown
-                </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
-                  By invoice count
-                </p>
-              </div>
-            </div>
-
-            {barData.length > 0 ? (
-              <>
-                <ResponsiveContainer width="100%" height={210}>
-                  <BarChart
-                    data={barData}
-                    layout="vertical"
-                    barSize={18}
-                    margin={{ top: 0, right: 10, left: 0, bottom: 0 }}
+          {/* Recent Invoices — compact */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35, delay: 0.2 }}
+            className="lg:col-span-1"
+          >
+            <Card className="h-full">
+              <CardHeader className="pb-2 pt-5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className="flex h-7 w-7 items-center justify-center rounded-md bg-muted">
+                      <FileText className="h-3 w-3 text-foreground" />
+                    </div>
+                    <CardTitle className="text-xs font-medium text-foreground">
+                      Recent
+                    </CardTitle>
+                  </div>
+                  <Link
+                    href="/invoices"
+                    className="text-[10px] font-medium text-primary hover:text-primary/80"
                   >
-                    <CartesianGrid
-                      strokeDasharray="3 3"
-                      stroke={axisColor}
-                      opacity={0.25}
-                      horizontal={false}
-                    />
-                    <XAxis
-                      type="number"
-                      tick={{ fill: tickColor, fontSize: 11 }}
-                      axisLine={false}
-                      tickLine={false}
-                    />
-                    <YAxis
-                      type="category"
-                      dataKey="name"
-                      tick={{ fill: tickColor, fontSize: 11, fontWeight: 500 }}
-                      axisLine={false}
-                      tickLine={false}
-                      width={100}
-                    />
-                    <Tooltip content={<ChartTooltip />} />
-                    <Bar
-                      dataKey="count"
-                      radius={[0, 12, 12, 0]}
-                      name="Invoices"
-                    >
-                      {barData.map((entry, i) => (
-                        <Cell key={i} fill={entry.fill} />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-                <div className="mt-5 flex flex-wrap gap-x-4 gap-y-2.5 border-t border-slate-100 pt-4 dark:border-slate-800">
-                  {barData.map((item) => (
+                    All
+                  </Link>
+                </div>
+              </CardHeader>
+              <CardContent className="p-3 pt-0">
+                <div className="space-y-2">
+                  {recentInvoices.slice(0, 4).map((inv) => (
                     <div
-                      key={item.name}
-                      className="inline-flex items-center gap-2"
+                      key={inv.id}
+                      className="flex items-center justify-between rounded-lg border border-border/60 bg-muted/20 px-2.5 py-2"
                     >
+                      <div className="min-w-0">
+                        <p className="truncate text-[11px] font-medium text-foreground">
+                          {inv.invoice_number}
+                        </p>
+                        <p className="truncate text-[10px] text-muted-foreground">
+                          {inv.customer?.name}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-[11px] font-medium text-foreground">
+                          {formatCurrency(inv.invoice_amount)}
+                        </p>
+                        <StatusBadge status={inv.status} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </div>
+
+        {/* BENTO ROW 3 — Revenue Trend (full) */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, delay: 0.2 }}
+        >
+          <Card>
+            <CardHeader className="pb-3 pt-5">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted">
+                    <Activity className="h-3.5 w-3.5 text-foreground" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-sm font-medium text-foreground">
+                      Monthly Revenue Trend
+                    </CardTitle>
+                    <CardDescription className="text-[11px] text-muted-foreground">
+                      Invoice performance over time
+                    </CardDescription>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  {["Total", "Banked", "Pending"].map((label, i) => (
+                    <div key={label} className="flex items-center gap-1">
                       <div
-                        className="h-2.5 w-2.5 shrink-0 rounded-sm"
-                        style={{ backgroundColor: item.fill }}
+                        className="h-1.5 w-1.5 rounded-full"
+                        style={{ backgroundColor: i === 0 ? primaryColor : i === 1 ? "hsl(var(--primary)/0.6)" : mutedColor }}
                       />
-                      <span className="text-xs font-medium text-slate-700 dark:text-slate-300">
-                        {item.name}
-                      </span>
-                      <span className="rounded-md bg-slate-100 px-1.5 py-0.5 text-xs font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-400">
-                        {item.count}
+                      <span className="text-[10px] font-medium text-muted-foreground">
+                        {label}
                       </span>
                     </div>
                   ))}
                 </div>
-              </>
-            ) : (
-              <EmptyState message="No status data available" />
-            )}
-          </BentoCard>
-        </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {monthlyChartData.length > 0 ? (
+                <ResponsiveContainer width="100%" height={260}>
+                  <AreaChart
+                    data={monthlyChartData}
+                    margin={{ top: 5, right: 5, left: 0, bottom: 0 }}
+                  >
+                    <defs>
+                      <linearGradient id="gTotal" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor={primaryColor} stopOpacity="0.08" />
+                        <stop offset="100%" stopColor={primaryColor} stopOpacity="0" />
+                      </linearGradient>
+                      <linearGradient id="gPaid" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="hsl(var(--primary)/0.5)" stopOpacity="0.08" />
+                        <stop offset="100%" stopColor="hsl(var(--primary)/0.5)" stopOpacity="0" />
+                      </linearGradient>
+                      <linearGradient id="gPending" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor={mutedColor} stopOpacity="0.06" />
+                        <stop offset="100%" stopColor={mutedColor} stopOpacity="0" />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      stroke={axisColor}
+                      opacity="0.4"
+                      vertical={false}
+                    />
+                    <XAxis
+                      dataKey="month"
+                      tick={{ fill: tickColor, fontSize: 11, fontWeight: 500 }}
+                      axisLine={false}
+                      tickLine={false}
+                      dy={8}
+                      interval="preserveStartEnd"
+                    />
+                    <YAxis
+                      tick={{ fill: tickColor, fontSize: 11 }}
+                      axisLine={false}
+                      tickLine={false}
+                      tickFormatter={formatCompact}
+                      width={45}
+                    />
+                    <Tooltip content={<ChartTooltip />} />
+                    <Area
+                      type="monotone"
+                      dataKey="total"
+                      stroke={primaryColor}
+                      strokeWidth={2}
+                      fill="url(#gTotal)"
+                      name="Total"
+                      dot={false}
+                      activeDot={{ r: 4, strokeWidth: 0, fill: primaryColor }}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="paid"
+                      stroke="hsl(var(--primary)/0.6)"
+                      strokeWidth={2}
+                      fill="url(#gPaid)"
+                      name="Banked"
+                      dot={false}
+                      activeDot={{ r: 4, strokeWidth: 0, fill: "hsl(var(--primary)/0.6)" }}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="pending"
+                      stroke={mutedColor}
+                      strokeWidth={2}
+                      fill="url(#gPending)"
+                      name="Pending"
+                      dot={false}
+                      activeDot={{ r: 4, strokeWidth: 0, fill: mutedColor }}
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              ) : (
+                <EmptyState message="No monthly trend data available" />
+              )}
+            </CardContent>
+          </Card>
+        </motion.div>
 
-        {/* ═══════════════════════════════════════════════════════════════ */}
-        {/* BENTO GRID — CHARTS ROW 2 (3 equal) */}
-        {/* ═══════════════════════════════════════════════════════════════ */}
-        <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
-          {/* Payment Velocity */}
-          <BentoCard delay={0.35} className="p-6">
-            <div className="mb-5 flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 dark:bg-indigo-500/10">
-                <Zap className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
-              </div>
-              <div>
-                <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                  Payment Velocity
-                </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Avg approval time (hours)
-                </p>
-              </div>
-            </div>
-            <ResponsiveContainer width="100%" height={220}>
-              <LineChart
-                data={velocityData}
-                margin={{ top: 5, right: 5, left: 0, bottom: 0 }}
-              >
-                <CartesianGrid
-                  strokeDasharray="3 3"
-                  stroke={axisColor}
-                  opacity={0.4}
-                  vertical={false}
-                />
-                <XAxis
-                  dataKey="day"
-                  tick={{ fill: tickColor, fontSize: 11, fontWeight: 500 }}
-                  axisLine={false}
-                  tickLine={false}
-                  dy={8}
-                />
-                <YAxis
-                  tick={{ fill: tickColor, fontSize: 11 }}
-                  axisLine={false}
-                  tickLine={false}
-                  width={35}
-                />
-                <Tooltip content={<ChartTooltip />} />
-                <ReferenceLine
-                  y={18}
-                  stroke="#10B981"
-                  strokeDasharray="6 4"
-                  strokeWidth={1.5}
-                  label={{
-                    value: "Target 18h",
-                    position: "right",
-                    fill: tickColor,
-                    fontSize: 10,
-                  }}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="hours"
-                  stroke="#6366F1"
-                  strokeWidth={2.5}
-                  dot={{ r: 4, fill: "#6366F1", strokeWidth: 0 }}
-                  activeDot={{ r: 6, strokeWidth: 0, fill: "#6366F1" }}
-                  name="Hours"
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </BentoCard>
+        {/* BENTO ROW 4 — Analytics */}
+        <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
+          {/* Status Breakdown */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35, delay: 0.25 }}
+          >
+            <Card>
+              <CardHeader className="pb-3 pt-5">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted">
+                    <BarChart2 className="h-3.5 w-3.5 text-foreground" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-sm font-medium text-foreground">
+                      Status Breakdown
+                    </CardTitle>
+                    <CardDescription className="text-[11px] text-muted-foreground">
+                      By invoice count
+                    </CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {barData.length > 0 ? (
+                  <>
+                    <ResponsiveContainer width="100%" height={180}>
+                      <BarChart
+                        data={barData}
+                        layout="vertical"
+                        barSize={10}
+                        margin={{ top: 0, right: 10, left: 0, bottom: 0 }}
+                      >
+                        <CartesianGrid
+                          strokeDasharray="3 3"
+                          stroke={axisColor}
+                          opacity="0.25"
+                          horizontal={false}
+                        />
+                        <XAxis
+                          type="number"
+                          tick={{ fill: tickColor, fontSize: 10 }}
+                          axisLine={false}
+                          tickLine={false}
+                        />
+                        <YAxis
+                          type="category"
+                          dataKey="name"
+                          tick={{ fill: tickColor, fontSize: 10, fontWeight: 500 }}
+                          axisLine={false}
+                          tickLine={false}
+                          width={90}
+                        />
+                        <Tooltip content={<ChartTooltip />} />
+                        <Bar
+                          dataKey="count"
+                          radius={[0, 6, 6, 0]}
+                          name="Invoices"
+                          fill={primaryColor}
+                        >
+                          {barData.map((entry, i) => (
+                            <Cell key={i} fill={i % 2 === 0 ? primaryColor : mutedColor} />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                    <Separator className="my-3" />
+                    <div className="flex flex-wrap gap-x-3 gap-y-1.5">
+                      {barData.map((item) => (
+                        <div
+                          key={item.name}
+                          className="inline-flex items-center gap-1.5"
+                        >
+                          <div
+                            className="h-1.5 w-1.5 shrink-0 rounded-sm"
+                            style={{ backgroundColor: "hsl(var(--primary))" }}
+                          />
+                          <span className="text-[10px] text-muted-foreground">
+                            {item.name}
+                          </span>
+                          <span className="rounded bg-muted px-1 py-0.5 text-[10px] font-medium text-foreground">
+                            {item.count}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                ) : (
+                  <EmptyState message="No status data" />
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
 
           {/* Revenue Distribution */}
-          <BentoCard delay={0.4} className="p-6">
-            <div className="mb-5 flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-50 dark:bg-violet-500/10">
-                <PieChart className="h-5 w-5 text-violet-600 dark:text-violet-400" />
-              </div>
-              <div>
-                <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                  Revenue Distribution
-                </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
-                  By source category
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-6">
-              <ResponsiveContainer width="55%" height={210}>
-                <RePieChart>
-                  <Pie
-                    data={categoryData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={45}
-                    outerRadius={75}
-                    paddingAngle={5}
-                    dataKey="value"
-                    stroke="none"
-                  >
-                    {categoryData.map((entry, i) => (
-                      <Cell key={i} fill={entry.fill} />
-                    ))}
-                  </Pie>
-                  <Tooltip
-                    formatter={(value) => formatCurrency(value)}
-                    contentStyle={{
-                      borderRadius: "16px",
-                      border: "1px solid #E2E8F0",
-                      background: "#fff",
-                      fontSize: "12px",
-                    }}
-                  />
-                </RePieChart>
-              </ResponsiveContainer>
-              <div className="flex flex-col gap-3">
-                {categoryData.map((item) => (
-                  <div key={item.name} className="flex items-center gap-2.5">
-                    <div
-                      className="h-3 w-3 shrink-0 rounded-full"
-                      style={{ backgroundColor: item.fill }}
-                    />
-                    <div>
-                      <p className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                        {item.name}
-                      </p>
-                      <p className="text-[11px] font-semibold text-slate-400">
-                        {formatCurrency(item.value)}
-                      </p>
-                    </div>
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35, delay: 0.3 }}
+          >
+            <Card>
+              <CardHeader className="pb-3 pt-5">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted">
+                    <PieChart className="h-3.5 w-3.5 text-foreground" />
                   </div>
-                ))}
-              </div>
-            </div>
-          </BentoCard>
+                  <div>
+                    <CardTitle className="text-sm font-medium text-foreground">
+                      Revenue Distribution
+                    </CardTitle>
+                    <CardDescription className="text-[11px] text-muted-foreground">
+                      By source category
+                    </CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center gap-4">
+                  <ResponsiveContainer width="50%" height={180}>
+                    <RePieChart>
+                      <Pie
+                        data={categoryData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={35}
+                        outerRadius={60}
+                        paddingAngle={3}
+                        dataKey="value"
+                        stroke="none"
+                      >
+                        {categoryData.map((entry, i) => (
+                          <Cell key={i} fill={i === 0 ? primaryColor : i === 1 ? "hsl(var(--primary)/0.6)" : i === 2 ? mutedColor : "hsl(var(--muted-foreground)/0.3)"} />
+                        ))}
+                      </Pie>
+                      <Tooltip
+                        formatter={(value) => formatCurrency(value)}
+                        contentStyle={{
+                          borderRadius: "8px",
+                          border: "1px solid hsl(var(--border))",
+                          background: "hsl(var(--popover))",
+                          fontSize: "11px",
+                        }}
+                      />
+                    </RePieChart>
+                  </ResponsiveContainer>
+                  <div className="flex flex-col gap-2">
+                    {categoryData.map((item, i) => (
+                      <div key={item.name} className="flex items-center gap-2">
+                        <div
+                          className="h-2 w-2 shrink-0 rounded-full"
+                          style={{ backgroundColor: i === 0 ? primaryColor : i === 1 ? "hsl(var(--primary)/0.6)" : i === 2 ? mutedColor : "hsl(var(--muted-foreground)/0.3)"}}
+                        />
+                        <div>
+                          <p className="text-[11px] font-medium text-foreground">
+                            {item.name}
+                          </p>
+                          <p className="text-[10px] text-muted-foreground">
+                            {formatCurrency(item.value)}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
 
           {/* Performance Radar */}
-          <BentoCard delay={0.45} className="p-6">
-            <div className="mb-5 flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 dark:bg-amber-500/10">
-                <Target className="h-5 w-5 text-amber-600 dark:text-amber-400" />
-              </div>
-              <div>
-                <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                  Performance Radar
-                </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
-                  KPI vs targets
-                </p>
-              </div>
-            </div>
-            <ResponsiveContainer width="100%" height={220}>
-              <RadarChart data={radarData} cx="50%" cy="50%" outerRadius="75%">
-                <PolarGrid stroke={axisColor} opacity={0.5} />
-                <PolarAngleAxis
-                  dataKey="metric"
-                  tick={{ fill: tickColor, fontSize: 10, fontWeight: 500 }}
-                />
-                <PolarRadiusAxis
-                  angle={30}
-                  domain={[0, 100]}
-                  tick={{ fill: tickColor, fontSize: 9 }}
-                  tickCount={5}
-                />
-                <Radar
-                  name="Current"
-                  dataKey="current"
-                  stroke="#3B82F6"
-                  fill="#3B82F6"
-                  fillOpacity={0.15}
-                  strokeWidth={2}
-                />
-                <Radar
-                  name="Target"
-                  dataKey="target"
-                  stroke="#10B981"
-                  fill="#10B981"
-                  fillOpacity={0.08}
-                  strokeWidth={1.5}
-                  strokeDasharray="4 4"
-                />
-                <Tooltip content={<ChartTooltip />} />
-                <Legend
-                  iconType="circle"
-                  iconSize={6}
-                  wrapperStyle={{ fontSize: 11, paddingTop: 8 }}
-                />
-              </RadarChart>
-            </ResponsiveContainer>
-          </BentoCard>
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35, delay: 0.35 }}
+          >
+            <Card>
+              <CardHeader className="pb-3 pt-5">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted">
+                    <Target className="h-3.5 w-3.5 text-foreground" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-sm font-medium text-foreground">
+                      Performance Radar
+                    </CardTitle>
+                    <CardDescription className="text-[11px] text-muted-foreground">
+                      KPI vs targets
+                    </CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={180}>
+                  <RadarChart data={radarData} cx="50%" cy="50%" outerRadius="75%">
+                    <PolarGrid stroke={axisColor} opacity="0.4" />
+                    <PolarAngleAxis
+                      dataKey="metric"
+                      tick={{ fill: tickColor, fontSize: 9, fontWeight: 500 }}
+                    />
+                    <PolarRadiusAxis
+                      angle={30}
+                      domain={[0, 100]}
+                      tick={{ fill: tickColor, fontSize: 8 }}
+                      tickCount={5}
+                    />
+                    <Radar
+                      name="Current"
+                      dataKey="current"
+                      stroke={primaryColor}
+                      fill={primaryColor}
+                      fillOpacity="0.1"
+                      strokeWidth={2}
+                    />
+                    <Radar
+                      name="Target"
+                      dataKey="target"
+                      stroke={mutedColor}
+                      fill={mutedColor}
+                      fillOpacity="0.05"
+                      strokeWidth={1.5}
+                      strokeDasharray="3 3"
+                    />
+                    <Tooltip content={<ChartTooltip />} />
+                    <Legend
+                      iconType="circle"
+                      iconSize={5}
+                      wrapperStyle={{ fontSize: 10, paddingTop: 6 }}
+                    />
+                  </RadarChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+          </motion.div>
         </div>
-
-        {/* ═══════════════════════════════════════════════════════════════ */}
-        {/* BENTO GRID — COLLECTION EFFICIENCY (Full width) */}
-        {/* ═══════════════════════════════════════════════════════════════ */}
-        <BentoCard delay={0.5} className="p-6">
-          <div className="mb-6 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 dark:bg-amber-500/10">
-                <TrendingUp className="h-5 w-5 text-amber-600 dark:text-amber-400" />
-              </div>
-              <div>
-                <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                  Collection Efficiency
-                </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Banked vs Gross revenue comparison
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
-                <div className="h-2.5 w-2.5 rounded-full bg-blue-500" />
-                <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
-                  Gross
-                </span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
-                <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
-                  Banked
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {monthlyChartData.length > 0 ? (
-            <ResponsiveContainer width="100%" height={260}>
-              <BarChart
-                data={monthlyChartData}
-                margin={{ top: 5, right: 5, left: 0, bottom: 0 }}
-                barGap={6}
-              >
-                <CartesianGrid
-                  strokeDasharray="3 3"
-                  stroke={axisColor}
-                  opacity={0.4}
-                  vertical={false}
-                />
-                <XAxis
-                  dataKey="month"
-                  tick={{ fill: tickColor, fontSize: 11, fontWeight: 500 }}
-                  axisLine={false}
-                  tickLine={false}
-                  dy={8}
-                />
-                <YAxis
-                  tick={{ fill: tickColor, fontSize: 11 }}
-                  axisLine={false}
-                  tickLine={false}
-                  tickFormatter={formatCompact}
-                  width={45}
-                />
-                <Tooltip content={<ChartTooltip />} />
-                <Bar
-                  dataKey="total"
-                  fill="#3B82F6"
-                  radius={[8, 8, 0, 0]}
-                  name="Gross"
-                  maxBarSize={36}
-                />
-                <Bar
-                  dataKey="paid"
-                  fill="#10B981"
-                  radius={[8, 8, 0, 0]}
-                  name="Banked"
-                  maxBarSize={36}
-                />
-              </BarChart>
-            </ResponsiveContainer>
-          ) : (
-            <EmptyState message="No collection data available" />
-          )}
-        </BentoCard>
-
-        {/* ═══════════════════════════════════════════════════════════════ */}
-        {/* BENTO GRID — RECENT INVOICES TABLE */}
-        {/* ═══════════════════════════════════════════════════════════════ */}
-        <BentoCard delay={0.55} className="overflow-hidden">
-          <div className="flex items-center justify-between border-b border-slate-100 px-6 py-5 dark:border-slate-800">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 dark:bg-indigo-500/10">
-                <FileText className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
-              </div>
-              <div>
-                <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                  Recent Invoices
-                </h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Latest 5 transactions
-                </p>
-              </div>
-            </div>
-            <Link
-              href="/invoices"
-              className="inline-flex items-center gap-1 rounded-xl px-4 py-2 text-sm font-semibold text-blue-600 transition-colors hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-500/10"
-            >
-              View all <ChevronRight className="h-4 w-4" />
-            </Link>
-          </div>
-
-          {/* Desktop table */}
-          <div className="hidden md:block overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-slate-100 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-800/30">
-                  <th className="px-5 py-3.5 text-left text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                    Invoice
-                  </th>
-                  <th className="px-5 py-3.5 text-left text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                    Date
-                  </th>
-                  <th className="px-5 py-3.5 text-right text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                    Amount
-                  </th>
-                  <th className="px-5 py-3.5 text-left text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                    Status
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {recentInvoices.length > 0 ? (
-                  recentInvoices.map((inv) => (
-                    <InvoiceTableRow key={inv.id} inv={inv} />
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan="4" className="px-5 py-12">
-                      <EmptyState message="No recent invoices found" />
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Mobile cards */}
-          <div className="md:hidden">
-            {recentInvoices.length > 0 ? (
-              recentInvoices.map((inv) => (
-                <InvoiceCard key={inv.id} inv={inv} />
-              ))
-            ) : (
-              <div className="px-4 py-12">
-                <EmptyState message="No recent invoices found" />
-              </div>
-            )}
-          </div>
-        </BentoCard>
       </div>
     </div>
   );
