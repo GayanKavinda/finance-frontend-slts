@@ -1,9 +1,10 @@
 // app/invoices/page.js
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { fetchInvoices, downloadInvoicePdf } from "@/lib/invoice";
+import { exportToCSV } from "@/lib/exportUtils";
 import StatusBadge from "@/components/ui/StatusBadge";
 import { DotmSquare12 } from "@/components/ui/dotm-square-12";
 import {
@@ -12,6 +13,7 @@ import {
   canApproveInvoice,
   canRejectInvoice,
 } from "@/lib/permissions";
+import { usePermission } from "@/hooks/usePermission";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   Search,
@@ -100,12 +102,66 @@ const STATUS_FILTERS = [
 export default function InvoicePage() {
   const { user } = useAuth();
   const router = useRouter();
+  const searchTimerRef = useRef(null);
+  const canEdit = usePermission("edit-invoice");
+
   const [invoices, setInvoices] = useState([]);
   const [meta, setMeta] = useState({});
-  const [page, setPage] = useState(1);
-  const [status, setStatus] = useState("");
-  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      return Number(params.get("page")) || 1;
+    }
+    return 1;
+  });
+  const [status, setStatus] = useState(() => {
+    if (typeof window !== "undefined") {
+      return new URLSearchParams(window.location.search).get("status") || "";
+    }
+    return "";
+  });
+  const [search, setSearch] = useState(() => {
+    if (typeof window !== "undefined") {
+      return new URLSearchParams(window.location.search).get("search") || "";
+    }
+    return "";
+  });
+  const [searchInput, setSearchInput] = useState(() => {
+    if (typeof window !== "undefined") {
+      return new URLSearchParams(window.location.search).get("search") || "";
+    }
+    return "";
+  });
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const handlePopState = () => {
+      const params = new URLSearchParams(window.location.search);
+      const p = Number(params.get("page")) || 1;
+      const s = params.get("status") || "";
+      const q = params.get("search") || "";
+      setPage(p);
+      setStatus(s);
+      setSearch(q);
+      setSearchInput(q);
+    };
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
+
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (page > 1) params.set("page", String(page));
+    if (status) params.set("status", status);
+    if (search) params.set("search", search);
+    const qs = params.toString();
+    const targetUrl = qs
+      ? `${window.location.pathname}?${qs}`
+      : window.location.pathname;
+    if (window.location.href !== targetUrl) {
+      router.replace(targetUrl, { scroll: false });
+    }
+  }, [page, status, search, router]);
 
   const loadInvoices = useCallback(async () => {
     setLoading(true);
@@ -167,6 +223,21 @@ export default function InvoicePage() {
               {total} invoice{total !== 1 ? "s" : ""}
             </p>
           </div>
+          <button
+            onClick={() =>
+              exportToCSV(invoices, "invoices_export", [
+                { key: "invoice_number", label: "Invoice #" },
+                { key: "customer.name", label: "Customer" },
+                { key: "invoice_amount", label: "Amount" },
+                { key: "invoice_date", label: "Invoice Date" },
+                { key: "status", label: "Status" },
+              ])
+            }
+            className="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/20 backdrop-blur-md transition-all shadow-md"
+          >
+            <Download className="w-4 h-4 text-cyan-300" />
+            Export CSV
+          </button>
         </div>
       </div>
 
@@ -228,10 +299,15 @@ export default function InvoicePage() {
           <input
             type="text"
             placeholder="Search invoice number…"
-            value={search}
+            value={searchInput}
             onChange={(e) => {
-              setSearch(e.target.value);
-              setPage(1);
+              const val = e.target.value;
+              setSearchInput(val);
+              if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+              searchTimerRef.current = setTimeout(() => {
+                setSearch(val);
+                setPage(1);
+              }, 300);
             }}
             className="w-full pl-11 pr-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-400 shadow-sm"
           />
@@ -330,7 +406,7 @@ export default function InvoicePage() {
                     <Download className="w-3.5 h-3.5" />
                   </button>
                   {inv.status === "Draft" &&
-                    canEditInvoice(user?.permissions) && (
+                    canEdit && (
                       <button
                         className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 rounded-lg transition-colors"
                         onClick={() => router.push(`/invoices/${inv.id}/edit`)}

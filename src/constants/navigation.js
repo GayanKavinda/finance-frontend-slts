@@ -46,6 +46,18 @@ export const navLinks = [
     requiredPermission: "manage-pos",
   },
   {
+    label: "Contractors",
+    href: "/contractors",
+    icon: HardHat,
+    requiredPermission: "manage-contractors",
+  },
+  {
+    label: "Contractor Bills",
+    href: "/contractor-bills",
+    icon: Banknote,
+    requiredPermission: "submit-contractor-bill",
+  },
+  {
     label: "Invoices",
     href: "/invoices",
     icon: Receipt,

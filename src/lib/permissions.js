@@ -108,6 +108,9 @@ export const canMarkBanked = (permissions) =>
 export const canManageRoles = (permissions) =>
   permissions?.includes("manage-roles");
 
+export const canDeleteJob = (permissions = []) =>
+  permissions.includes("delete-job");
+
 export const getStatusMeta = (status) => {
   const meta = {
     Draft: { label: "Draft", color: "gray" },
