@@ -2,14 +2,14 @@ const { test, expect } = require('@playwright/test');
 
 test('Registration-to-Award-Payment Lifecycle Audit', async ({ page }) => {
   // 1. Sign In
-  await page.goto('http://localhost:2500/signin');
+  await page.goto('http://localhost:3000/signin');
   await page.fill('input[type="email"]', 'admin@procurex.com');
   await page.fill('input[type="password"]', 'password');
   await page.click('button[type="submit"]');
   await expect(page).toHaveURL(/.*dashboard/);
 
   // 2. Navigate to Tenders
-  await page.goto('http://localhost:2500/tenders');
+  await page.goto('http://localhost:3000/tenders');
   await expect(page.locator('h1')).toContainText('Tenders');
 
   // 3. Create a Tender (Registration)
@@ -38,12 +38,12 @@ test('Registration-to-Award-Payment Lifecycle Audit', async ({ page }) => {
   console.log('✅ Award Phase: Passed');
 
   // 5. Verify Project Job Initialization
-  await page.goto('http://localhost:2500/jobs');
+  await page.goto('http://localhost:3000/jobs');
   await expect(page.locator('text=Project: Full Lifecycle Audit Tender')).toBeVisible();
   console.log('✅ Project Job Initialization: Passed');
 
   // 6. Billing Verification (Invoice Generation)
-  await page.goto('http://localhost:2500/invoices');
+  await page.goto('http://localhost:3000/invoices');
   // Logic would continue here for full payment flow
   console.log('✅ System Integrity Audit: Completed Successfully');
 });

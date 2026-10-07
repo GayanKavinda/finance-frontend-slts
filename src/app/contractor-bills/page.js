@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { useRouter } from "next/navigation";
 import {
   fetchContractorBills,
   createContractorBill,
@@ -14,38 +15,54 @@ import {
   fetchContractors,
 } from "@/lib/contractor";
 import { fetchJobs } from "@/lib/procurement";
+import { exportToCSV } from "@/lib/exportUtils";
 import { toast } from "react-hot-toast";
 import {
   Plus,
   Search,
   FileText,
-  CheckCircle2,
   Clock,
-  X,
-  Upload,
-  Trash2,
-  ExternalLink,
-  ChevronRight,
-  Filter,
+  CheckCircle2,
   DollarSign,
-  Verified,
-  CreditCard,
-  Building2,
   Download,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import StatusBadge from "@/components/ui/StatusBadge";
 import { useAuth } from "@/contexts/AuthContext";
+import { usePermission } from "@/hooks/usePermission";
+import ContractorBillCard from "./components/ContractorBillCard";
+import RegisterBillModal from "./components/RegisterBillModal";
+import UploadDocumentModal from "./components/UploadDocumentModal";
+import RecordPaymentModal from "./components/RecordPaymentModal";
+import RejectBillModal from "./components/RejectBillModal";
 
 export default function ContractorBillsPage() {
   const { user } = useAuth();
   const permissions = user?.permissions || [];
+  const router = useRouter();
+  const searchTimerRef = useRef(null);
+
+  const canVerify = usePermission(["verify-contractor-bill", "submit-contractor-bill"]);
+  const canSubmitToFinance = usePermission("submit-contractor-bill");
+  const canApprove = usePermission(["approve-contractor-payment", "approve-payment"]);
+  const canRecordPayment = usePermission(["mark-contractor-paid", "record-payment"]);
 
   const [bills, setBills] = useState([]);
   const [jobs, setJobs] = useState([]);
   const [contractors, setContractors] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(() => {
+    if (typeof window !== "undefined") {
+      return new URLSearchParams(window.location.search).get("search") || "";
+    }
+    return "";
+  });
+  const [searchInput, setSearchInput] = useState(() => {
+    if (typeof window !== "undefined") {
+      return new URLSearchParams(window.location.search).get("search") || "";
+    }
+    return "";
+  });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedBill, setSelectedBill] = useState(null);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
@@ -73,6 +90,29 @@ export default function ContractorBillsPage() {
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
   const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
+
+  useEffect(() => {
+    const handlePopState = () => {
+      const params = new URLSearchParams(window.location.search);
+      const q = params.get("search") || "";
+      setSearch(q);
+      setSearchInput(q);
+    };
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
+
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (search) params.set("search", search);
+    const qs = params.toString();
+    const targetUrl = qs
+      ? `${window.location.pathname}?${qs}`
+      : window.location.pathname;
+    if (window.location.href !== targetUrl) {
+      router.replace(targetUrl, { scroll: false });
+    }
+  }, [search, router]);
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -236,8 +276,25 @@ export default function ContractorBillsPage() {
               {bills.length} bill{bills.length !== 1 ? "s" : ""} registered
             </p>
           </div>
-          <button
-            onClick={() => setIsModalOpen(true)}
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() =>
+                exportToCSV(bills, "contractor_bills_export", [
+                  { key: "bill_number", label: "Bill #" },
+                  { key: "contractor.name", label: "Contractor" },
+                  { key: "job.name", label: "Job" },
+                  { key: "amount", label: "Amount" },
+                  { key: "bill_date", label: "Bill Date" },
+                  { key: "status", label: "Status" },
+                ])
+              }
+              className="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/20 backdrop-blur-md transition-all shadow-md"
+            >
+              <Download className="w-4 h-4 text-rose-300" />
+              Export CSV
+            </button>
+            <button
+              onClick={() => setIsModalOpen(true)}
             className="flex items-center gap-2 bg-white hover:bg-rose-50 text-slate-900 px-5 py-3 rounded-2xl font-bold text-sm shadow-xl hover:scale-105 transition-all"
             style={{ fontFamily: "var(--font-display)" }}
           >
@@ -303,8 +360,15 @@ export default function ContractorBillsPage() {
         <input
           type="text"
           placeholder="Search by bill number or contractor…"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          value={searchInput}
+          onChange={(e) => {
+            const val = e.target.value;
+            setSearchInput(val);
+            if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+            searchTimerRef.current = setTimeout(() => {
+              setSearch(val);
+            }, 300);
+          }}
           className="w-full pl-11 pr-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-400 shadow-sm"
         />
       </div>
@@ -326,498 +390,73 @@ export default function ContractorBillsPage() {
           </div>
         ) : (
           filteredBills.map((bill) => (
-            <Card
+            <ContractorBillCard
               key={bill.id}
-              className="rounded-[2.5rem] p-8 hover:shadow-2xl transition-all duration-500 group border-none shadow-xl shadow-gray-100 dark:shadow-none bg-white dark:bg-gray-800 overflow-hidden relative"
-            >
-              <div className="flex flex-col lg:flex-row justify-between gap-8">
-                <div className="flex-1 space-y-4">
-                  <div className="flex items-start justify-between">
-                    <div className="flex gap-4">
-                      <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
-                        <Building2 className="w-7 h-7" />
-                      </div>
-                      <div>
-                        <h3 className="text-xl font-black text-gray-900 dark:text-white">
-                          #{bill.bill_number}
-                        </h3>
-                        <p className="font-bold text-gray-500 dark:text-gray-400">
-                          {bill.contractor.name}
-                        </p>
-                      </div>
-                    </div>
-                    <StatusBadge status={bill.status} />
-                  </div>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-gray-50 dark:border-gray-700/50">
-                    <div>
-                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                        Job / Project
-                      </p>
-                      <p className="font-bold text-sm truncate text-gray-800 dark:text-gray-200">
-                        {bill.job.name}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                        Amount
-                      </p>
-                      <p className="font-black text-sm text-gray-800 dark:text-gray-100">
-                        LKR {Number(bill.amount).toLocaleString()}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                        Date
-                      </p>
-                      <p className="font-bold text-sm text-gray-800 dark:text-gray-200">
-                        {new Date(bill.bill_date).toLocaleDateString()}
-                      </p>
-                    </div>
-                    <div className="flex flex-wrap gap-1">
-                      {bill.documents?.map((doc) => (
-                        <a
-                          key={doc.id}
-                          href={`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/storage/${doc.file_path}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          download
-                          className="p-1.5 bg-gray-100 dark:bg-gray-700 rounded-lg hover:text-primary transition-colors flex items-center gap-1 text-xs font-bold"
-                          title={doc.document_type}
-                        >
-                          <Download className="w-3.5 h-3.5" />
-                          <span className="hidden sm:inline">DL</span>
-                        </a>
-                      ))}
-                      {bill.status === "Draft" && (
-                        <button
-                          onClick={() => {
-                            setSelectedBill(bill);
-                            setIsUploadModalOpen(true);
-                          }}
-                          className="p-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100"
-                        >
-                          <Upload className="w-3.5 h-3.5" />
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="lg:w-72 flex flex-col justify-center gap-3">
-                  {bill.status === "Draft" &&
-                    permissions.includes("enter-quotations") && (
-                      <button
-                        onClick={() => handleVerify(bill.id)}
-                        className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-2xl font-black transition-all"
-                      >
-                        <Verified className="w-4 h-4" /> Verify (Proc.)
-                      </button>
-                    )}
-                  {bill.status === "Verified" &&
-                    permissions.includes("submit-contractor-bill") && (
-                      <button
-                        onClick={() => handleSubmitToFinance(bill.id)}
-                        className="w-full flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-600 text-white py-3 rounded-2xl font-black transition-all"
-                      >
-                        <Plus className="w-4 h-4" /> Submit to Finance
-                      </button>
-                    )}
-                  {bill.status === "Verified" &&
-                    permissions.includes("enter-quotations") && (
-                      <button
-                        className="w-full py-2 text-xs text-gray-400 font-bold hover:text-gray-600 underline"
-                        onClick={() => {
-                          setSelectedBill(bill);
-                          setIsUploadModalOpen(true);
-                        }}
-                      >
-                        Edit Attachments
-                      </button>
-                    )}
-                  {bill.status === "Submitted" &&
-                    permissions.includes("approve-payment") && (
-                      <div className="space-y-2">
-                        <button
-                          onClick={() => handleApprove(bill.id)}
-                          className="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white py-3 rounded-2xl font-black transition-all"
-                        >
-                          <CheckCircle2 className="w-4 h-4" /> Approve (Fin.)
-                        </button>
-                        <button
-                          onClick={() => {
-                            setSelectedBill(bill);
-                            setIsRejectModalOpen(true);
-                          }}
-                          className="w-full flex items-center justify-center gap-2 bg-red-50 text-red-600 hover:bg-red-100 py-3 rounded-2xl font-bold transition-all"
-                        >
-                          <X className="w-4 h-4" /> Reject
-                        </button>
-                      </div>
-                    )}
-                  {bill.status === "Approved" &&
-                    permissions.includes("mark-contractor-paid") && (
-                      <div className="space-y-2">
-                        <button
-                          onClick={() => {
-                            setSelectedBill(bill);
-                            setPaymentForm({
-                              ...paymentForm,
-                              payment_amount: bill.amount,
-                            });
-                            setIsPaymentModalOpen(true);
-                          }}
-                          className="w-full flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-white py-3 rounded-2xl font-black transition-all"
-                        >
-                          <CreditCard className="w-4 h-4" /> Record Payment
-                        </button>
-                        <button
-                          onClick={() => {
-                            setSelectedBill(bill);
-                            setIsRejectModalOpen(true);
-                          }}
-                          className="w-full text-xs text-red-400 font-bold hover:text-red-500 underline"
-                        >
-                          Reject Approved Bill
-                        </button>
-                      </div>
-                    )}
-                  {bill.status === "Rejected" && (
-                    <div className="w-full p-4 bg-red-50 dark:bg-red-900/10 rounded-2xl border border-red-100 dark:border-red-900/20">
-                      <p className="text-[10px] font-black text-red-400 uppercase tracking-widest mb-1">
-                        Rejection Reason
-                      </p>
-                      <p className="text-xs font-bold text-red-700 italic">
-                        &quot;{bill.rejection_reason}&quot;
-                      </p>
-                      <button
-                        onClick={() => handleVerify(bill.id)}
-                        className="w-full mt-3 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-xl font-bold text-xs transition-all"
-                      >
-                        Re-Verify
-                      </button>
-                    </div>
-                  )}
-                  {bill.status === "Paid" && (
-                    <div className="w-full p-4 bg-gray-50 dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-700">
-                      <div className="grid grid-cols-2 gap-2">
-                        <div>
-                          <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">
-                            Ref
-                          </p>
-                          <p className="font-bold text-xs truncate text-gray-800 dark:text-gray-200">
-                            {bill.payment_reference}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">
-                            Bank
-                          </p>
-                          <p className="font-bold text-xs truncate text-gray-800 dark:text-gray-200">
-                            {bill.bank_name}
-                          </p>
-                        </div>
-                      </div>
-                      <p className="text-[10px] font-medium text-gray-500 dark:text-gray-400 mt-2">
-                        Paid LKR {Number(bill.payment_amount).toLocaleString()}{" "}
-                        on {new Date(bill.paid_at).toLocaleDateString()}
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </Card>
+              bill={bill}
+              canVerify={canVerify}
+              canSubmitToFinance={canSubmitToFinance}
+              canApprove={canApprove}
+              canRecordPayment={canRecordPayment}
+              onOpenUpload={(selected) => {
+                setSelectedBill(selected);
+                setIsUploadModalOpen(true);
+              }}
+              onVerify={handleVerify}
+              onSubmitToFinance={handleSubmitToFinance}
+              onApprove={handleApprove}
+              onOpenReject={(selected) => {
+                setSelectedBill(selected);
+                setIsRejectModalOpen(true);
+              }}
+              onOpenPayment={(selected) => {
+                setSelectedBill(selected);
+                setPaymentForm({
+                  ...paymentForm,
+                  payment_amount: selected.amount,
+                });
+                setIsPaymentModalOpen(true);
+              }}
+            />
           ))
         )}
       </div>
 
-      {/* MODALS */}
-      {/* Registration Modal */}
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-gray-800 w-full max-w-xl rounded-[2.5rem] shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
-            <div className="px-8 py-6 flex justify-between items-center border-b border-gray-100 dark:border-gray-700">
-              <h2 className="text-2xl font-black">Register Contractor Bill</h2>
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full"
-              >
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-            <form onSubmit={handleSubmit} className="p-8 space-y-6">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-black uppercase text-gray-400">
-                    Job
-                  </label>
-                  <select
-                    required
-                    value={form.job_id}
-                    onChange={(e) =>
-                      setForm({ ...form, job_id: e.target.value })
-                    }
-                    className="w-full px-5 py-3.5 bg-gray-50 dark:bg-gray-900 border-none rounded-2xl font-bold"
-                  >
-                    <option value="">Select Job</option>
-                    {jobs.map((j) => (
-                      <option key={j.id} value={j.id}>
-                        {j.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs font-black uppercase text-gray-400">
-                    Contractor
-                  </label>
-                  <select
-                    required
-                    value={form.contractor_id}
-                    onChange={(e) =>
-                      setForm({ ...form, contractor_id: e.target.value })
-                    }
-                    className="w-full px-5 py-3.5 bg-gray-50 dark:bg-gray-900 border-none rounded-2xl font-bold"
-                  >
-                    <option value="">Select Contractor</option>
-                    {contractors.map((c) => (
-                      <option key={c.id} value={c.id}>
-                        {c.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-xs font-black uppercase text-gray-400">
-                  Bill Number
-                </label>
-                <input
-                  required
-                  value={form.bill_number}
-                  onChange={(e) =>
-                    setForm({ ...form, bill_number: e.target.value })
-                  }
-                  className="w-full px-5 py-3.5 bg-gray-50 dark:bg-gray-900 border-none rounded-2xl font-black"
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-black uppercase text-gray-400">
-                    Amount (LKR)
-                  </label>
-                  <input
-                    type="number"
-                    required
-                    value={form.amount}
-                    onChange={(e) =>
-                      setForm({ ...form, amount: e.target.value })
-                    }
-                    className="w-full px-5 py-3.5 bg-gray-50 dark:bg-gray-900 border-none rounded-2xl font-black"
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs font-black uppercase text-gray-400">
-                    Date
-                  </label>
-                  <input
-                    type="date"
-                    required
-                    value={form.bill_date}
-                    onChange={(e) =>
-                      setForm({ ...form, bill_date: e.target.value })
-                    }
-                    className="w-full px-5 py-3.5 bg-gray-50 dark:bg-gray-900 border-none rounded-2xl font-bold"
-                  />
-                </div>
-              </div>
-              <button
-                type="submit"
-                className="w-full py-4.5 bg-primary text-white rounded-2xl font-black shadow-lg shadow-primary/20"
-              >
-                Create Bill Draft
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
+      {/* Modals */}
+      <RegisterBillModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSubmit={handleSubmit}
+        form={form}
+        setForm={setForm}
+        jobs={jobs}
+        contractors={contractors}
+      />
 
-      {/* Upload Modal */}
-      {isUploadModalOpen && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-gray-800 w-full max-w-lg rounded-[2.5rem] p-8 space-y-6 animate-in slide-in-from-bottom-4 duration-300">
-            <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-black">Upload Document</h2>
-              <button onClick={() => setIsUploadModalOpen(false)}>
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-            <div className="p-12 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-[2rem] flex flex-col items-center justify-center gap-4 bg-gray-50 dark:bg-gray-900/50">
-              <Upload className="w-12 h-12 text-primary/40" />
-              <input
-                type="file"
-                onChange={(e) =>
-                  setUploadForm({ ...uploadForm, file: e.target.files[0] })
-                }
-                className="text-sm font-medium"
-              />
-            </div>
-            <select
-              value={uploadForm.document_type}
-              onChange={(e) =>
-                setUploadForm({ ...uploadForm, document_type: e.target.value })
-              }
-              className="w-full px-5 py-3.5 bg-gray-100 dark:bg-gray-900 rounded-2xl border-none font-bold"
-            >
-              <option>Contractor Bill</option>
-              <option>Completion Certificate</option>
-              <option>Site Photo</option>
-              <option>Other Attachment</option>
-            </select>
-            <button
-              onClick={handleUpload}
-              className="w-full py-4.5 bg-primary text-white rounded-2xl font-black"
-            >
-              Confirm Upload
-            </button>
-          </div>
-        </div>
-      )}
+      <UploadDocumentModal
+        isOpen={isUploadModalOpen}
+        onClose={() => setIsUploadModalOpen(false)}
+        uploadForm={uploadForm}
+        setUploadForm={setUploadForm}
+        handleUpload={handleUpload}
+      />
 
-      {/* Payment Modal */}
-      {isPaymentModalOpen && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-gray-800 w-full max-w-lg rounded-[2.5rem] p-8 space-y-6">
-            <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-black">Record Payment</h2>
-              <button onClick={() => setIsPaymentModalOpen(false)}>
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-            <div className="p-6 bg-primary/5 rounded-2xl border border-primary/10">
-              <p className="text-sm font-bold text-primary">
-                Paying #{selectedBill?.bill_number}
-              </p>
-              <p className="text-2xl font-black text-gray-900 dark:text-white mt-1">
-                LKR {Number(selectedBill?.amount).toLocaleString()}
-              </p>
-            </div>
-            <form onSubmit={handlePayment} className="space-y-6">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-black uppercase text-gray-400 tracking-widest">
-                    Reference
-                  </label>
-                  <input
-                    required
-                    value={paymentForm.payment_reference}
-                    onChange={(e) =>
-                      setPaymentForm({
-                        ...paymentForm,
-                        payment_reference: e.target.value,
-                      })
-                    }
-                    className="w-full px-5 py-4 bg-gray-50 dark:bg-gray-900 rounded-2xl border-none font-black"
-                    placeholder="Chq No..."
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs font-black uppercase text-gray-400 tracking-widest">
-                    Bank Name
-                  </label>
-                  <input
-                    required
-                    value={paymentForm.bank_name}
-                    onChange={(e) =>
-                      setPaymentForm({
-                        ...paymentForm,
-                        bank_name: e.target.value,
-                      })
-                    }
-                    className="w-full px-5 py-4 bg-gray-50 dark:bg-gray-900 rounded-2xl border-none font-black"
-                    placeholder="e.g. BOC, Sampath"
-                  />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-black uppercase text-gray-400 tracking-widest">
-                    Amount Paid
-                  </label>
-                  <input
-                    type="number"
-                    required
-                    value={paymentForm.payment_amount}
-                    onChange={(e) =>
-                      setPaymentForm({
-                        ...paymentForm,
-                        payment_amount: e.target.value,
-                      })
-                    }
-                    className="w-full px-5 py-4 bg-gray-50 dark:bg-gray-900 rounded-2xl border-none font-black"
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <label className="text-xs font-black uppercase text-gray-400 tracking-widest">
-                    Date
-                  </label>
-                  <input
-                    type="date"
-                    required
-                    value={paymentForm.paid_at}
-                    onChange={(e) =>
-                      setPaymentForm({
-                        ...paymentForm,
-                        paid_at: e.target.value,
-                      })
-                    }
-                    className="w-full px-5 py-4 bg-gray-50 dark:bg-gray-900 rounded-2xl border-none font-bold"
-                  />
-                </div>
-              </div>
-              <button
-                type="submit"
-                className="w-full py-4.5 bg-primary text-white rounded-2xl font-black shadow-lg shadow-primary/20"
-              >
-                Mark as Paid
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
-      {/* Rejection Modal */}
-      {isRejectModalOpen && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-gray-800 w-full max-w-lg rounded-[2.5rem] p-8 space-y-6">
-            <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-black text-red-600">Reject Bill</h2>
-              <button onClick={() => setIsRejectModalOpen(false)}>
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-            <form onSubmit={handleReject} className="space-y-6">
-              <div className="space-y-1.5">
-                <label className="text-xs font-black uppercase text-gray-400 tracking-widest">
-                  Reason for Rejection
-                </label>
-                <textarea
-                  required
-                  rows={4}
-                  value={rejectionReason}
-                  onChange={(e) => setRejectionReason(e.target.value)}
-                  className="w-full px-5 py-4 bg-gray-50 dark:bg-gray-900 rounded-2xl border-none font-bold resize-none"
-                  placeholder="Explain why this bill is being rejected..."
-                />
-              </div>
-              <button
-                type="submit"
-                className="w-full py-4.5 bg-red-600 text-white rounded-2xl font-black shadow-lg shadow-red-200"
-              >
-                Confirm Rejection
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
+      <RecordPaymentModal
+        isOpen={isPaymentModalOpen}
+        onClose={() => setIsPaymentModalOpen(false)}
+        selectedBill={selectedBill}
+        paymentForm={paymentForm}
+        setPaymentForm={setPaymentForm}
+        handlePayment={handlePayment}
+      />
+
+      <RejectBillModal
+        isOpen={isRejectModalOpen}
+        onClose={() => setIsRejectModalOpen(false)}
+        rejectionReason={rejectionReason}
+        setRejectionReason={setRejectionReason}
+        handleReject={handleReject}
+      />
     </div>
   );
 }
+

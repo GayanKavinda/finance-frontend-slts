@@ -1,7 +1,7 @@
 // src/app/tenders/page.js
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import {
   fetchTenders,
   createTender,
@@ -27,6 +27,7 @@ import {
   Clock,
   FileText,
   Download,
+  Target,
 } from "lucide-react";
 import { downloadTenderAwardLetter } from "@/lib/procurement";
 import StatusBadge from "@/components/ui/StatusBadge";
@@ -211,13 +212,37 @@ const Field = ({ label, children }) => (
 );
 
 export default function TendersPage() {
+  const router = useRouter();
+  const searchTimerRef = useRef(null);
+
   const [tenders, setTenders] = useState([]);
   const [customers, setCustomers] = useState([]);
   const [meta, setMeta] = useState({});
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(() => {
+    if (typeof window !== "undefined") {
+      return Number(new URLSearchParams(window.location.search).get("page")) || 1;
+    }
+    return 1;
+  });
+  const [statusFilter, setStatusFilter] = useState(() => {
+    if (typeof window !== "undefined") {
+      return new URLSearchParams(window.location.search).get("status") || "";
+    }
+    return "";
+  });
+  const [search, setSearch] = useState(() => {
+    if (typeof window !== "undefined") {
+      return new URLSearchParams(window.location.search).get("search") || "";
+    }
+    return "";
+  });
+  const [searchInput, setSearchInput] = useState(() => {
+    if (typeof window !== "undefined") {
+      return new URLSearchParams(window.location.search).get("search") || "";
+    }
+    return "";
+  });
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [selectedTender, setSelectedTender] = useState(null);
   const [saving, setSaving] = useState(false);
@@ -234,6 +259,35 @@ export default function TendersPage() {
     status: "Open",
   });
   const setF = (k, v) => setForm((f) => ({ ...f, [k]: v }));
+
+  useEffect(() => {
+    const handlePopState = () => {
+      const params = new URLSearchParams(window.location.search);
+      const p = Number(params.get("page")) || 1;
+      const s = params.get("status") || "";
+      const q = params.get("search") || "";
+      setPage(p);
+      setStatusFilter(s);
+      setSearch(q);
+      setSearchInput(q);
+    };
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
+
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (page > 1) params.set("page", String(page));
+    if (statusFilter) params.set("status", statusFilter);
+    if (search) params.set("search", search);
+    const qs = params.toString();
+    const targetUrl = qs
+      ? `${window.location.pathname}?${qs}`
+      : window.location.pathname;
+    if (window.location.href !== targetUrl) {
+      router.replace(targetUrl, { scroll: false });
+    }
+  }, [page, statusFilter, search, router]);
 
   const loadTenders = useCallback(async () => {
     setLoading(true);
@@ -461,10 +515,15 @@ export default function TendersPage() {
             <input
               type="text"
               placeholder="Search tenders…"
-              value={search}
+              value={searchInput}
               onChange={(e) => {
-                setSearch(e.target.value);
-                setPage(1);
+                const val = e.target.value;
+                setSearchInput(val);
+                if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+                searchTimerRef.current = setTimeout(() => {
+                  setSearch(val);
+                  setPage(1);
+                }, 300);
               }}
               className="w-full pl-11 pr-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-400 shadow-sm"
             />

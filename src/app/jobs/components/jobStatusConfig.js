@@ -1,0 +1,42 @@
+export const STATUS_CONFIG = {
+  Pending: {
+    bg: "bg-amber-500",
+    light: "bg-amber-50 dark:bg-amber-500/10",
+    text: "text-amber-600 dark:text-amber-400",
+    border: "border-amber-200 dark:border-amber-500/20",
+    gradient: "from-amber-400 to-amber-500",
+    dot: "bg-amber-500",
+  },
+  Active: {
+    bg: "bg-blue-500",
+    light: "bg-blue-50 dark:bg-blue-500/10",
+    text: "text-blue-600 dark:text-blue-400",
+    border: "border-blue-200 dark:border-blue-500/20",
+    gradient: "from-blue-400 to-blue-500",
+    dot: "bg-blue-500",
+  },
+  "On Hold": {
+    bg: "bg-orange-500",
+    light: "bg-orange-50 dark:bg-orange-500/10",
+    text: "text-orange-600 dark:text-orange-400",
+    border: "border-orange-200 dark:border-orange-500/20",
+    gradient: "from-orange-400 to-orange-500",
+    dot: "bg-orange-500",
+  },
+  Completed: {
+    bg: "bg-emerald-500",
+    light: "bg-emerald-50 dark:bg-emerald-500/10",
+    text: "text-emerald-600 dark:text-emerald-400",
+    border: "border-emerald-200 dark:border-emerald-500/20",
+    gradient: "from-emerald-400 to-emerald-500",
+    dot: "bg-emerald-500",
+  },
+  Cancelled: {
+    bg: "bg-rose-500",
+    light: "bg-rose-50 dark:bg-rose-500/10",
+    text: "text-rose-600 dark:text-rose-400",
+    border: "border-rose-200 dark:border-rose-500/20",
+    gradient: "from-rose-400 to-rose-500",
+    dot: "bg-rose-500",
+  },
+};
