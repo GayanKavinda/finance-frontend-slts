@@ -12,7 +12,7 @@ export default function ActionCard({ icon, label, description, onClick, delay = 
       whileHover={{ y: -3 }}
       whileTap={{ scale: 0.98 }}
       onClick={onClick}
-      className="glass-effect action-card text-left w-full group relative p-4 rounded-xl"
+      className="bg-card border border-border text-left w-full group relative p-4 rounded-xl hover:shadow-soft transition-all duration-200"
     >
       <div className="flex items-center gap-4">
         <div className="action-icon w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center transition-all">

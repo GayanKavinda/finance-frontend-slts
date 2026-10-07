@@ -12,22 +12,22 @@ export default function UploadDocumentModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white dark:bg-gray-800 w-full max-w-lg rounded-[2.5rem] p-8 space-y-6 animate-in slide-in-from-bottom-4 duration-300">
+    <div className="fixed inset-0 bg-black/60  z-50 flex items-center justify-center p-4">
+      <div className="bg-white dark:bg-gray-800 w-full max-w-lg rounded-2xl p-6 space-y-5 shadow-strong">
         <div className="flex justify-between items-center">
-          <h2 className="text-2xl font-black">Upload Document</h2>
-          <button type="button" onClick={onClose}>
-            <X className="w-6 h-6" />
+          <h2 className="text-lg font-medium text-foreground">Upload Document</h2>
+          <button type="button" onClick={onClose} className="p-2 hover:bg-muted rounded-lg transition-colors">
+            <X className="w-5 h-5" />
           </button>
         </div>
-        <div className="p-12 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-[2rem] flex flex-col items-center justify-center gap-4 bg-gray-50 dark:bg-gray-900/50">
-          <Upload className="w-12 h-12 text-primary/40" />
+        <div className="p-6 border-2 border-dashed border-border rounded-xl flex flex-col items-center justify-center gap-3 bg-muted/50">
+          <Upload className="w-10 h-10 text-muted-foreground" />
           <input
             type="file"
             onChange={(e) =>
               setUploadForm({ ...uploadForm, file: e.target.files[0] })
             }
-            className="text-sm font-medium"
+            className="text-sm font-medium text-foreground"
           />
         </div>
         <select
@@ -35,7 +35,7 @@ export default function UploadDocumentModal({
           onChange={(e) =>
             setUploadForm({ ...uploadForm, document_type: e.target.value })
           }
-          className="w-full px-5 py-3.5 bg-gray-100 dark:bg-gray-900 rounded-2xl border-none font-bold"
+          className="w-full px-4 py-3 bg-background border border-input rounded-xl text-sm font-medium text-foreground outline-none focus:ring-2 focus:ring-primary/20"
         >
           <option>Contractor Bill</option>
           <option>Completion Certificate</option>
@@ -45,7 +45,7 @@ export default function UploadDocumentModal({
         <button
           type="button"
           onClick={handleUpload}
-          className="w-full py-4.5 bg-primary text-white rounded-2xl font-black"
+          className="w-full py-3 bg-primary text-primary-foreground rounded-xl font-medium shadow-sm hover:bg-primary/90 transition-colors"
         >
           Confirm Upload
         </button>

@@ -50,12 +50,12 @@ function SectionHeader({ icon: Icon, title, iconColor = "text-primary" }) {
             <Icon size={18} className={iconColor} />
           </div>
         )}
-        <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+        <h3 className="text-sm font-medium text-slate-700 dark:text-slate-300 uppercase tracking-wider">
           {title}
         </h3>
       </div>
       <div
-        className={`h-0.5 w-16 bg-gradient-to-r ${iconColor.replace("text-", "from-").split(" ")[0]} to-transparent rounded-full`}
+        className={`h-0.5 w-16 bg-background ${iconColor.replace("text-", "from-").split(" ")[0]} to-transparent rounded-full`}
       ></div>
     </div>
   );
@@ -70,7 +70,7 @@ function Field({
 }) {
   return (
     <div className="flex flex-col gap-2">
-      <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 flex items-center gap-2 uppercase tracking-wider">
+      <label className="text-[10px] font-medium text-slate-500 dark:text-slate-400 flex items-center gap-2 uppercase tracking-wider">
         {Icon && <Icon size={12} className={iconColor} />} {label}
       </label>
       {children}
@@ -110,9 +110,10 @@ export default function PersonalDetails({ user, refetch }) {
   useEffect(() => {
     if (user) {
       profileForm.reset({ name: user.name || "" });
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setAvatarPreview(user?.avatar_url || null);
     }
-  }, [user]);
+  }, [user, profileForm]);
 
   // Handlers
   const onUpdateProfile = async (data) => {
@@ -281,11 +282,11 @@ export default function PersonalDetails({ user, refetch }) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setShowPreview(false)}
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md p-4"
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60  p-4"
           >
             <motion.div
               layoutId="avatar-preview-modal"
-              className="relative aspect-square w-full max-w-sm overflow-hidden rounded-3xl bg-slate-900 shadow-2xl ring-1 ring-white/10"
+              className="relative aspect-square w-full max-w-sm overflow-hidden rounded-3xl bg-slate-900 shadow-sm ring-1 ring-white/10"
               onClick={(e) => e.stopPropagation()}
             >
               <Image
@@ -297,7 +298,7 @@ export default function PersonalDetails({ user, refetch }) {
               />
               <button
                 onClick={() => setShowPreview(false)}
-                className="absolute right-4 top-4 rounded-full bg-black/50 p-2 text-white backdrop-blur-lg transition hover:bg-black/75 cursor-pointer"
+                className="absolute right-4 top-4 rounded-full bg-black/50 p-2 text-white  transition hover:bg-black/75 cursor-pointer"
               >
                 <XCircle size={20} />
               </button>
@@ -322,7 +323,7 @@ export default function PersonalDetails({ user, refetch }) {
       <div className="w-full lg:col-span-1">
         <div className="relative rounded-2xl border border-slate-200 dark:border-slate-800 p-5 bg-white/60 dark:bg-slate-950/40 dark:shadow-[0_0_80px_-12px_rgba(0,180,235,0.15)]">
           {/* Glow effect for dark mode */}
-          <div className="absolute inset-0 -z-10 rounded-2xl bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 blur-2xl opacity-0 dark:opacity-60"></div>
+          <div className="absolute inset-0 -z-10 rounded-2xl bg-muted/50"></div>
 
           <SectionHeader
             icon={Camera}
@@ -365,7 +366,7 @@ export default function PersonalDetails({ user, refetch }) {
                 whileTap={{ scale: 0.9 }}
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="absolute -bottom-2 -right-2 bg-white/10 dark:bg-black/20 backdrop-blur-md text-slate-900 dark:text-white p-2 rounded-full shadow-lg border border-white/20 dark:border-slate-800 hover:bg-white/20 dark:hover:bg-white/10 transition-colors z-10 cursor-pointer"
+                className="absolute -bottom-2 -right-2 bg-white/10 dark:bg-black/20  text-slate-900 dark:text-white p-2 rounded-full shadow-sm border border-white/20 dark:border-slate-800 hover:bg-white/20 dark:hover:bg-white/10 transition-colors z-10 cursor-pointer"
                 title="Change photo"
               >
                 <Camera size={14} />
@@ -411,9 +412,9 @@ export default function PersonalDetails({ user, refetch }) {
                   type="button"
                   disabled={!avatarFile || isUploadingAvatar}
                   onClick={onUploadAvatar}
-                  className="group relative flex items-center gap-2 overflow-hidden rounded-xl bg-primary px-4 py-2 text-xs font-bold text-primary-foreground shadow-lg shadow-primary/25 transition-all duration-300 hover:scale-105 hover:shadow-primary/40 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="group relative flex items-center gap-2 overflow-hidden rounded-xl bg-primary px-4 py-2 text-xs font-medium text-primary-foreground shadow-sm shadow-primary/25 transition-all duration-300 hover:scale-105 hover:shadow-primary/40 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 group-hover:animate-[shimmer_1.5s_infinite]"></div>
+                  <div className="absolute inset-0 -translate-x-full bg-transparent transition-transform duration-700 group-hover:animate-[shimmer_1.5s_infinite]"></div>
                   <span className="relative flex items-center gap-2">
                     {isUploadingAvatar ? (
                       <>
@@ -441,7 +442,7 @@ export default function PersonalDetails({ user, refetch }) {
                       setAvatarPreview(user?.avatar_url || null);
                       enqueueSnackbar("Crop cancelled", { variant: "info" });
                     }}
-                    className="rounded-xl border border-slate-200 bg-white/50 px-4 py-2 text-xs font-bold text-slate-600 shadow-sm backdrop-blur-md transition-all hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-800/50 dark:text-slate-300 dark:hover:bg-slate-800"
+                    className="rounded-xl border border-slate-200 bg-white/50 px-4 py-2 text-xs font-medium text-slate-600 shadow-sm  transition-all hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-800/50 dark:text-slate-300 dark:hover:bg-slate-800"
                   >
                     Cancel
                   </motion.button>
@@ -465,7 +466,7 @@ export default function PersonalDetails({ user, refetch }) {
       <div className="w-full lg:col-span-2 space-y-6">
         <div className="relative rounded-2xl border border-slate-200 dark:border-slate-800 p-5 bg-white/60 dark:bg-slate-950/40 dark:shadow-[0_0_80px_-12px_rgba(0,180,235,0.15)]">
           {/* Glow effect for dark mode */}
-          <div className="absolute inset-0 -z-10 rounded-2xl bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 blur-2xl opacity-0 dark:opacity-60"></div>
+          <div className="absolute inset-0 -z-10 rounded-2xl bg-muted/50"></div>
 
           <SectionHeader
             icon={User}
@@ -505,9 +506,9 @@ export default function PersonalDetails({ user, refetch }) {
                 whileTap={{ scale: 0.98 }}
                 type="submit"
                 disabled={profileForm.formState.isSubmitting}
-                className="group relative inline-flex w-auto items-center justify-center gap-2 overflow-hidden rounded-xl bg-primary px-5 py-2.5 text-xs font-bold text-primary-foreground shadow-lg shadow-primary/25 transition-all duration-300 hover:shadow-primary/40 disabled:cursor-not-allowed disabled:opacity-50"
+                className="group relative inline-flex w-auto items-center justify-center gap-2 overflow-hidden rounded-xl bg-primary px-5 py-2.5 text-xs font-medium text-primary-foreground shadow-sm shadow-primary/25 transition-all duration-300 hover:shadow-primary/40 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 group-hover:animate-[shimmer_1.5s_infinite]"></div>
+                <div className="absolute inset-0 -translate-x-full bg-transparent transition-transform duration-700 group-hover:animate-[shimmer_1.5s_infinite]"></div>
                 <span className="relative flex items-center gap-2">
                   {profileForm.formState.isSubmitting ? (
                     <>
@@ -531,7 +532,7 @@ export default function PersonalDetails({ user, refetch }) {
 
         <div className="relative rounded-2xl border border-slate-200 dark:border-slate-800 p-5 bg-white/60 dark:bg-slate-950/40 dark:shadow-[0_0_80px_-12px_rgba(0,180,235,0.15)]">
           {/* Glow effect for dark mode */}
-          <div className="absolute inset-0 -z-10 rounded-2xl bg-gradient-to-br from-secondary/5 via-transparent to-primary/5 blur-2xl opacity-0 dark:opacity-60"></div>
+          <div className="absolute inset-0 -z-10 rounded-2xl bg-muted/50"></div>
 
           <SectionHeader
             icon={Mail}
@@ -577,7 +578,7 @@ export default function PersonalDetails({ user, refetch }) {
                   type="button"
                   onClick={onRequestEmailOtp}
                   disabled={emailForm.formState.isSubmitting}
-                  className="group flex w-auto cursor-pointer items-center justify-center gap-2 rounded-xl border border-primary/20 bg-primary/5 px-4 py-2 text-xs font-bold text-primary transition-all duration-300 hover:border-primary/50 hover:bg-primary/10 hover:shadow-lg hover:shadow-primary/10 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="group flex w-auto cursor-pointer items-center justify-center gap-2 rounded-xl border border-primary/20 bg-primary/5 px-4 py-2 text-xs font-medium text-primary transition-all duration-300 hover:border-primary/50 hover:bg-primary/10 hover:shadow-sm hover:shadow-primary/10 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <Mail className="w-4 h-4 transition-transform duration-300 group-hover:scale-110" />
                   <span>Send Code</span>
@@ -606,9 +607,9 @@ export default function PersonalDetails({ user, refetch }) {
                 whileTap={{ scale: 0.98 }}
                 type="submit"
                 disabled={emailForm.formState.isSubmitting}
-                className="group relative inline-flex w-auto items-center justify-center gap-2 overflow-hidden rounded-xl bg-secondary px-5 py-2.5 text-xs font-bold text-secondary-foreground shadow-lg shadow-secondary/25 transition-all duration-300 hover:shadow-secondary/40 disabled:cursor-not-allowed disabled:opacity-50"
+                className="group relative inline-flex w-auto items-center justify-center gap-2 overflow-hidden rounded-xl bg-secondary px-5 py-2.5 text-xs font-medium text-secondary-foreground shadow-sm shadow-secondary/25 transition-all duration-300 hover:shadow-secondary/40 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 group-hover:animate-[shimmer_1.5s_infinite]"></div>
+                <div className="absolute inset-0 -translate-x-full bg-transparent transition-transform duration-700 group-hover:animate-[shimmer_1.5s_infinite]"></div>
                 <span className="relative flex items-center gap-2">
                   {emailForm.formState.isSubmitting ? (
                     <>

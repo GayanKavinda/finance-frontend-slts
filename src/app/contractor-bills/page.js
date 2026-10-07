@@ -26,7 +26,10 @@ import {
   DollarSign,
   Download,
 } from "lucide-react";
-import { Card } from "@/components/ui/card";
+import { Card } from "@/components/ui/Card";
+import { CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import StatusBadge from "@/components/ui/StatusBadge";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePermission } from "@/hooks/usePermission";
@@ -85,6 +88,8 @@ export default function ContractorBillsPage() {
     payment_reference: "",
     bank_name: "",
     payment_amount: "",
+    retention_amount: "",
+    milestone_name: "Progress Milestone",
     paid_at: new Date().toISOString().split("T")[0],
   });
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
@@ -114,27 +119,50 @@ export default function ContractorBillsPage() {
     }
   }, [search, router]);
 
-  const loadData = useCallback(async () => {
+  useEffect(() => {
+    let cancelled = false;
+    const loadData = async () => {
+      setLoading(true);
+      try {
+        const [billRes, jobRes, contractorRes] = await Promise.all([
+          fetchContractorBills(),
+          fetchJobs({ page: 1 }),
+          fetchContractors(),
+        ]);
+        if (!cancelled) {
+          setBills(billRes || []);
+          setJobs(jobRes.data || []);
+          setContractors(contractorRes || []);
+        }
+      } catch {
+        if (!cancelled) toast.error("Failed to load bills");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+    loadData();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const reloadData = useCallback(async () => {
     setLoading(true);
     try {
       const [billRes, jobRes, contractorRes] = await Promise.all([
         fetchContractorBills(),
-        fetchJobs({ page: 1 }), // Assuming this returns {data: []}
-        fetchContractors(), // Assuming this returns []
+        fetchJobs({ page: 1 }),
+        fetchContractors(),
       ]);
       setBills(billRes || []);
       setJobs(jobRes.data || []);
       setContractors(contractorRes || []);
-    } catch (error) {
+    } catch {
       toast.error("Failed to load bills");
     } finally {
       setLoading(false);
     }
   }, []);
-
-  useEffect(() => {
-    loadData();
-  }, [loadData]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -146,7 +174,7 @@ export default function ContractorBillsPage() {
       await createContractorBill(payload);
       toast.success("Bill registered successfully");
       setIsModalOpen(false);
-      loadData();
+      reloadData();
     } catch (error) {
       toast.error(error.response?.data?.message || "Failed to create bill");
     }
@@ -165,8 +193,8 @@ export default function ContractorBillsPage() {
       await uploadBillDocument(selectedBill.id, formData);
       toast.success("Document uploaded successfully");
       setIsUploadModalOpen(false);
-      loadData();
-    } catch (error) {
+      reloadData();
+    } catch {
       toast.error("Upload failed");
     }
   };
@@ -176,8 +204,8 @@ export default function ContractorBillsPage() {
       try {
         await deleteBillDocument(docId);
         toast.success("Document deleted");
-        loadData();
-      } catch (error) {
+        reloadData();
+      } catch {
         toast.error("Delete failed");
       }
     }
@@ -187,9 +215,9 @@ export default function ContractorBillsPage() {
     try {
       await verifyContractorBill(id);
       toast.success("Bill verified successfully");
-      loadData();
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Verification failed");
+      reloadData();
+    } catch {
+      toast.error("Verification failed");
     }
   };
 
@@ -197,8 +225,8 @@ export default function ContractorBillsPage() {
     try {
       await approveContractorBill(id);
       toast.success("Bill approved for payment");
-      loadData();
-    } catch (error) {
+      reloadData();
+    } catch {
       toast.error("Approval failed");
     }
   };
@@ -207,8 +235,8 @@ export default function ContractorBillsPage() {
     try {
       await submitContractorBill(id);
       toast.success("Bill submitted to finance");
-      loadData();
-    } catch (error) {
+      reloadData();
+    } catch {
       toast.error("Submission failed");
     }
   };
@@ -221,8 +249,8 @@ export default function ContractorBillsPage() {
       toast.success("Bill rejected");
       setIsRejectModalOpen(false);
       setRejectionReason("");
-      loadData();
-    } catch (error) {
+      reloadData();
+    } catch {
       toast.error("Rejection failed");
     }
   };
@@ -233,9 +261,9 @@ export default function ContractorBillsPage() {
       await recordContractorPayment(selectedBill.id, paymentForm);
       toast.success("Payment recorded successfully");
       setIsPaymentModalOpen(false);
-      loadData();
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Payment recording failed");
+      reloadData();
+    } catch {
+      toast.error("Payment recording failed");
     }
   };
 
@@ -250,144 +278,93 @@ export default function ContractorBillsPage() {
   const paidCount = bills.filter((b) => b.status === "Paid").length;
 
   return (
-    <div className="min-h-full p-6 space-y-6">
-      {/* Hero */}
-      <div className="relative bg-gradient-to-br from-rose-900 via-pink-900 to-slate-900 rounded-3xl p-8 overflow-hidden">
-        <div
-          className="absolute inset-0 opacity-10"
-          style={{
-            backgroundImage:
-              "radial-gradient(circle, #fff 1px, transparent 1px)",
-            backgroundSize: "24px 24px",
-          }}
-        />
-        <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <p className="text-rose-300 text-xs font-bold uppercase tracking-widest mb-1">
-              Vendor Payments
-            </p>
-            <h1
-              className="text-3xl font-black text-white tracking-tight"
-              style={{ fontFamily: "var(--font-display)" }}
-            >
-              Contractor Bills
-            </h1>
-            <p className="text-rose-200/60 text-sm mt-1">
-              {bills.length} bill{bills.length !== 1 ? "s" : ""} registered
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() =>
-                exportToCSV(bills, "contractor_bills_export", [
-                  { key: "bill_number", label: "Bill #" },
-                  { key: "contractor.name", label: "Contractor" },
-                  { key: "job.name", label: "Job" },
-                  { key: "amount", label: "Amount" },
-                  { key: "bill_date", label: "Bill Date" },
-                  { key: "status", label: "Status" },
-                ])
-              }
-              className="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/20 backdrop-blur-md transition-all shadow-md"
-            >
-              <Download className="w-4 h-4 text-rose-300" />
-              Export CSV
-            </button>
-            <button
-              onClick={() => setIsModalOpen(true)}
-            className="flex items-center gap-2 bg-white hover:bg-rose-50 text-slate-900 px-5 py-3 rounded-2xl font-bold text-sm shadow-xl hover:scale-105 transition-all"
-            style={{ fontFamily: "var(--font-display)" }}
+    <div className="min-h-full p-4 sm:p-6 space-y-4">
+      {/* Zen Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-border/50">
+        <div>
+          <h1 className="text-base font-semibold tracking-tight text-foreground">
+            Contractor Bills
+          </h1>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Progress payment ledger, contractor claims verification, and disbursement approval.
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() =>
+              exportToCSV(bills, "contractor_bills_export", [
+                { key: "bill_number", label: "Bill #" },
+                { key: "contractor.name", label: "Contractor" },
+                { key: "job.name", label: "Job" },
+                { key: "amount", label: "Amount" },
+                { key: "bill_date", label: "Bill Date" },
+                { key: "status", label: "Status" },
+              ])
+            }
+            className="h-8 text-xs gap-1.5"
           >
-            <Plus className="w-4 h-4" />
+            <Download className="w-3.5 h-3.5 text-muted-foreground" />
+            Export CSV
+          </Button>
+          <Button
+            size="sm"
+            onClick={() => setIsModalOpen(true)}
+            className="h-8 text-xs gap-1.5"
+          >
+            <Plus className="w-3.5 h-3.5" />
             Register Bill
-          </button>
+          </Button>
         </div>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        {[
-          {
-            icon: FileText,
-            label: "Total",
-            value: bills.length,
-            color: "bg-rose-50 dark:bg-rose-900/20 text-rose-600",
-          },
-          {
-            icon: Clock,
-            label: "Draft",
-            value: draftCount,
-            color: "bg-gray-100 dark:bg-gray-700 text-gray-500",
-          },
-          {
-            icon: CheckCircle2,
-            label: "Paid",
-            value: paidCount,
-            color: "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600",
-          },
-          {
-            icon: DollarSign,
-            label: "Total Value",
-            value: totalAmt > 0 ? `LKR ${(totalAmt / 1e6).toFixed(1)}M` : "—",
-            color: "bg-blue-50 dark:bg-blue-900/20 text-blue-600",
-          },
-        ].map(({ icon: Icon, label, value, color }) => (
-          <div
-            key={label}
-            className="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm"
-          >
-            <div
-              className={`w-10 h-10 rounded-xl flex items-center justify-center mb-3 ${color}`}
-            >
-              <Icon className="w-5 h-5" />
-            </div>
-            <div
-              className="text-xl font-bold text-gray-900 dark:text-white"
-              style={{ fontFamily: "var(--font-display)" }}
-            >
-              {value}
-            </div>
-            <div className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mt-1">
-              {label}
-            </div>
-          </div>
-        ))}
+      {/* Compact Search */}
+      <div className="flex items-center justify-between gap-2.5">
+        <div className="relative flex-1 max-w-sm">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+          <input
+            type="text"
+            placeholder="Search by bill # or contractor…"
+            value={searchInput}
+            onChange={(e) => {
+              const val = e.target.value;
+              setSearchInput(val);
+              if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+              searchTimerRef.current = setTimeout(() => {
+                setSearch(val);
+              }, 300);
+            }}
+            className="h-8 w-full pl-8 pr-3 bg-card border border-border rounded-md text-xs font-medium text-foreground outline-none focus:border-primary transition-colors"
+          />
+        </div>
+        <div className="text-xs text-muted-foreground hidden sm:block">
+          <span>{bills.length} total</span>
+          <span className="mx-1.5">·</span>
+          <span>{draftCount} draft</span>
+          <span className="mx-1.5">·</span>
+          <span className="text-foreground font-medium">{paidCount} paid</span>
+        </div>
       </div>
 
-      {/* Search */}
-      <div className="relative max-w-md">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-        <input
-          type="text"
-          placeholder="Search by bill number or contractor…"
-          value={searchInput}
-          onChange={(e) => {
-            const val = e.target.value;
-            setSearchInput(val);
-            if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
-            searchTimerRef.current = setTimeout(() => {
-              setSearch(val);
-            }, 300);
-          }}
-          className="w-full pl-11 pr-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-400 shadow-sm"
-        />
-      </div>
-
-      <div className="grid grid-cols-1 gap-6">
+      <div className="grid grid-cols-1 gap-4">
         {loading ? (
-          <div className="animate-pulse space-y-4">
-            {[1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className="h-32 bg-gray-100 dark:bg-gray-800 rounded-3xl"
-              />
-            ))}
-          </div>
+          Array.from({ length: 3 }).map((_, i) => (
+            <Card key={i} className="p-4 animate-pulse">
+              <div className="h-16 bg-muted rounded" />
+            </Card>
+          ))
         ) : filteredBills.length === 0 ? (
-          <div className="text-center py-20 bg-gray-50 dark:bg-gray-900 rounded-[3rem] border-2 border-dashed border-gray-200 dark:border-gray-800">
-            <FileText className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-            <p className="text-gray-500 font-black">No bills found</p>
-          </div>
+          <Card className="p-8">
+            <div className="flex flex-col items-center justify-center py-8 text-center">
+              <div className="mb-3 rounded-lg bg-muted p-3">
+                <FileText className="h-5 w-5 text-muted-foreground" />
+              </div>
+              <p className="text-sm font-medium text-muted-foreground">
+                No bills found
+              </p>
+            </div>
+          </Card>
         ) : (
           filteredBills.map((bill) => (
             <ContractorBillCard
@@ -459,4 +436,3 @@ export default function ContractorBillsPage() {
     </div>
   );
 }
-

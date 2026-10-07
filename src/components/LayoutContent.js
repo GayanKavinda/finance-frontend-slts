@@ -14,7 +14,6 @@ import { AUTH_PATHS } from "@/constants/navigation";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import PublicRoute from "@/components/PublicRoute";
 import ScrollToTop from "@/components/ScrollToTop";
-import PulsingBackground from "@/components/PulsingBackground";
 
 const SidebarContext = createContext();
 
@@ -29,7 +28,6 @@ function ScrollableContent({ children }) {
   const pathname = usePathname();
   const { user } = useAuth();
 
-  // Show sidebar on authenticated pages (not auth pages or home page)
   const isAuthPage = AUTH_PATHS.includes(pathname);
   const isHomePage = pathname === "/";
   const isDashboard = pathname === "/dashboard";
@@ -50,10 +48,9 @@ function ScrollableContent({ children }) {
       value={{ isSidebarCollapsed, setIsSidebarCollapsed }}
     >
       <ThemeScrollArea
-        className="h-full w-full bg-transparent"
+        className="h-full w-full bg-background"
         onScroll={handleScroll}
       >
-        <PulsingBackground />
         <div className="flex flex-col min-h-screen">
           <Navbar
             isMobileSidebarOpen={isMobileSidebarOpen}
@@ -69,10 +66,10 @@ function ScrollableContent({ children }) {
               />
               <main
                 className={`flex-1 pt-16 transition-all duration-300 ${
-                  isSidebarCollapsed ? "lg:ml-[80px]" : "lg:ml-[280px]"
+                  isSidebarCollapsed ? "lg:ml-[72px]" : "lg:ml-[260px]"
                 }`}
               >
-                <div className="p-6">
+                <div className="p-4 sm:p-6 lg:p-8">
                   {!isDashboard && <Breadcrumb path={pathname} />}
                   {renderContent()}
                 </div>

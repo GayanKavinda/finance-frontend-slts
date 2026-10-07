@@ -84,7 +84,7 @@ export default function Home() {
         {/* Global Visual Layers (Static - Higher Performance) */}
         <div className="absolute inset-0 pointer-events-none z-1">
           <div className="absolute inset-0 bg-linear-to-b from-black/60 via-transparent to-black/80" />
-          <div className="absolute inset-0 bg-black/10 backdrop-blur-[0.5px]" />
+          <div className="absolute inset-0 bg-black/10 -[0.5px]" />
           <div className="absolute inset-0 opacity-[0.03] mix-blend-overlay bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
         </div>
 
@@ -176,7 +176,7 @@ export default function Home() {
                     <motion.button
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.98 }}
-                      className="px-6 py-3 bg-white/10 hover:bg-white/20 text-white font-medium text-sm rounded-xl backdrop-blur-md border border-white/20 shadow-lg transition-all duration-300 flex items-center justify-center gap-2 w-full sm:w-auto cursor-pointer"
+                      className="px-6 py-3 bg-white/10 hover:bg-white/20 text-white font-medium text-sm rounded-xl  border border-white/20 shadow-sm transition-all duration-300 flex items-center justify-center gap-2 w-full sm:w-auto cursor-pointer"
                     >
                       {slides[currentSlide].cta}
                       <ArrowRight className="w-4 h-4" />
@@ -187,7 +187,7 @@ export default function Home() {
                     <motion.button
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.98 }}
-                      className="px-6 py-3 text-sm font-medium rounded-xl backdrop-blur-md bg-white/5 hover:bg-white/10 border border-white/30 text-white transition-all duration-300 w-full sm:w-auto cursor-pointer"
+                      className="px-6 py-3 text-sm font-medium rounded-xl  bg-white/5 hover:bg-white/10 border border-white/30 text-white transition-all duration-300 w-full sm:w-auto cursor-pointer"
                     >
                       Sign In
                     </motion.button>
@@ -247,7 +247,7 @@ export default function Home() {
             }}
             whileTap={{ scale: 0.9 }}
             onClick={prevSlide}
-            className="pointer-events-auto p-3 rounded-full backdrop-blur-xl bg-white/5 border border-white/10 text-white transition-all duration-300"
+            className="pointer-events-auto p-3 rounded-full  bg-white/5 border border-white/10 text-white transition-all duration-300"
           >
             <ChevronLeft className="w-5 h-5" />
           </motion.button>
@@ -259,7 +259,7 @@ export default function Home() {
             }}
             whileTap={{ scale: 0.9 }}
             onClick={nextSlide}
-            className="pointer-events-auto p-3 rounded-full backdrop-blur-xl bg-white/5 border border-white/10 text-white transition-all duration-300"
+            className="pointer-events-auto p-3 rounded-full  bg-white/5 border border-white/10 text-white transition-all duration-300"
           >
             <ChevronRight className="w-5 h-5" />
           </motion.button>

@@ -2,12 +2,14 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
+import { useRouter } from "next/navigation";
 import {
   fetchTenders,
   createTender,
   updateTender,
   deleteTender,
   fetchCustomers,
+  downloadTenderAwardLetter,
 } from "@/lib/procurement";
 import { toast } from "react-hot-toast";
 import {
@@ -15,201 +17,18 @@ import {
   Search,
   Edit2,
   Trash2,
-  X,
   Briefcase,
-  Calendar,
-  DollarSign,
   ChevronLeft,
   ChevronRight,
-  Filter,
-  TrendingUp,
-  CheckCircle,
-  Clock,
   FileText,
-  Download,
-  Target,
 } from "lucide-react";
-import { downloadTenderAwardLetter } from "@/lib/procurement";
 import StatusBadge from "@/components/ui/StatusBadge";
 import FormModal from "@/components/ui/FormModal";
-import WorkflowRoadmap from "@/components/ui/WorkflowRoadmap";
-import { DotmSquare12 } from "@/components/ui/dotm-square-12";
 import { LoadingOverlay } from "@/components/ui/LoadingOverlay";
-
-const TENDER_STEPS = [
-  { id: "Open", label: "Open", icon: Briefcase },
-  { id: "In Progress", label: "In Progress", icon: Clock },
-  { id: "Awarded", label: "Awarded", icon: CheckCircle },
-  { id: "Closed", label: "Closed", icon: CheckCircle },
-];
-
-// ── Status config ──────────────────────────────────────────────
-const STATUS_COLORS = {
-  Open: {
-    accent: "from-emerald-400 to-teal-500",
-    pill: "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400",
-    dot: "bg-emerald-500",
-  },
-  Closed: {
-    accent: "from-gray-400 to-slate-500",
-    pill: "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300",
-    dot: "bg-gray-400",
-  },
-  Won: {
-    accent: "from-blue-500 to-indigo-600",
-    pill: "bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400",
-    dot: "bg-blue-500",
-  },
-  Lost: {
-    accent: "from-red-400 to-rose-500",
-    pill: "bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400",
-    dot: "bg-red-400",
-  },
-};
-const getStatus = (s) => STATUS_COLORS[s] || STATUS_COLORS.Open;
-
-const fmt = (n) => (n ? `LKR ${Number(n).toLocaleString()}` : "—");
-
-function TenderCard({ tender, onEdit, onDelete, onDownloadAward }) {
-  const st = getStatus(tender.status);
-  const budget = Number(tender.budget || 0);
-  const awarded = Number(tender.awarded_amount || 0);
-  const pct =
-    budget > 0 ? Math.min(100, Math.round((awarded / budget) * 100)) : 0;
-
-  return (
-    <div className="group bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden">
-      {/* Left accent bar via gradient top strip */}
-      <div className={`h-1 w-full bg-gradient-to-r ${st.accent}`} />
-      <div className="p-5">
-        {/* Head */}
-        <div className="flex items-start justify-between mb-3">
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2 mb-1">
-              <span className="font-black text-xs text-gray-400 uppercase tracking-widest">
-                {tender.tender_number}
-              </span>
-              <span
-                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wide ${st.pill}`}
-              >
-                <span className={`w-1 h-1 rounded-full ${st.dot}`} />
-                {tender.status}
-              </span>
-            </div>
-            <h3
-              className="font-bold text-gray-900 dark:text-white text-sm leading-snug truncate"
-              style={{ fontFamily: "var(--font-display)" }}
-            >
-              {tender.name}
-            </h3>
-            {tender.customer?.name && (
-              <p className="text-xs text-gray-500 mt-0.5 truncate">
-                {tender.customer.name}
-              </p>
-            )}
-          </div>
-          <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity ml-2 flex-shrink-0">
-            <button
-              onClick={() => onEdit(tender)}
-              className="p-1.5 hover:bg-blue-50 dark:hover:bg-blue-900/20 text-blue-500 rounded-lg transition-colors"
-              title="Edit"
-            >
-              <Edit2 className="w-3.5 h-3.5" />
-            </button>
-            {tender.awarded_amount > 0 && (
-              <button
-                onClick={() => onDownloadAward(tender)}
-                className="p-1.5 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 text-emerald-500 rounded-lg transition-colors"
-                title="Award Letter"
-              >
-                <FileText className="w-3.5 h-3.5" />
-              </button>
-            )}
-            <button
-              onClick={() => onDelete(tender.id)}
-              className="p-1.5 hover:bg-red-50 dark:hover:bg-red-900/20 text-red-500 rounded-lg transition-colors"
-              title="Delete"
-            >
-              <Trash2 className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        </div>
-
-        {/* Budget bar */}
-        {budget > 0 && (
-          <div className="mb-3">
-            <div className="flex justify-between text-[10px] text-gray-400 mb-1">
-              <span>Budget</span>
-              <span>{pct}% awarded</span>
-            </div>
-            <div className="h-1.5 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
-              <div
-                className={`h-full bg-gradient-to-r ${st.accent} transition-all duration-500 rounded-full`}
-                style={{ width: `${pct}%` }}
-              />
-            </div>
-          </div>
-        )}
-
-        {/* Footer amounts */}
-        <div className="grid grid-cols-2 gap-2 text-xs">
-          <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-2.5">
-            <div className="text-gray-400 text-[10px] uppercase font-bold tracking-wide mb-0.5">
-              Budget
-            </div>
-            <div className="font-bold text-gray-800 dark:text-gray-200">
-              {fmt(tender.budget)}
-            </div>
-          </div>
-          <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-2.5">
-            <div className="text-gray-400 text-[10px] uppercase font-bold tracking-wide mb-0.5">
-              Awarded
-            </div>
-            <div className="font-bold text-gray-800 dark:text-gray-200">
-              {fmt(tender.awarded_amount)}
-            </div>
-          </div>
-        </div>
-
-        {/* Dates */}
-        {(tender.start_date || tender.end_date) && (
-          <div className="flex items-center gap-1.5 text-[10px] text-gray-400 mt-3 pt-3 border-t border-gray-50 dark:border-gray-700">
-            <Calendar className="w-3 h-3 flex-shrink-0" />
-            <span>{tender.start_date || "—"}</span>
-            <span>→</span>
-            <span>{tender.end_date || "—"}</span>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function SkeletonCard() {
-  return (
-    <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 overflow-hidden relative min-h-[220px] flex flex-col">
-      <div className="h-1 bg-gray-200 dark:bg-gray-700 w-full" />
-      <div className="flex-1 flex items-center justify-center">
-        <DotmSquare12 size={40} dotSize={5} color="rgba(192, 132, 252, 0.2)" />
-      </div>
-      <div className="p-5 space-y-3 opacity-30">
-        <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-24" />
-        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-4/5" />
-      </div>
-    </div>
-  );
-}
-
-const inputCls =
-  "w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-teal-500/20 focus:border-teal-400 outline-none transition-all text-sm font-medium text-gray-800 dark:text-gray-200 placeholder-gray-400";
-const Field = ({ label, children }) => (
-  <div className="space-y-1.5">
-    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 dark:text-gray-500 ml-1">
-      {label}
-    </label>
-    {children}
-  </div>
-);
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function TendersPage() {
   const router = useRouter();
@@ -219,30 +38,10 @@ export default function TendersPage() {
   const [customers, setCustomers] = useState([]);
   const [meta, setMeta] = useState({});
   const [loading, setLoading] = useState(true);
-  const [page, setPage] = useState(() => {
-    if (typeof window !== "undefined") {
-      return Number(new URLSearchParams(window.location.search).get("page")) || 1;
-    }
-    return 1;
-  });
-  const [statusFilter, setStatusFilter] = useState(() => {
-    if (typeof window !== "undefined") {
-      return new URLSearchParams(window.location.search).get("status") || "";
-    }
-    return "";
-  });
-  const [search, setSearch] = useState(() => {
-    if (typeof window !== "undefined") {
-      return new URLSearchParams(window.location.search).get("search") || "";
-    }
-    return "";
-  });
-  const [searchInput, setSearchInput] = useState(() => {
-    if (typeof window !== "undefined") {
-      return new URLSearchParams(window.location.search).get("search") || "";
-    }
-    return "";
-  });
+  const [page, setPage] = useState(1);
+  const [statusFilter, setStatusFilter] = useState("");
+  const [search, setSearch] = useState("");
+  const [searchInput, setSearchInput] = useState("");
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [selectedTender, setSelectedTender] = useState(null);
   const [saving, setSaving] = useState(false);
@@ -260,41 +59,16 @@ export default function TendersPage() {
   });
   const setF = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
-  useEffect(() => {
-    const handlePopState = () => {
-      const params = new URLSearchParams(window.location.search);
-      const p = Number(params.get("page")) || 1;
-      const s = params.get("status") || "";
-      const q = params.get("search") || "";
-      setPage(p);
-      setStatusFilter(s);
-      setSearch(q);
-      setSearchInput(q);
-    };
-    window.addEventListener("popstate", handlePopState);
-    return () => window.removeEventListener("popstate", handlePopState);
-  }, []);
-
-  useEffect(() => {
-    const params = new URLSearchParams();
-    if (page > 1) params.set("page", String(page));
-    if (statusFilter) params.set("status", statusFilter);
-    if (search) params.set("search", search);
-    const qs = params.toString();
-    const targetUrl = qs
-      ? `${window.location.pathname}?${qs}`
-      : window.location.pathname;
-    if (window.location.href !== targetUrl) {
-      router.replace(targetUrl, { scroll: false });
-    }
-  }, [page, statusFilter, search, router]);
-
-  const loadTenders = useCallback(async () => {
+  const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await fetchTenders({ page, status: statusFilter, search });
-      setTenders(data.data || []);
-      setMeta(data.meta || {});
+      const [tRes, cRes] = await Promise.all([
+        fetchTenders({ page, status: statusFilter, search }),
+        fetchCustomers({ per_page: 100 }),
+      ]);
+      setTenders(tRes.data || []);
+      setMeta(tRes.meta || {});
+      setCustomers(cRes.data || []);
     } catch {
       toast.error("Failed to load tenders");
     } finally {
@@ -303,28 +77,23 @@ export default function TendersPage() {
   }, [page, statusFilter, search]);
 
   useEffect(() => {
-    loadTenders();
-  }, [loadTenders]);
-  useEffect(() => {
-    fetchCustomers({ page: 1 })
-      .then((r) => setCustomers(r.data || []))
-      .catch(() => {});
-  }, []);
+    loadData();
+  }, [loadData]);
 
-  const openDrawer = (t = null) => {
-    setSelectedTender(t);
+  const openDrawer = (tender = null) => {
+    setSelectedTender(tender);
     setForm(
-      t
+      tender
         ? {
-            tender_number: t.tender_number || "",
-            customer_id: t.customer_id || "",
-            name: t.name || "",
-            description: t.description || "",
-            awarded_amount: t.awarded_amount || "",
-            budget: t.budget || "",
-            start_date: t.start_date || "",
-            end_date: t.end_date || "",
-            status: t.status || "Open",
+            tender_number: tender.tender_number || "",
+            customer_id: tender.customer_id || "",
+            name: tender.name || "",
+            description: tender.description || "",
+            awarded_amount: tender.awarded_amount || "",
+            budget: tender.budget || "",
+            start_date: tender.start_date || "",
+            end_date: tender.end_date || "",
+            status: tender.status || "Open",
           }
         : {
             tender_number: "",
@@ -345,21 +114,15 @@ export default function TendersPage() {
     e.preventDefault();
     setSaving(true);
     try {
-      const payload = {
-        ...form,
-        awarded_amount:
-          form.awarded_amount === "" ? 0 : Number(form.awarded_amount),
-        budget: form.budget === "" ? 0 : Number(form.budget),
-      };
       if (selectedTender) {
-        await updateTender(selectedTender.id, payload);
+        await updateTender(selectedTender.id, form);
         toast.success("Tender updated");
       } else {
-        await createTender(payload);
+        await createTender(form);
         toast.success("Tender created");
       }
       setDrawerOpen(false);
-      loadTenders();
+      loadData();
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed to save tender");
     } finally {
@@ -372,7 +135,7 @@ export default function TendersPage() {
       await deleteTender(id);
       toast.success("Tender deleted");
       setDeleteConfirm(null);
-      loadTenders();
+      loadData();
     } catch (err) {
       toast.error(err.response?.data?.message || "Delete failed");
     }
@@ -394,206 +157,194 @@ export default function TendersPage() {
     }
   };
 
-  const totalBudget = tenders.reduce((s, t) => s + Number(t.budget || 0), 0);
+  const total = meta.total ?? tenders.length;
   const openCount = tenders.filter((t) => t.status === "Open").length;
-  const closedCount = tenders.filter((t) => t.status === "Closed").length;
 
   return (
     <>
       <LoadingOverlay isLoading={saving} message={selectedTender ? "Updating Tender..." : "Creating Tender..."} />
-      <div className="min-h-full p-6 space-y-6">
-        {/* Hero */}
-        <div className="relative bg-gradient-to-br from-teal-900 via-emerald-900 to-slate-900 rounded-3xl p-8 overflow-hidden">
-          <div
-            className="absolute inset-0 opacity-10"
-            style={{
-              backgroundImage:
-                "radial-gradient(circle, #fff 1px, transparent 1px)",
-              backgroundSize: "24px 24px",
-            }}
-          />
-          <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <p className="text-teal-300 text-xs font-bold uppercase tracking-widest mb-1">
-                Bid & Contract Management
-              </p>
-              <h1
-                className="text-3xl font-black text-white tracking-tight"
-                style={{ fontFamily: "var(--font-display)" }}
-              >
-                Tenders
-              </h1>
-              <p className="text-teal-200/60 text-sm mt-1">
-                {meta.total ?? tenders.length} total tender
-                {(meta.total ?? tenders.length) !== 1 ? "s" : ""}
-              </p>
-            </div>
-            <button
+      <div className="min-h-full p-4 sm:p-6 space-y-4">
+        {/* Zen Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-border/50">
+          <div>
+            <h1 className="text-base font-semibold tracking-tight text-foreground">
+              Tenders & Bids
+            </h1>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Public and commercial procurement bidding pipeline and contracts register.
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              size="sm"
               onClick={() => openDrawer()}
-              className="flex items-center gap-2 bg-white hover:bg-teal-50 text-slate-900 px-5 py-3 rounded-2xl font-bold text-sm shadow-xl hover:scale-105 transition-all"
-              style={{ fontFamily: "var(--font-display)" }}
+              className="h-8 text-xs gap-1.5"
             >
-              <Plus className="w-4 h-4" />
+              <Plus className="w-3.5 h-3.5" />
               Add Tender
-            </button>
+            </Button>
           </div>
         </div>
 
-        {/* Selected Tender Contextual Roadmap */}
-        {selectedTender && (
-          <div className="bg-white/5 backdrop-blur-xl rounded-3xl p-6 border border-white/10 shadow-2xl">
-            <div className="flex items-center justify-between mb-4 px-2">
-              <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                <Target className="w-5 h-5 text-teal-400" />
-                Procurement Pipeline: {selectedTender.tender_number}
-              </h2>
-              <button 
-                onClick={() => setSelectedTender(null)}
-                className="text-xs text-teal-400 hover:text-teal-300 font-bold uppercase tracking-widest"
-              >
-                Clear Selection
-              </button>
-            </div>
-            <WorkflowRoadmap 
-              currentStatus={selectedTender.status} 
-              steps={TENDER_STEPS} 
-            />
-          </div>
-        )}
-
-        {/* Stats */}
-        <div className="grid grid-cols-3 gap-4">
-          {[
-            {
-              icon: Briefcase,
-              label: "Open",
-              value: openCount,
-              color: "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600",
-            },
-            {
-              icon: CheckCircle,
-              label: "Closed",
-              value: closedCount,
-              color: "bg-gray-100 dark:bg-gray-700 text-gray-500",
-            },
-            {
-              icon: DollarSign,
-              label: "Total Budget",
-              value:
-                totalBudget > 0
-                  ? `LKR ${(totalBudget / 1e6).toFixed(1)}M`
-                  : "—",
-              color: "bg-blue-50 dark:bg-blue-900/20 text-blue-600",
-            },
-          ].map(({ icon: Icon, label, value, color }) => (
-            <div
-              key={label}
-              className="bg-white dark:bg-gray-800 rounded-2xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm"
-            >
-              <div
-                className={`w-10 h-10 rounded-xl flex items-center justify-center mb-3 ${color}`}
-              >
-                <Icon className="w-5 h-5" />
-              </div>
-              <div
-                className="text-xl font-bold text-gray-900 dark:text-white"
-                style={{ fontFamily: "var(--font-display)" }}
-              >
-                {value}
-              </div>
-              <div className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mt-1">
-                {label}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Filters */}
-        <div className="flex flex-wrap gap-3 items-center">
-          <div className="relative flex-1 min-w-[200px] max-w-sm">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search tenders…"
-              value={searchInput}
-              onChange={(e) => {
-                const val = e.target.value;
-                setSearchInput(val);
-                if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
-                searchTimerRef.current = setTimeout(() => {
-                  setSearch(val);
-                  setPage(1);
-                }, 300);
-              }}
-              className="w-full pl-11 pr-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-400 shadow-sm"
-            />
-          </div>
-          <div className="flex gap-2">
-            {["", "Open", "Closed"].map((s) => (
-              <button
-                key={s}
-                onClick={() => {
-                  setStatusFilter(s);
-                  setPage(1);
+        {/* Control Strip & Filters */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-2.5">
+          <div className="flex items-center gap-2 w-full sm:w-auto flex-1 max-w-md">
+            <div className="relative flex-1">
+              <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Search tender # or title…"
+                value={searchInput}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setSearchInput(val);
+                  if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+                  searchTimerRef.current = setTimeout(() => {
+                    setSearch(val);
+                    setPage(1);
+                  }, 300);
                 }}
-                className={`px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${statusFilter === s ? "bg-teal-600 text-white shadow-lg shadow-teal-500/30" : "bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700"}`}
-              >
-                {s || "All"}
-              </button>
-            ))}
+                className="h-8 text-xs pl-8 bg-card border-border"
+              />
+            </div>
+            <select
+              value={statusFilter}
+              onChange={(e) => {
+                setStatusFilter(e.target.value);
+                setPage(1);
+              }}
+              className="h-8 px-2.5 bg-card border border-border rounded-md text-xs font-medium text-foreground outline-none focus:border-primary"
+            >
+              <option value="">All Statuses</option>
+              <option value="Open">Open</option>
+              <option value="Closed">Closed</option>
+            </select>
+          </div>
+
+          <div className="text-xs text-muted-foreground hidden sm:block">
+            <span>{total} tenders</span>
+            <span className="mx-1.5">·</span>
+            <span className="text-foreground font-medium">{openCount} active bids</span>
           </div>
         </div>
 
-        {/* Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {loading ? (
-            Array.from({ length: 8 }).map((_, i) => <SkeletonCard key={i} />)
-          ) : tenders.length === 0 ? (
-            <div className="col-span-full flex flex-col items-center justify-center py-20 text-gray-400">
-              <Briefcase className="w-12 h-12 mb-3 opacity-30" />
-              <p className="text-sm font-medium">No tenders found</p>
-            </div>
-          ) : (
-            tenders.map((t) => (
-              <TenderCard
-                key={t.id}
-                tender={t}
-                onEdit={openDrawer}
-                onDelete={(id) => setDeleteConfirm(id)}
-                onDownloadAward={handleDownloadAward}
-              />
-            ))
-          )}
+        {/* Zen Compact Data Table */}
+        <div className="bg-card border border-border rounded-lg overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead>
+                <tr className="border-b border-border/60 bg-muted/30 text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+                  <th className="py-2.5 px-3.5">Tender #</th>
+                  <th className="py-2.5 px-3">Title / Scope</th>
+                  <th className="py-2.5 px-3">Customer</th>
+                  <th className="py-2.5 px-3 text-right">Budget (LKR)</th>
+                  <th className="py-2.5 px-3 text-right">Awarded (LKR)</th>
+                  <th className="py-2.5 px-3">Status</th>
+                  <th className="py-2.5 px-3.5 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border/40">
+                {loading ? (
+                  Array.from({ length: 6 }).map((_, i) => (
+                    <tr key={i} className="animate-pulse">
+                      <td className="py-2.5 px-3.5"><div className="h-3 w-20 bg-muted rounded" /></td>
+                      <td className="py-2.5 px-3"><div className="h-3 w-36 bg-muted rounded" /></td>
+                      <td className="py-2.5 px-3"><div className="h-3 w-28 bg-muted rounded" /></td>
+                      <td className="py-2.5 px-3 text-right"><div className="h-3 w-20 bg-muted rounded ml-auto" /></td>
+                      <td className="py-2.5 px-3 text-right"><div className="h-3 w-20 bg-muted rounded ml-auto" /></td>
+                      <td className="py-2.5 px-3"><div className="h-4 w-14 bg-muted rounded" /></td>
+                      <td className="py-2.5 px-3.5 text-right"><div className="h-4 w-12 bg-muted rounded ml-auto" /></td>
+                    </tr>
+                  ))
+                ) : tenders.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="py-12 text-center text-muted-foreground">
+                      <Briefcase className="w-8 h-8 mx-auto mb-2 opacity-30" />
+                      <p className="text-xs">No tenders found matching query</p>
+                    </td>
+                  </tr>
+                ) : (
+                  tenders.map((t) => (
+                    <tr key={t.id} className="hover:bg-muted/20 transition-colors">
+                      <td className="py-2.5 px-3.5 font-medium text-foreground">
+                        {t.tender_number}
+                      </td>
+                      <td className="py-2.5 px-3 font-medium text-foreground truncate max-w-[220px]">
+                        {t.name}
+                      </td>
+                      <td className="py-2.5 px-3 text-muted-foreground truncate max-w-[180px]">
+                        {t.customer?.name || "—"}
+                      </td>
+                      <td className="py-2.5 px-3 text-right text-muted-foreground font-medium">
+                        {t.budget ? Number(t.budget).toLocaleString() : "—"}
+                      </td>
+                      <td className="py-2.5 px-3 text-right font-medium text-foreground">
+                        {t.awarded_amount ? Number(t.awarded_amount).toLocaleString() : "—"}
+                      </td>
+                      <td className="py-2.5 px-3">
+                        <StatusBadge status={t.status} />
+                      </td>
+                      <td className="py-2.5 px-3.5 text-right">
+                        <div className="flex items-center justify-end gap-1">
+                          {t.awarded_amount > 0 && (
+                            <button
+                              onClick={() => handleDownloadAward(t)}
+                              className="p-1 text-muted-foreground hover:text-foreground rounded hover:bg-muted"
+                              title="Award Letter"
+                            >
+                              <FileText className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                          <button
+                            onClick={() => openDrawer(t)}
+                            className="p-1 text-muted-foreground hover:text-foreground rounded hover:bg-muted"
+                            title="Edit"
+                          >
+                            <Edit2 className="w-3 h-3" />
+                          </button>
+                          <button
+                            onClick={() => setDeleteConfirm(t.id)}
+                            className="p-1 text-muted-foreground hover:text-destructive rounded hover:bg-destructive/10"
+                            title="Delete"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
 
         {/* Pagination */}
         {meta.last_page > 1 && (
-          <div className="flex items-center justify-center gap-2 pt-4">
-            <button
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              disabled={page === 1}
-              className="p-2 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 disabled:opacity-40 hover:bg-gray-50 dark:hover:bg-gray-700 shadow-sm"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-            {Array.from({ length: meta.last_page }, (_, i) => i + 1).map(
-              (p) => (
-                <button
-                  key={p}
-                  onClick={() => setPage(p)}
-                  className={`w-9 h-9 rounded-xl text-sm font-bold transition-all ${page === p ? "bg-teal-600 text-white shadow-lg shadow-teal-500/30" : "bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700"}`}
-                >
-                  {p}
-                </button>
-              ),
-            )}
-            <button
-              onClick={() => setPage((p) => Math.min(meta.last_page, p + 1))}
-              disabled={page === meta.last_page}
-              className="p-2 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 disabled:opacity-40 hover:bg-gray-50 dark:hover:bg-gray-700 shadow-sm"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </button>
+          <div className="flex items-center justify-between text-xs text-muted-foreground pt-1">
+            <span>
+              Page {page} of {meta.last_page} ({total} tenders)
+            </span>
+            <div className="flex items-center gap-1">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={page === 1}
+                className="h-7 w-7"
+              >
+                <ChevronLeft className="w-3.5 h-3.5" />
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setPage((p) => Math.min(meta.last_page, p + 1))}
+                disabled={page === meta.last_page}
+                className="h-7 w-7"
+              >
+                <ChevronRight className="w-3.5 h-3.5" />
+              </Button>
+            </div>
           </div>
         )}
       </div>
@@ -602,144 +353,153 @@ export default function TendersPage() {
       <FormModal
         isOpen={drawerOpen}
         onClose={() => setDrawerOpen(false)}
-        title={selectedTender ? "Update Tender" : "New Tender"}
-        description={
-          selectedTender ? "Edit tender details" : "Create a new tender"
-        }
+        title={selectedTender ? "Edit Tender" : "New Tender"}
+        description="Configure bid specifications and financial allocations"
         onSubmit={handleSubmit}
-        submitText={selectedTender ? "Update" : "Create"}
+        submitText={selectedTender ? "Update Tender" : "Save Tender"}
         isSubmitting={saving}
         size="lg"
       >
-        <div className="space-y-5">
-          <div className="grid grid-cols-2 gap-4">
-            <Field label="Tender Number *">
-              <input
+        <div className="space-y-3">
+          <div className="grid grid-cols-2 gap-2.5">
+            <div>
+              <Label className="text-[11px] text-muted-foreground uppercase">Tender Number *</Label>
+              <Input
                 required
                 value={form.tender_number}
-                onChange={(e) =>
-                  setF("tender_number", e.target.value.toUpperCase())
-                }
-                placeholder="SLT/2026/001"
-                className={inputCls}
+                onChange={(e) => setF("tender_number", e.target.value)}
+                placeholder="e.g. TND-2026-001"
+                className="h-8 text-xs mt-1"
               />
-            </Field>
-            <Field label="Status">
+            </div>
+            <div>
+              <Label className="text-[11px] text-muted-foreground uppercase">Customer / Client</Label>
               <select
-                value={form.status}
-                onChange={(e) => setF("status", e.target.value)}
-                className={inputCls}
+                value={form.customer_id}
+                onChange={(e) => setF("customer_id", e.target.value)}
+                className="h-8 w-full px-2 mt-1 text-xs bg-background border border-border rounded-md outline-none"
               >
-                <option value="Open">Open</option>
-                <option value="Closed">Closed</option>
+                <option value="">Select Customer</option>
+                {customers.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
               </select>
-            </Field>
+            </div>
           </div>
-          <Field label="Tender Name *">
-            <input
+
+          <div>
+            <Label className="text-[11px] text-muted-foreground uppercase">Title / Name *</Label>
+            <Input
               required
               value={form.name}
               onChange={(e) => setF("name", e.target.value)}
-              placeholder="Brief title"
-              className={inputCls}
+              placeholder="e.g. Highway Expansion Phase II"
+              className="h-8 text-xs mt-1"
             />
-          </Field>
-          <Field label="Customer *">
-            <select
-              required
-              value={form.customer_id}
-              onChange={(e) => setF("customer_id", e.target.value)}
-              className={inputCls}
-            >
-              <option value="">Select customer…</option>
-              {customers.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
-          </Field>
-          <Field label="Description">
-            <textarea
-              rows={2}
-              value={form.description}
-              onChange={(e) => setF("description", e.target.value)}
-              placeholder="Brief description…"
-              className={`${inputCls} resize-none`}
-            />
-          </Field>
-          <div className="grid grid-cols-2 gap-4">
-            <Field label="Budget (LKR)">
-              <input
+          </div>
+
+          <div className="grid grid-cols-2 gap-2.5">
+            <div>
+              <Label className="text-[11px] text-muted-foreground uppercase">Budget (LKR)</Label>
+              <Input
                 type="number"
                 value={form.budget}
                 onChange={(e) => setF("budget", e.target.value)}
-                placeholder="0"
-                className={inputCls}
+                placeholder="e.g. 5000000"
+                className="h-8 text-xs mt-1"
               />
-            </Field>
-            <Field label="Awarded (LKR)">
-              <input
+            </div>
+            <div>
+              <Label className="text-[11px] text-muted-foreground uppercase">Awarded Amount (LKR)</Label>
+              <Input
                 type="number"
                 value={form.awarded_amount}
                 onChange={(e) => setF("awarded_amount", e.target.value)}
-                placeholder="0"
-                className={inputCls}
+                placeholder="e.g. 4800000"
+                className="h-8 text-xs mt-1"
               />
-            </Field>
+            </div>
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <Field label="Start Date">
-              <input
+
+          <div className="grid grid-cols-3 gap-2.5">
+            <div>
+              <Label className="text-[11px] text-muted-foreground uppercase">Status</Label>
+              <select
+                value={form.status}
+                onChange={(e) => setF("status", e.target.value)}
+                className="h-8 w-full px-2 mt-1 text-xs bg-background border border-border rounded-md outline-none"
+              >
+                <option value="Open">Open</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Awarded">Awarded</option>
+                <option value="Closed">Closed</option>
+              </select>
+            </div>
+            <div>
+              <Label className="text-[11px] text-muted-foreground uppercase">Start Date</Label>
+              <Input
                 type="date"
                 value={form.start_date}
                 onChange={(e) => setF("start_date", e.target.value)}
-                className={inputCls}
+                className="h-8 text-xs mt-1"
               />
-            </Field>
-            <Field label="End Date">
-              <input
+            </div>
+            <div>
+              <Label className="text-[11px] text-muted-foreground uppercase">End Date</Label>
+              <Input
                 type="date"
                 value={form.end_date}
                 onChange={(e) => setF("end_date", e.target.value)}
-                className={inputCls}
+                className="h-8 text-xs mt-1"
               />
-            </Field>
+            </div>
+          </div>
+
+          <div>
+            <Label className="text-[11px] text-muted-foreground uppercase">Scope Description</Label>
+            <Textarea
+              value={form.description}
+              onChange={(e) => setF("description", e.target.value)}
+              rows={2}
+              placeholder="Outline project terms and conditions"
+              className="text-xs mt-1"
+            />
           </div>
         </div>
       </FormModal>
 
-      {/* Delete Confirm */}
+      {/* Delete Confirmation */}
       {deleteConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-sm p-6 space-y-4">
-            <div className="text-center space-y-2">
-              <div className="w-14 h-14 rounded-2xl bg-red-50 dark:bg-red-900/20 flex items-center justify-center mx-auto">
-                <Trash2 className="w-6 h-6 text-red-500" />
-              </div>
-              <h3
-                className="font-black text-gray-900 dark:text-white text-lg"
-                style={{ fontFamily: "var(--font-display)" }}
-              >
-                Delete Tender?
-              </h3>
-              <p className="text-sm text-gray-500">
-                Tenders with attached jobs cannot be deleted.
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-[1px] p-4">
+          <div className="w-full max-w-xs bg-card border border-border rounded-lg p-4 shadow-xl space-y-3 text-center">
+            <div className="w-8 h-8 rounded-full bg-destructive/10 text-destructive flex items-center justify-center mx-auto">
+              <Trash2 className="w-4 h-4" />
+            </div>
+            <div>
+              <h3 className="text-xs font-semibold text-foreground">Delete Tender?</h3>
+              <p className="text-[11px] text-muted-foreground mt-1">
+                All associated records and progress will be detached.
               </p>
             </div>
-            <div className="flex gap-3">
-              <button
+            <div className="flex gap-2 pt-2">
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={() => setDeleteConfirm(null)}
-                className="flex-1 py-3 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-bold text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                className="flex-1 h-8 text-xs"
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="destructive"
+                size="sm"
                 onClick={() => handleDelete(deleteConfirm)}
-                className="flex-1 py-3 rounded-xl bg-red-600 hover:bg-red-700 text-white text-sm font-black transition-colors shadow-lg shadow-red-500/30"
+                className="flex-1 h-8 text-xs"
               >
                 Delete
-              </button>
+              </Button>
             </div>
           </div>
         </div>

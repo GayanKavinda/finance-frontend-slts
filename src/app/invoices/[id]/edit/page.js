@@ -36,8 +36,20 @@ export default function EditInvoicePage() {
   }, [id]);
 
   useEffect(() => {
-    if (user) loadInvoice();
-  }, [user, loadInvoice]);
+    if (!user) return;
+    const run = async () => {
+      try {
+        setLoading(true);
+        const res = await api.get(`/invoices/${id}`);
+        setInvoice(res.data);
+      } catch {
+        setError("Failed to load invoice or not authorized.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    run();
+  }, [user, id]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -92,7 +104,7 @@ export default function EditInvoicePage() {
   const permissions = user?.permissions ?? [];
   if (!canEditInvoice(permissions) || invoice.status !== "Draft") {
     return (
-      <div className="p-8 text-center text-red-500 font-bold">
+      <div className="p-8 text-center text-red-500 font-medium">
         Editing is only allowed for Draft invoices with proper permissions.
       </div>
     );
@@ -111,7 +123,7 @@ export default function EditInvoicePage() {
 
           <button
             onClick={() => setModalOpen(true)}
-            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl font-bold shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 transition-all hover:scale-105 active:scale-95"
+            className="flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary/90 text-white rounded-xl font-medium shadow-sm transition-all "
           >
             <Save size={18} />
             Edit Invoice
@@ -121,27 +133,27 @@ export default function EditInvoicePage() {
         <div className="bg-white dark:bg-gray-800 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm p-8">
           <div className="space-y-4">
             <div>
-              <p className="text-xs font-bold uppercase text-gray-400 tracking-wider mb-1">
+              <p className="text-xs font-medium uppercase text-gray-400 tracking-wider mb-1">
                 Invoice Number
               </p>
-              <p className="text-2xl font-black text-gray-900 dark:text-white">
+              <p className="text-2xl font-medium text-gray-900 dark:text-white">
                 {invoice.invoice_number}
               </p>
             </div>
             <div className="grid grid-cols-2 gap-6">
               <div>
-                <p className="text-xs font-bold uppercase text-gray-400 tracking-wider mb-1">
+                <p className="text-xs font-medium uppercase text-gray-400 tracking-wider mb-1">
                   Amount
                 </p>
-                <p className="text-lg font-bold text-gray-900 dark:text-white">
+                <p className="text-lg font-medium text-gray-900 dark:text-white">
                   LKR {Number(invoice.invoice_amount).toLocaleString()}
                 </p>
               </div>
               <div>
-                <p className="text-xs font-bold uppercase text-gray-400 tracking-wider mb-1">
+                <p className="text-xs font-medium uppercase text-gray-400 tracking-wider mb-1">
                   Date
                 </p>
-                <p className="text-lg font-bold text-gray-900 dark:text-white">
+                <p className="text-lg font-medium text-gray-900 dark:text-white">
                   {invoice.invoice_date
                     ? invoice.invoice_date.split("T")[0]
                     : ""}

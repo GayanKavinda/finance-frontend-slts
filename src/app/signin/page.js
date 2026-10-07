@@ -11,8 +11,6 @@ import {
   Mail,
   Loader2,
   ShieldCheck,
-  Mail as MailIcon,
-  Lock as LockIcon,
 } from "lucide-react";
 import axios from "@/lib/axios";
 import { toast } from "@/lib/toast";
@@ -20,7 +18,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { fetchCsrf } from "@/lib/auth";
 import { useAuth } from "@/contexts/AuthContext";
-import Image from "next/image";
+import { Button } from "@/components/ui/button";
 
 const schema = yup.object({
   email: yup
@@ -37,13 +35,7 @@ export default function Signin() {
   const [passwordStrength, setPasswordStrength] = useState({
     score: 0,
     label: "Weak",
-    color: "text-red-500",
-    bars: [
-      "bg-slate-200 dark:bg-slate-700",
-      "bg-slate-200 dark:bg-slate-700",
-      "bg-slate-200 dark:bg-slate-700",
-      "bg-slate-200 dark:bg-slate-700",
-    ],
+    bars: ["bg-muted", "bg-muted", "bg-muted", "bg-muted"],
   });
 
   const {
@@ -62,13 +54,7 @@ export default function Signin() {
       setPasswordStrength({
         score: -1,
         label: "N/A",
-        color: "text-slate-400 dark:text-slate-600",
-        bars: [
-          "bg-slate-100 dark:bg-slate-800",
-          "bg-slate-100 dark:bg-slate-800",
-          "bg-slate-100 dark:bg-slate-800",
-          "bg-slate-100 dark:bg-slate-800",
-        ],
+        bars: ["bg-muted", "bg-muted", "bg-muted", "bg-muted"],
       });
       return;
     }
@@ -91,25 +77,16 @@ export default function Signin() {
     }
 
     const labels = ["Weak", "Fair", "Good", "Strong"];
-    const colors = [
-      "text-red-500",
-      "text-orange-500",
-      "text-yellow-500",
-      "text-sltGreen",
-    ];
-
     const barColors = [0, 1, 2, 3].map((i) => {
-      if (i >= score) return "bg-slate-200 dark:bg-slate-700";
-      if (score === 1) return "bg-red-500";
-      if (score === 2) return "bg-orange-500";
-      if (score === 3) return "bg-yellow-500";
-      return "bg-sltGreen";
+      if (i >= score) return "bg-muted";
+      if (score === 1) return "bg-destructive";
+      if (score === 2) return "bg-primary";
+      return "bg-primary";
     });
 
     setPasswordStrength({
       score,
       label: labels[score - 1] || "Weak",
-      color: colors[score - 1] || "text-red-500",
       bars: barColors,
     });
   }, [passwordValue]);
@@ -131,89 +108,57 @@ export default function Signin() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 sm:p-0 bg-[#f8fafc] dark:bg-[#020617] transition-colors duration-500">
-      <main className="w-full max-w-4xl h-full sm:h-[540px] flex flex-col md:flex-row shadow-2xl rounded-3xl overflow-hidden bg-white dark:bg-[#0f172a] border border-slate-100 dark:border-slate-800 transition-all duration-500 shadow-slate-200/50 dark:shadow-none">
-        {/* BEGIN: LeftPanel_Visual_With_Background_Image */}
-        <section className="hidden md:flex md:w-1/2 flex-col justify-between p-10 text-white relative overflow-hidden group">
-          {/* Background Image Container */}
-          <div className="absolute inset-0 z-0">
-            <Image
-              src="/slides/6.wp9223826-finance-4k-wallpapers.avif"
-              alt="Finance Background"
-              fill
-              sizes="(max-width: 768px) 100vw, 50vw"
-              className="object-cover transition-transform duration-700 group-hover:scale-110"
-              priority
-            />
-            {/* Multi-layered Overlays */}
-            <div className="absolute inset-0 bg-blue-900/60 dark:bg-blue-950/70" />
-            <div className="absolute inset-0 bg-gradient-to-t from-blue-950/80 via-transparent to-blue-900/40" />
-            <div className="absolute inset-0 finance-pattern opacity-20" />
-          </div>
-
-          {/* Top Section */}
-          <div className="relative z-10">
-            <div className="flex items-center gap-2 mb-6">
-              <div className="w-9 h-9 bg-white rounded-lg flex items-center justify-center overflow-hidden shadow-lg border border-white/20">
-                <Image
-                  src="/icons/slt_digital_icon.png"
-                  alt="SLT Logo"
-                  width={28}
-                  height={28}
-                  className="object-contain"
-                />
+    <div className="min-h-screen flex items-center justify-center p-4 bg-background">
+      <main className="w-full max-w-4xl flex flex-col md:flex-row bg-card border border-border rounded-xl overflow-hidden shadow-soft">
+        {/* Left Panel */}
+        <section className="hidden md:flex md:w-1/2 flex-col justify-between p-10 bg-muted/30">
+          <div>
+            <div className="flex items-center gap-2 mb-8">
+              <div className="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center text-primary text-xs font-semibold">
+                PX
               </div>
-              <span className="font-bold text-lg tracking-tight drop-shadow-md">
-                SLT <span className="text-sltGreen">SERVICES</span>
+              <span className="font-medium text-sm tracking-tight text-foreground">
+                ProcureX
               </span>
             </div>
-            <h1 className="text-3xl font-bold leading-tight mb-3 drop-shadow-lg">
+            <h1 className="text-2xl font-medium tracking-tight text-foreground mb-3">
               Financial Intelligence <br />& Strategic Insight.
             </h1>
-            <p className="text-blue-50 text-base font-light max-w-xs opacity-95 leading-relaxed drop-shadow-md">
+            <p className="text-sm text-muted-foreground leading-relaxed max-w-xs">
               Empowering the Internal Procurement Division with secure,
               real-time data management.
             </p>
           </div>
 
-          {/* Bottom Security Tag */}
-          <div className="relative z-10 flex items-center gap-3 bg-white/10 dark:bg-white/5 p-3 rounded-xl border border-white/20 dark:border-white/10 backdrop-blur-md transition-all shadow-xl">
-            <ShieldCheck className="text-sltGreen w-5 h-5 drop-shadow-[0_0_8px_rgba(76,175,80,0.5)]" />
+          <div className="flex items-center gap-3 bg-muted/50 p-3 rounded-lg border border-border">
+            <ShieldCheck className="h-5 w-5 text-primary" />
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-widest opacity-90">
+              <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
                 System Status
               </p>
-              <p className="text-sm font-semibold truncate">
+              <p className="text-xs font-medium text-foreground">
                 SLT ProcureX Secure Portal - Active
               </p>
             </div>
           </div>
         </section>
-        {/* END: LeftPanel_Visual */}
 
-        {/* BEGIN: RightPanel_Form */}
-        <section className="w-full md:w-1/2 p-8 sm:p-10 lg:p-12 flex flex-col justify-center bg-white dark:bg-[#0f172a] transition-all duration-500">
-          {/* Mobile Logo */}
+        {/* Right Panel */}
+        <section className="w-full md:w-1/2 p-8 sm:p-10 flex flex-col justify-center bg-card">
           <div className="md:hidden flex items-center gap-2 mb-6">
-            <div className="w-9 h-9 rounded flex items-center justify-center overflow-hidden bg-sltBlue">
-              <Image
-                src="/icons/slt_digital_icon.png"
-                alt="SLT"
-                width={28}
-                height={28}
-                className="brightness-0 invert object-contain"
-              />
+            <div className="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center text-primary text-xs font-semibold">
+              PX
             </div>
-            <span className="font-bold text-xl dark:text-white">
-              SLT SERVICES
+            <span className="font-medium text-sm tracking-tight text-foreground">
+              ProcureX
             </span>
           </div>
 
-          <header className="mb-8 text-left">
-            <h2 className="text-2xl font-bold text-slate-800 dark:text-white mb-2 transition-colors tracking-tight">
-              SLT ProcureX Portal
+          <header className="mb-6 text-left">
+            <h2 className="text-xl font-medium tracking-tight text-foreground mb-1">
+              Sign in to your account
             </h2>
-            <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">
+            <p className="text-xs text-muted-foreground">
               Secure access for authorized personnel only.
             </p>
           </header>
@@ -221,17 +166,17 @@ export default function Signin() {
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-1.5 text-left">
               <label
-                className="text-[13px] font-semibold text-slate-700 dark:text-slate-300 ml-1"
+                className="text-xs font-medium text-foreground ml-1"
                 htmlFor="email"
               >
                 Work Email
               </label>
               <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 group-focus-within:text-sltBlue transition-colors">
-                  <MailIcon className="w-4 h-4" />
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-muted-foreground">
+                  <Mail className="w-4 h-4" />
                 </div>
                 <input
-                  className={`block w-full pl-10 pr-4 py-2.5 border rounded-xl bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-sltBlue/20 focus:border-sltBlue transition-all outline-none ${errors.email ? "border-red-500" : "border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600"}`}
+                  className={`block w-full pl-10 pr-4 py-2.5 border rounded-lg bg-background text-foreground text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none ${errors.email ? "border-destructive" : "border-border"}`}
                   id="email"
                   type="email"
                   placeholder="e.g. johndoe@slts.lk"
@@ -239,7 +184,7 @@ export default function Signin() {
                 />
               </div>
               {errors.email && (
-                <p className="text-[11px] text-red-500 mt-1 ml-1 font-medium">
+                <p className="text-[11px] text-destructive mt-1 ml-1 font-medium">
                   {errors.email.message}
                 </p>
               )}
@@ -248,25 +193,24 @@ export default function Signin() {
             <div className="space-y-1.5 text-left">
               <div className="flex justify-between items-center px-1">
                 <label
-                  className="text-[13px] font-semibold text-slate-700 dark:text-slate-300"
+                  className="text-xs font-medium text-foreground"
                   htmlFor="password"
                 >
                   Password
                 </label>
                 <Link
                   href="/forgot-password"
-                  size="sm"
-                  className="text-[11px] font-bold text-sltBlue hover:text-sltBlue-light transition-colors"
+                  className="text-[11px] font-medium text-primary hover:text-primary/80 transition-colors"
                 >
                   Forgot Password?
                 </Link>
               </div>
               <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 group-focus-within:text-sltBlue transition-colors">
-                  <LockIcon className="w-4 h-4" />
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-muted-foreground">
+                  <Lock className="w-4 h-4" />
                 </div>
                 <input
-                  className={`block w-full pl-10 pr-4 py-2.5 border rounded-xl bg-slate-50 dark:bg-slate-800/50 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-sltBlue/20 focus:border-sltBlue transition-all outline-none ${errors.password ? "border-red-500" : "border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600"}`}
+                  className={`block w-full pl-10 pr-4 py-2.5 border rounded-lg bg-background text-foreground text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none ${errors.password ? "border-destructive" : "border-border"}`}
                   id="password"
                   type="password"
                   placeholder="••••••••"
@@ -274,19 +218,17 @@ export default function Signin() {
                 />
               </div>
               {errors.password && (
-                <p className="text-[11px] text-red-500 mt-1 ml-1 font-medium">
+                <p className="text-[11px] text-destructive mt-1 ml-1 font-medium">
                   {errors.password.message}
                 </p>
               )}
 
-              <div className="mt-3 p-2 rounded-lg bg-slate-50/50 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800/50 space-y-1.5">
+              <div className="mt-3 p-2 rounded-lg bg-muted/30 border border-border space-y-1.5">
                 <div className="flex justify-between items-center px-1">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                  <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
                     Security Index
                   </span>
-                  <span
-                    className={`text-[10px] font-bold uppercase tracking-wider transition-colors duration-300 ${passwordStrength.color}`}
-                  >
+                  <span className="text-[10px] font-medium uppercase tracking-wider text-foreground">
                     {passwordStrength.label}
                   </span>
                 </div>
@@ -306,19 +248,19 @@ export default function Signin() {
                 id="remember-device"
                 name="remember-device"
                 type="checkbox"
-                className="h-4 w-4 text-sltBlue focus:ring-sltBlue/30 border-slate-300 dark:border-slate-700 rounded cursor-pointer bg-white dark:bg-slate-800"
+                className="h-4 w-4 rounded border-border bg-background text-primary focus:ring-primary/30"
                 {...register("remember")}
               />
               <label
                 htmlFor="remember-device"
-                className="text-[12px] font-semibold text-slate-600 dark:text-slate-400 cursor-pointer select-none"
+                className="text-xs text-muted-foreground cursor-pointer select-none"
               >
                 Maintain secure session on this device
               </label>
             </div>
 
-            <button
-              className="w-full flex justify-center items-center py-3 px-4 rounded-xl shadow-lg text-sm font-bold text-white bg-gradient-to-r from-sltBlue to-sltBlue-dark hover:brightness-110 active:scale-[0.99] disabled:opacity-70 disabled:cursor-not-allowed mt-2 transition-all"
+            <Button
+              className="w-full"
               type="submit"
               disabled={isSubmitting}
             >
@@ -327,24 +269,19 @@ export default function Signin() {
               ) : (
                 "Sign In to Portal"
               )}
-            </button>
+            </Button>
           </form>
 
-          <footer className="mt-8 pt-5 border-t border-slate-100 dark:border-slate-800 text-center transition-colors duration-500">
-            <p className="text-[13px] text-slate-500 dark:text-slate-400 font-medium">
-              Don&lsquo;t have an account?{" "}
+          <footer className="mt-6 pt-5 border-t border-border text-center">
+            <p className="text-xs text-muted-foreground">
+              Don&apos;t have an account?{" "}
               <Link
                 href="/signup"
-                className="font-bold text-sltGreen hover:text-sltGreen-dark hover:underline ml-1.5 transition-all"
+                className="font-medium text-primary hover:text-primary/80 transition-colors"
               >
                 Sign Up
               </Link>
             </p>
-            <div className="mt-6 flex justify-center items-center gap-4 grayscale opacity-40">
-              <span className="text-[10px] font-extrabold tracking-[0.2em] uppercase text-slate-400">
-                Authorized Personnel Only
-              </span>
-            </div>
           </footer>
         </section>
       </main>

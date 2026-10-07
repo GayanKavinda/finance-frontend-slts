@@ -49,58 +49,46 @@ export default function AuditTrail({ invoiceId }) {
   }
 
   return (
-    <ol className="relative border-l border-gray-200 ml-3">
+    <ol className="relative border-l border-border ml-3 my-2">
       {history.map((entry, i) => {
         const meta = TIMELINE_ICONS[entry.new_status] ?? {
-          bg: "bg-gray-100",
+          bg: "bg-muted",
           icon: "🔄",
         };
         return (
-          <li key={entry.id ?? i} className="mb-6 ml-5">
+          <li key={entry.id ?? i} className="mb-4 ml-5">
             <span
-              className={`absolute -left-3.5 flex h-7 w-7 items-center justify-center rounded-full ring-4 ring-white ${meta.bg} text-base`}
+              className={`absolute -left-3 flex h-6 w-6 items-center justify-center rounded-full ring-4 ring-background ${meta.bg} text-xs`}
             >
               {meta.icon}
             </span>
 
-            <div className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl px-4 py-3 shadow-sm">
+            <div className="bg-card border border-border rounded-lg px-4 py-3 shadow-xs">
               <div className="flex items-center justify-between gap-2 flex-wrap">
                 <div className="flex items-center gap-2">
                   {entry.old_status && (
                     <>
                       <StatusBadge status={entry.old_status} />
-                      <svg
-                        className="w-3.5 h-3.5 text-gray-400"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M9 5l7 7-7 7"
-                        />
-                      </svg>
+                      <span className="text-muted-foreground text-xs">→</span>
                     </>
                   )}
                   <StatusBadge status={entry.new_status} />
                 </div>
-                <span className="text-xs text-gray-400 flex-shrink-0">
+                <span className="text-[11px] text-muted-foreground">
                   {fmtDateTime(entry.created_at)}
                 </span>
               </div>
 
-              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1.5">
+              <p className="text-xs text-muted-foreground mt-1.5">
                 By{" "}
-                <span className="font-medium text-gray-800 dark:text-gray-200">
+                <span className="font-medium text-foreground">
                   {entry.user?.name ?? "System"}
                 </span>
               </p>
 
               {entry.reason && (
-                <div className="mt-2 bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/20 rounded-lg px-3 py-2 text-sm text-red-700 dark:text-red-400">
-                  <span className="font-medium">Reason:</span> {entry.reason}
+                <div className="mt-2 bg-destructive/10 border border-destructive/20 rounded-md px-3 py-2 text-xs text-destructive">
+                  <span className="font-semibold">Reason:</span> {entry.reason}
                 </div>
               )}
             </div>

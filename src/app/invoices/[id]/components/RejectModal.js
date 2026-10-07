@@ -8,11 +8,11 @@ export default function RejectModal({ invoiceNumber, onConfirm, onClose, loading
   const tooShort = reason.trim().length < 10;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-md overflow-hidden border border-gray-100 dark:border-gray-700">
-        <div className="bg-red-50 dark:bg-red-900/10 border-b border-red-100 dark:border-red-900/20 px-6 py-5">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+      <div className="bg-white dark:bg-gray-800 w-full max-w-md rounded-2xl shadow-strong overflow-hidden border border-border">
+        <div className="bg-destructive/5 border-b border-border px-6 py-5">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-red-100 dark:bg-red-900/30 flex items-center justify-center text-red-600">
+            <div className="w-10 h-10 rounded-xl bg-destructive/10 flex items-center justify-center text-destructive">
               <svg
                 className="w-6 h-6"
                 fill="none"
@@ -28,17 +28,17 @@ export default function RejectModal({ invoiceNumber, onConfirm, onClose, loading
               </svg>
             </div>
             <div>
-              <h3 className="font-black text-gray-900 dark:text-white uppercase tracking-tighter">
+              <h3 className="text-lg font-medium text-foreground">
                 Reject Invoice
               </h3>
-              <p className="text-xs text-red-600/60 font-bold">
+              <p className="text-xs text-muted-foreground">
                 {invoiceNumber}
               </p>
             </div>
           </div>
         </div>
         <div className="p-6 space-y-4 text-left">
-          <label className="block text-xs font-black text-gray-400 uppercase tracking-widest ml-1">
+          <label className="block text-xs font-medium text-muted-foreground uppercase tracking-wider">
             Rejection Reason
           </label>
           <textarea
@@ -46,23 +46,23 @@ export default function RejectModal({ invoiceNumber, onConfirm, onClose, loading
             onChange={(e) => setReason(e.target.value)}
             rows={4}
             placeholder="Describe the issue clearly..."
-            className="w-full bg-gray-50 dark:bg-gray-900 border-none rounded-2xl p-4 text-sm focus:ring-2 focus:ring-red-100 outline-none resize-none"
+            className="w-full bg-background border border-input rounded-xl p-3 text-sm font-medium text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/20 resize-none"
           />
-          <p className="text-[10px] text-gray-400 font-bold text-right uppercase tracking-widest">
+          <p className="text-[10px] text-muted-foreground text-right uppercase tracking-wider">
             {reason.length}/1000
           </p>
         </div>
-        <div className="px-6 py-5 bg-gray-50 dark:bg-gray-900/50 flex gap-3">
+        <div className="px-6 pb-6 flex gap-3">
           <button
             onClick={onClose}
-            className="flex-1 py-3 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl font-bold transition-colors"
+            className="flex-1 py-2.5 bg-muted rounded-xl font-medium transition-colors text-sm"
           >
             Cancel
           </button>
           <button
             onClick={() => onConfirm(reason)}
             disabled={tooShort || loading}
-            className="flex-[2] py-3 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold shadow-lg shadow-red-200 transition-all disabled:opacity-50"
+            className="flex-[2] py-2.5 bg-destructive hover:bg-destructive/90 text-destructive-foreground rounded-xl font-medium transition-colors disabled:opacity-50 text-sm"
           >
             Reject Invoice
           </button>

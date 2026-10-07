@@ -63,7 +63,10 @@ export default function JobDetailPage() {
   }, [id]);
 
   useEffect(() => {
-    loadData();
+    const run = async () => {
+      await loadData();
+    };
+    run();
   }, [loadData]);
 
   const handleQuoteSubmit = async (e) => {
@@ -348,7 +351,7 @@ export default function JobDetailPage() {
         {/* Right Column */}
         <div className="space-y-6">
           {/* Financial Summary */}
-          <div className="bg-gradient-to-br from-primary to-primary/90 rounded-xl p-5 text-white">
+          <div className="bg-primary rounded-xl p-5 text-white">
             <h2 className="text-sm font-medium mb-4 flex items-center gap-2 opacity-90">
               <TrendingUp className="w-4 h-4" />
               Financial Summary

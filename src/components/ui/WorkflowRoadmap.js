@@ -18,19 +18,17 @@ export default function WorkflowRoadmap({ currentStatus, steps = DEFAULT_STEPS }
   const progress = steps.length > 1 ? (Math.max(0, currentIndex) / (steps.length - 1)) * 100 : 0;
 
   return (
-    <div className="relative mb-10 w-full px-4 py-8 overflow-hidden rounded-3xl border border-white/20 bg-white/5 backdrop-blur-md shadow-2xl">
-      <div className="absolute top-0 left-0 h-1 w-full bg-white/5" />
-      
+    <div className="relative mb-6 w-full px-5 py-5 overflow-hidden rounded-xl border border-border bg-card/60 shadow-xs">
       {/* Background Track */}
       <div className="relative flex items-center justify-between">
-        <div className="absolute left-0 top-1/2 h-0.5 w-full -translate-y-1/2 bg-white/10" />
+        <div className="absolute left-0 top-4 h-0.5 w-full bg-border" />
         
         {/* Progress Bar */}
         <motion.div
           initial={{ width: 0 }}
           animate={{ width: `${progress}%` }}
-          transition={{ duration: 1, ease: "circOut" }}
-          className="absolute left-0 top-1/2 h-0.5 -translate-y-1/2 bg-gradient-to-r from-blue-500 via-violet-500 to-emerald-500 shadow-[0_0_15px_rgba(59,130,246,0.5)]"
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          className="absolute left-0 top-4 h-0.5 bg-primary"
         />
 
         {steps.map((step, index) => {
@@ -41,52 +39,29 @@ export default function WorkflowRoadmap({ currentStatus, steps = DEFAULT_STEPS }
           return (
             <div key={step.id} className="relative z-10 flex flex-col items-center">
               {/* Node */}
-              <motion.div
-                initial={false}
-                animate={{
-                  scale: isActive ? 1.2 : 1,
-                  backgroundColor: isCompleted || isActive ? "rgb(255,255,255)" : "rgba(255,255,255,0.05)",
-                }}
+              <div
                 className={cn(
-                  "flex h-10 w-10 items-center justify-center rounded-full border-2 transition-all duration-500",
-                  isCompleted ? "border-emerald-500 bg-white" : 
-                  isActive ? "border-blue-500 bg-white shadow-[0_0_20px_rgba(59,130,246,0.4)]" : 
-                  "border-white/10 bg-white/5"
+                  "flex h-8 w-8 items-center justify-center rounded-full border transition-all text-xs",
+                  isCompleted ? "border-emerald-600 bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:border-emerald-500" : 
+                  isActive ? "border-primary bg-primary text-primary-foreground shadow-xs" : 
+                  "border-border bg-muted/60 text-muted-foreground"
                 )}
               >
                 {isCompleted ? (
-                  <Check className="h-5 w-5 text-emerald-600" />
+                  <Check className="h-4 w-4" />
                 ) : (
-                  <Icon className={cn(
-                    "h-5 w-5",
-                    isActive ? "text-blue-600" : "text-white/40"
-                  )} />
+                  <Icon className="h-3.5 w-3.5" />
                 )}
-
-                {/* Pulsing Aura for Active */}
-                {isActive && (
-                  <motion.div
-                    animate={{ scale: [1, 1.5, 1], opacity: [0.5, 0, 0.5] }}
-                    transition={{ duration: 2, repeat: Infinity }}
-                    className="absolute inset-0 rounded-full bg-blue-500/20"
-                  />
-                )}
-              </motion.div>
+              </div>
 
               {/* Label */}
-              <div className="absolute top-12 whitespace-nowrap text-center">
+              <div className="mt-2 whitespace-nowrap text-center">
                 <p className={cn(
-                  "text-[10px] font-bold uppercase tracking-widest transition-colors duration-500",
-                  isActive ? "text-blue-400" : isCompleted ? "text-emerald-400" : "text-white/30"
+                  "text-[10.5px] font-medium tracking-tight",
+                  isActive ? "text-foreground font-semibold" : isCompleted ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground"
                 )}>
                   {step.label}
                 </p>
-                {isActive && (
-                  <motion.div 
-                    layoutId="active-dot"
-                    className="mx-auto mt-1 h-1 w-1 rounded-full bg-blue-500" 
-                  />
-                )}
               </div>
             </div>
           );
