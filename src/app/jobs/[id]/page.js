@@ -53,8 +53,8 @@ export default function JobDetailPage() {
         fetchContractors(),
       ]);
       setJob(jobRes.data);
-      setQuotations(quoteRes);
-      setContractors(contractorRes);
+      setQuotations(Array.isArray(quoteRes) ? quoteRes : (quoteRes?.data || []));
+      setContractors(Array.isArray(contractorRes) ? contractorRes : (contractorRes?.data || []));
     } catch (error) {
       toast.error("Failed to load job details");
     } finally {

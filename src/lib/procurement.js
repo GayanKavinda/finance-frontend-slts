@@ -100,13 +100,29 @@ export const deleteJob = async (id) => {
 export const fetchPurchaseOrders = async ({
   page = 1,
   job_id = "",
+  status = "",
   search = "",
 } = {}) => {
   const params = new URLSearchParams();
   params.append("page", page);
   if (job_id) params.append("job_id", job_id);
+  if (status) params.append("status", status);
   if (search) params.append("search", search);
   const res = await axios.get(`/purchase-orders?${params.toString()}`);
+  return res.data;
+};
+
+export const fetchPurchaseOrderStats = async ({ job_id = "" } = {}) => {
+  const params = new URLSearchParams();
+  if (job_id) params.append("job_id", job_id);
+  const res = await axios.get(`/purchase-orders/stats?${params.toString()}`);
+  return res.data;
+};
+
+export const downloadPurchaseOrderPdf = async (id) => {
+  const res = await axios.get(`/purchase-orders/${id}/download-pdf`, {
+    responseType: "blob",
+  });
   return res.data;
 };
 
