@@ -13,8 +13,8 @@ export function usePermission(permissions, requireAll = false) {
 
   if (!user) return false;
 
-  // Admin users typically have full permissions
-  if (user.roles && user.roles.includes("Admin")) return true;
+  // Super Admin and Admin users have full permissions
+  if (user.roles && (user.roles.includes("Admin") || user.roles.includes("Super Admin"))) return true;
 
   const userPermissions = user.permissions || [];
 

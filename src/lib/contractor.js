@@ -1,9 +1,14 @@
 import axios from "@/lib/axios";
 
 // Contractor CRUD
-export const fetchContractors = async () => {
-  const res = await axios.get("/contractors");
-  return res.data;
+export const fetchContractors = async (params = {}) => {
+  const res = await axios.get("/contractors", { params });
+  const data = res.data;
+  // If backend returns Laravel paginator object { data: [...], current_page: 1, ... }, extract data
+  if (data && Array.isArray(data.data)) {
+    return data.data;
+  }
+  return Array.isArray(data) ? data : [];
 };
 
 export const fetchContractor = async (id) => {

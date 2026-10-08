@@ -31,7 +31,7 @@ import { toast } from "@/lib/toast";
 import { fmt, fmtDate, fmtDateTime } from "@/lib/utils";
 import { downloadInvoicePdf } from "@/lib/invoice";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@/components/ui/Badge";
 
 // Components
 import StatusBadge from "@/components/invoices/StatusBadge";
