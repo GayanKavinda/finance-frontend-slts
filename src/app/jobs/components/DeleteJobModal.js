@@ -1,6 +1,7 @@
 "use client";
 
-import { Trash2 } from "lucide-react";
+import { Trash2, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export default function DeleteJobModal({
   isOpen,
@@ -11,35 +12,34 @@ export default function DeleteJobModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
-      <div className="bg-white dark:bg-gray-800 border border-border rounded-2xl shadow-sm w-full max-w-sm p-6">
-        <div className="text-center mb-5">
-          <div className="w-14 h-14 rounded-xl bg-destructive/10 flex items-center justify-center mx-auto mb-4">
-            <Trash2 className="w-7 h-7 text-destructive" />
-          </div>
-          <h3 className="text-lg font-medium text-foreground">
-            Delete Job?
-          </h3>
-          <p className="text-sm text-muted-foreground mt-2">
-            This action cannot be undone. Jobs with purchase orders cannot be
-            deleted.
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-[1px] p-4">
+      <div className="w-full max-w-xs bg-card border border-border rounded-lg p-4 shadow-xl space-y-3 text-center">
+        <div className="w-8 h-8 rounded-full bg-destructive/10 text-destructive flex items-center justify-center mx-auto">
+          <Trash2 className="w-4 h-4" />
+        </div>
+        <div>
+          <h3 className="text-xs font-semibold text-foreground">Delete Job?</h3>
+          <p className="text-[11px] text-muted-foreground mt-1">
+            This record will be permanently deleted from the jobs ledger.
           </p>
         </div>
-        <div className="flex gap-3">
-          <button
-            type="button"
+        <div className="flex gap-2 pt-2">
+          <Button
+            variant="outline"
+            size="sm"
             onClick={onClose}
-            className="flex-1 py-2.5 rounded-xl border border-input bg-background text-sm font-medium text-foreground hover:bg-muted transition-colors"
+            className="flex-1 h-8 text-xs"
           >
             Cancel
-          </button>
-          <button
-            type="button"
+          </Button>
+          <Button
+            variant="destructive"
+            size="sm"
             onClick={() => onConfirm(jobId)}
-            className="flex-1 py-2.5 rounded-xl bg-destructive hover:bg-destructive/90 text-destructive-foreground text-sm font-medium transition-colors"
+            className="flex-1 h-8 text-xs"
           >
             Delete
-          </button>
+          </Button>
         </div>
       </div>
     </div>

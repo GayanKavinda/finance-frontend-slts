@@ -10,6 +10,19 @@ import { ArrowLeft, Save, Loader2 } from "lucide-react";
 import FormModal from "@/components/ui/FormModal";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import { Button } from "@/components/ui/button";
+import StatusBadge from "@/components/ui/StatusBadge";
+
+const fmtMoney = (n) =>
+  Number(n || 0).toLocaleString(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+
+const fmtDate = (d) =>
+  d ? new Date(d).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" }) : "—";
 
 export default function EditInvoicePage() {
   const { id } = useParams();
@@ -37,19 +50,8 @@ export default function EditInvoicePage() {
 
   useEffect(() => {
     if (!user) return;
-    const run = async () => {
-      try {
-        setLoading(true);
-        const res = await api.get(`/invoices/${id}`);
-        setInvoice(res.data);
-      } catch {
-        setError("Failed to load invoice or not authorized.");
-      } finally {
-        setLoading(false);
-      }
-    };
-    run();
-  }, [user, id]);
+    loadInvoice();
+  }, [user, loadInvoice]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -70,7 +72,6 @@ export default function EditInvoicePage() {
         customer_po_number: invoice.customer_po_number,
         customer_po_description: invoice.customer_po_description,
       });
-      setModalOpen(false);
       router.push(`/invoices/${id}`);
     } catch (err) {
       alert(err.response?.data?.message ?? "Failed to update invoice");
@@ -89,14 +90,14 @@ export default function EditInvoicePage() {
 
   if (error || !invoice) {
     return (
-      <div className="p-8 text-center text-gray-500">
-        <p>{error || "Invoice not found."}</p>
-        <button
-          onClick={() => router.back()}
-          className="text-primary hover:underline mt-2"
-        >
-          Go Back
-        </button>
+      <div className="min-h-full p-4 sm:p-6">
+        <div className="flex flex-col items-center justify-center py-12 bg-card border border-border rounded-lg">
+          <p className="text-sm font-medium text-foreground">{error || "Invoice not found."}</p>
+          <Button variant="outline" size="sm" onClick={() => router.back()} className="mt-3 flex items-center gap-2">
+            <ArrowLeft className="w-3.5 h-3.5" />
+            Go Back
+          </Button>
+        </div>
       </div>
     );
   }
@@ -104,65 +105,115 @@ export default function EditInvoicePage() {
   const permissions = user?.permissions ?? [];
   if (!canEditInvoice(permissions) || invoice.status !== "Draft") {
     return (
-      <div className="p-8 text-center text-red-500 font-medium">
-        Editing is only allowed for Draft invoices with proper permissions.
+      <div className="min-h-full p-4 sm:p-6">
+        <div className="flex flex-col items-center justify-center py-12 bg-card border border-border rounded-lg">
+          <div className="w-10 h-10 rounded-full bg-destructive/10 text-destructive flex items-center justify-center mb-3">
+            <Loader2 className="w-5 h-5" />
+          </div>
+          <p className="text-sm font-medium text-foreground">Editing Not Allowed</p>
+          <p className="text-xs text-muted-foreground mt-1 text-center max-w-md">
+            Editing is only allowed for Draft invoices with proper permissions.
+          </p>
+          <Button variant="outline" size="sm" onClick={() => router.back()} className="mt-3 flex items-center gap-2">
+            <ArrowLeft className="w-3.5 h-3.5" />
+            Go Back
+          </Button>
+        </div>
       </div>
     );
   }
 
+  const Field = ({ label, children, required }) => (
+    <div className="space-y-1.5">
+      <Label className="text-[11px] text-muted-foreground uppercase tracking-wider">
+        {label}{required && <span className="text-destructive ml-1">*</span>}
+      </Label>
+      {children}
+    </div>
+  );
+
   return (
-    <>
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <button
+    <div className="min-h-full bg-background p-4 sm:p-6 space-y-4">
+      {/* Zen Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-border/50">
+        <div className="flex items-center gap-3">
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={() => router.back()}
-            className="flex items-center gap-2 px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-xl transition-all"
+            className="h-8 w-8"
           >
-            <ArrowLeft size={16} /> Back to Invoice
-          </button>
-
-          <button
-            onClick={() => setModalOpen(true)}
-            className="flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary/90 text-white rounded-xl font-medium shadow-sm transition-all "
-          >
-            <Save size={18} />
-            Edit Invoice
-          </button>
-        </div>
-
-        <div className="bg-white dark:bg-gray-800 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm p-8">
-          <div className="space-y-4">
-            <div>
-              <p className="text-xs font-medium uppercase text-gray-400 tracking-wider mb-1">
-                Invoice Number
-              </p>
-              <p className="text-2xl font-medium text-gray-900 dark:text-white">
-                {invoice.invoice_number}
-              </p>
+            <ArrowLeft className="w-3.5 h-3.5" />
+          </Button>
+          <div>
+            <div className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-medium uppercase tracking-widest mb-1">
+              Invoice Edit
             </div>
-            <div className="grid grid-cols-2 gap-6">
+            <h1 className="text-base font-semibold tracking-tight text-foreground">
+              {invoice.invoice_number}
+            </h1>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Update draft invoice details
+            </p>
+          </div>
+        </div>
+        <Button
+          onClick={() => setModalOpen(true)}
+          className="h-8 text-xs gap-1.5"
+        >
+          <Save className="w-3.5 h-3.5" />
+          Save Changes
+        </Button>
+      </div>
+
+      {/* Invoice Summary Card */}
+      <Card>
+        <CardContent className="p-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="space-y-1">
+              <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">Invoice Number</p>
+              <p className="text-base font-semibold text-foreground">{invoice.invoice_number}</p>
+            </div>
+            <div className="flex items-center gap-4 flex-wrap">
               <div>
-                <p className="text-xs font-medium uppercase text-gray-400 tracking-wider mb-1">
-                  Amount
-                </p>
-                <p className="text-lg font-medium text-gray-900 dark:text-white">
-                  LKR {Number(invoice.invoice_amount).toLocaleString()}
-                </p>
+                <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">Amount</p>
+                <p className="text-lg font-semibold text-foreground">LKR {fmtMoney(invoice.invoice_amount)}</p>
               </div>
               <div>
-                <p className="text-xs font-medium uppercase text-gray-400 tracking-wider mb-1">
-                  Date
-                </p>
-                <p className="text-lg font-medium text-gray-900 dark:text-white">
-                  {invoice.invoice_date
-                    ? invoice.invoice_date.split("T")[0]
-                    : ""}
-                </p>
+                <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">Date</p>
+                <p className="text-base font-medium text-foreground">{fmtDate(invoice.invoice_date)}</p>
+              </div>
+              <div>
+                <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">Status</p>
+                <StatusBadge status={invoice.status} />
               </div>
             </div>
           </div>
-        </div>
-      </div>
+
+          {(invoice.billing_address || invoice.customer_po_number || invoice.customer_po_description) && (
+            <div className="mt-4 pt-4 border-t border-border/50 grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+              {invoice.billing_address && (
+                <div className="space-y-0.5">
+                  <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">Billing Address</p>
+                  <p className="text-foreground truncate">{invoice.billing_address}</p>
+                </div>
+              )}
+              {invoice.customer_po_number && (
+                <div className="space-y-0.5">
+                  <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">Customer PO #</p>
+                  <p className="text-foreground font-medium">{invoice.customer_po_number}</p>
+                </div>
+              )}
+              {invoice.customer_po_description && (
+                <div className="space-y-0.5">
+                  <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">PO Description</p>
+                  <p className="text-foreground truncate max-w-xs">{invoice.customer_po_description}</p>
+                </div>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Edit Modal */}
       <FormModal
@@ -171,75 +222,63 @@ export default function EditInvoicePage() {
         title="Edit Invoice Draft"
         description={`Update details for ${invoice.invoice_number}`}
         onSubmit={handleSubmit}
-        submitText="Update"
+        submitText="Update Invoice"
         isSubmitting={saving}
         size="md"
       >
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="invoice_amount">Invoice Amount (LKR) *</Label>
+        <div className="space-y-3">
+          <Field label="Invoice Amount (LKR)" required>
             <Input
-              id="invoice_amount"
-              name="invoice_amount"
               type="number"
               step="0.01"
+              required
               value={invoice.invoice_amount}
               onChange={handleChange}
               placeholder="0.00"
-              required
+              className="h-8 text-xs"
             />
-          </div>
+          </Field>
 
-          <div className="space-y-2">
-            <Label htmlFor="invoice_date">Invoice Date *</Label>
+          <Field label="Invoice Date" required>
             <Input
-              id="invoice_date"
               type="date"
-              name="invoice_date"
-              value={
-                invoice.invoice_date ? invoice.invoice_date.split("T")[0] : ""
-              }
-              onChange={handleChange}
               required
+              value={invoice.invoice_date ? invoice.invoice_date.split("T")[0] : ""}
+              onChange={handleChange}
+              className="h-8 text-xs"
             />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="billing_address">Manual Billing Address</Label>
-            <textarea
-              id="billing_address"
-              name="billing_address"
+          </Field>
+
+          <Field label="Manual Billing Address">
+            <Textarea
               rows={2}
               value={invoice.billing_address || ""}
               onChange={handleChange}
               placeholder="Enter manual billing address if different from customer default..."
-              className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              className="text-xs"
             />
-          </div>
+          </Field>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="customer_po_number">Customer PO Number</Label>
+          <div className="grid grid-cols-2 gap-2.5">
+            <Field label="Customer PO Number">
               <Input
-                id="customer_po_number"
-                name="customer_po_number"
                 value={invoice.customer_po_number || ""}
                 onChange={handleChange}
                 placeholder="e.g. CUST-PO-123"
+                className="h-8 text-xs"
               />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="customer_po_description">Customer PO Demand / Description</Label>
+            </Field>
+            <Field label="Customer PO Description">
               <Input
-                id="customer_po_description"
-                name="customer_po_description"
                 value={invoice.customer_po_description || ""}
                 onChange={handleChange}
                 placeholder="e.g. Advance payment for milestone 1"
+                className="h-8 text-xs"
               />
-            </div>
+            </Field>
           </div>
         </div>
       </FormModal>
-    </>
+    </div>
   );
 }

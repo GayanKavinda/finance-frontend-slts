@@ -66,11 +66,13 @@ export const downloadTenderAwardLetter = async (id) => {
 export const fetchJobs = async ({
   page = 1,
   customer_id = "",
+  status = "",
   search = "",
 } = {}) => {
   const params = new URLSearchParams();
   params.append("page", page);
   if (customer_id) params.append("customer_id", customer_id);
+  if (status) params.append("status", status);
   if (search) params.append("search", search);
   const res = await axios.get(`/jobs?${params.toString()}`);
   return res.data;
@@ -93,6 +95,17 @@ export const fetchJob = async (id) => {
 
 export const deleteJob = async (id) => {
   const res = await axios.delete(`/jobs/${id}`);
+  return res.data;
+};
+
+export const exportJobs = async (params = {}) => {
+  const searchParams = new URLSearchParams();
+  Object.entries(params).forEach(([key, value]) => {
+    if (value) searchParams.append(key, value);
+  });
+  const res = await axios.get(`/jobs/export?${searchParams.toString()}`, {
+    responseType: "blob",
+  });
   return res.data;
 };
 
