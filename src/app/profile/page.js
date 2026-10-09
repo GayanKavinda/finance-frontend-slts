@@ -3,9 +3,9 @@
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/Card";
-import { CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import { Card, CardContent } from "@/components/ui/Card";
 import { Separator } from "@/components/ui/Separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/Tabs";
 import PersonalDetails from "./PersonalDetails";
 import SecuritySettings from "./SecuritySettings";
 import ActivityLog from "./ActivityLog";
@@ -18,52 +18,49 @@ const TABS = [
 
 export default function ProfilePage() {
   const { user, loading, refetch } = useAuth();
-  const [tab, setTab] = useState("personal");
+  const [activeTab, setActiveTab] = useState("personal");
 
   if (loading || !user) {
-    return <div />;
+    return (
+      <div className="min-h-full bg-background p-4 sm:p-6 flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
   }
 
   return (
     <div className="min-h-full bg-background p-4 sm:p-6">
-      <div className="max-w-3xl mx-auto space-y-6">
-        {/* Header */}
-        <div className="text-center space-y-2">
-          <h1 className="text-xl font-medium tracking-tight text-foreground">
+      <div className="max-w-5xl mx-auto space-y-6">
+        <div className="space-y-2">
+          <h1 className="text-xl sm:text-2xl font-medium tracking-tight text-foreground">
             Profile Settings
           </h1>
-          <p className="text-xs text-muted-foreground">
-            Manage your personal information and security
+          <p className="text-sm text-muted-foreground">
+            Manage your personal information, security settings, and view activity
           </p>
         </div>
 
-        {/* Tabs */}
-        <div className="flex justify-center border-b border-border">
-          {TABS.map((t) => (
-            <button
-              key={t.key}
-              onClick={() => setTab(t.key)}
-              className={`relative px-6 py-2.5 text-sm font-medium -mb-px transition-all cursor-pointer ${
-                tab === t.key
-                  ? "text-primary border-b-2 border-primary"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {t.label}
-            </button>
-          ))}
-        </div>
+        <Tabs value={activeTab} onChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            {TABS.map((t) => (
+              <TabsTrigger key={t.key} value={t.key}>
+                {t.label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
 
-        {/* Content */}
-        <div>
-          {tab === "personal" && (
+          <TabsContent value="personal" className="pt-4">
             <PersonalDetails key="personal" user={user} refetch={refetch} />
-          )}
+          </TabsContent>
 
-          {tab === "security" && <SecuritySettings key="security" />}
+          <TabsContent value="security" className="pt-4">
+            <SecuritySettings key="security" />
+          </TabsContent>
 
-          {tab === "activity" && <ActivityLog key="activity" />}
-        </div>
+          <TabsContent value="activity" className="pt-4">
+            <ActivityLog key="activity" />
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );

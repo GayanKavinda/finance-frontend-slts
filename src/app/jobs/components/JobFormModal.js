@@ -1,15 +1,22 @@
 "use client";
 
 import FormModal from "@/components/ui/FormModal";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
 
-const inputCls =
-  "w-full px-3 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all text-sm text-slate-700 dark:text-slate-300 placeholder-slate-400";
-
-const Field = ({ label, children }) => (
+const Field = ({ label, children, required }) => (
   <div className="space-y-1.5">
-    <label className="text-xs font-medium text-slate-500 dark:text-slate-400">
-      {label}
-    </label>
+    <Label className="text-[11px] text-muted-foreground uppercase tracking-wider">
+      {label}{required && <span className="text-destructive ml-1">*</span>}
+    </Label>
     {children}
   </div>
 );
@@ -31,104 +38,101 @@ export default function JobFormModal({
       onClose={onClose}
       title={selectedJob ? "Update Job" : "Create Job"}
       description={
-        selectedJob ? "Edit job details" : "Create a new project job"
+        selectedJob
+          ? "Update job details, value, or status"
+          : "Configure job specifics, value, and project allocation"
       }
       onSubmit={onSubmit}
-      submitText={selectedJob ? "Update" : "Create"}
+      submitText={selectedJob ? "Update Job" : "Create Job"}
       isSubmitting={isSubmitting}
       size="lg"
     >
-      <div className="space-y-4">
-        <Field label="Job / Project Name *">
-          <input
+      <div className="space-y-3">
+        <Field label="Job / Project Name" required>
+          <Input
             required
             value={form.name}
             onChange={(e) => setF("name", e.target.value)}
             placeholder="e.g. Fiber Backbone Phase 1"
-            className={inputCls}
+            className="h-8 text-xs"
           />
         </Field>
 
-        <div className="grid grid-cols-2 gap-4">
-          <Field label="Customer *">
-            <select
-              required
-              value={form.customer_id}
-              onChange={(e) => setF("customer_id", e.target.value)}
-              className={inputCls}
-            >
-              <option value="">Select customer...</option>
-              {customers.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
+        <div className="grid grid-cols-2 gap-2.5">
+          <Field label="Customer" required>
+            <Select value={form.customer_id} onValueChange={(value) => setF("customer_id", value)}>
+              <SelectTrigger className="h-8 text-xs">
+                <SelectValue placeholder="Select customer..." />
+              </SelectTrigger>
+              <SelectContent>
+                {customers.map((c) => (
+                  <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </Field>
           <Field label="Status">
-            <select
-              value={form.status}
-              onChange={(e) => setF("status", e.target.value)}
-              className={inputCls}
-            >
-              <option value="Pending">Pending</option>
-              <option value="Active">Active</option>
-              <option value="Completed">Completed</option>
-            </select>
+            <Select value={form.status} onValueChange={(value) => setF("status", value)}>
+              <SelectTrigger className="h-8 text-xs">
+                <SelectValue placeholder="Select status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Pending">Pending</SelectItem>
+                <SelectItem value="Active">Active</SelectItem>
+                <SelectItem value="Completed">Completed</SelectItem>
+              </SelectContent>
+            </Select>
           </Field>
         </div>
 
-        <Field label="Linked Tender *">
-          <select
-            required
-            value={form.tender_id}
-            onChange={(e) => setF("tender_id", e.target.value)}
-            className={inputCls}
-          >
-            <option value="">Select tender...</option>
-            {tenders.map((t) => (
-              <option key={t.id} value={t.id}>
-                {t.tender_number} — {t.name}
-              </option>
-            ))}
-          </select>
+        <Field label="Linked Tender" required>
+          <Select value={form.tender_id} onValueChange={(value) => setF("tender_id", value)}>
+            <SelectTrigger className="h-8 text-xs">
+              <SelectValue placeholder="Select tender..." />
+            </SelectTrigger>
+            <SelectContent>
+              {tenders.map((t) => (
+                <SelectItem key={t.id} value={t.id}>{t.tender_number} — {t.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </Field>
 
         <Field label="Project Value (LKR)">
-          <input
+          <Input
             type="number"
             value={form.project_value}
             onChange={(e) => setF("project_value", e.target.value)}
             placeholder="0"
-            className={inputCls}
+            className="h-8 text-xs"
           />
         </Field>
 
-        <Field label="Description">
-          <textarea
+        <Field label="Scope / Description">
+          <Textarea
             rows={2}
             value={form.description}
             onChange={(e) => setF("description", e.target.value)}
-            placeholder="Brief scope..."
-            className={`${inputCls} resize-none`}
+            placeholder="Requisition specifications or items list (one item per line)"
+            className="text-xs"
           />
         </Field>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-2.5">
           <Field label="Work Start Date">
-            <input
+            <Input
               type="date"
               value={form.work_start_date}
               onChange={(e) => setF("work_start_date", e.target.value)}
-              className={inputCls}
+              className="h-8 text-xs"
             />
           </Field>
           <Field label="Completion Date">
-            <input
+            <Input
               type="date"
               value={form.work_completion_date}
               onChange={(e) => setF("work_completion_date", e.target.value)}
-              className={inputCls}
+              className="h-8 text-xs"
             />
           </Field>
         </div>

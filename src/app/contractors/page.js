@@ -19,8 +19,6 @@ import {
   Building2,
   Star,
   Banknote,
-  ChevronLeft,
-  ChevronRight,
   HardHat,
   Shield,
   Award,
@@ -32,8 +30,14 @@ import { Textarea } from "@/components/ui/textarea";
 import FormModal from "@/components/ui/FormModal";
 import { Card } from "@/components/ui/Card";
 import { CardContent } from "@/components/ui/Card";
-import { Separator } from "@/components/ui/Separator";
 import { Badge } from "@/components/ui/Badge";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
 
 const STATUS_CONFIG = {
   Active: {
@@ -44,46 +48,33 @@ const STATUS_CONFIG = {
   },
 };
 
-function StarRating({ rating, onChange }) {
-  return (
-    <div className="flex gap-1">
-      {[1, 2, 3, 4, 5].map((s) => (
-        <button
-          key={s}
-          type="button"
-          onClick={() => onChange && onChange(s)}
-          className={`p-1.5 rounded-md transition-colors ${
-            rating >= s ? "text-primary" : "text-muted-foreground"
-          }`}
-        >
-          <Star className={`w-4 h-4 ${rating >= s ? "fill-current" : ""}`} />
-        </button>
-      ))}
-    </div>
-  );
-}
+const Field = ({ label, children, required }) => (
+  <div className="space-y-1.5">
+    <Label className="text-[11px] text-muted-foreground uppercase tracking-wider">
+      {label}{required && <span className="text-destructive ml-1">*</span>}
+    </Label>
+    {children}
+  </div>
+);
 
 function ContractorCard({ contractor, onEdit, onDelete }) {
   const isBlacklisted = contractor.status === "Blacklisted";
 
   return (
-    <div className="p-3 bg-card border border-border rounded-lg hover:border-border/80 transition-colors flex flex-col justify-between">
-      <div>
-        <div className="flex items-start justify-between gap-2 mb-2">
+    <div className="bg-card border border-border rounded-lg p-3 hover:shadow-sm transition-shadow">
+      <div className="space-y-2">
+        <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
             <div className="flex items-center gap-1.5 flex-wrap">
               <span className="text-xs font-semibold text-foreground truncate">
                 {contractor.name}
               </span>
-              {isBlacklisted ? (
-                <span className="text-[10px] px-1 py-0.2 bg-destructive/10 text-destructive rounded">
-                  Blacklisted
-                </span>
-              ) : (
-                <span className="text-[10px] px-1 py-0.2 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded">
-                  Active
-                </span>
-              )}
+              <Badge
+                variant={isBlacklisted ? "destructive" : "success"}
+                className="text-[10px]"
+              >
+                {isBlacklisted ? "Blacklisted" : "Active"}
+              </Badge>
             </div>
             <p className="text-[11px] text-muted-foreground truncate">
               {contractor.contact_person || "No contact person specified"}
@@ -150,17 +141,14 @@ function ContractorCard({ contractor, onEdit, onDelete }) {
 
 function SkeletonCard() {
   return (
-    <Card className="p-5 animate-pulse">
-      <div className="flex items-center gap-3 mb-4">
-        <div className="w-12 h-12 rounded-xl bg-muted flex-shrink-0" />
-        <div className="space-y-2 flex-1">
-          <div className="h-3.5 bg-muted rounded w-3/4" />
-          <div className="h-3 bg-muted rounded w-1/2" />
-        </div>
-      </div>
+    <Card className="p-3 animate-pulse">
       <div className="space-y-2">
-        <div className="h-3 bg-muted rounded w-full" />
-        <div className="h-3 bg-muted rounded w-4/5" />
+        <div className="h-3 bg-muted rounded w-1/3" />
+        <div className="h-2.5 bg-muted rounded w-1/4" />
+        <div className="space-y-1.5">
+          <div className="h-3 bg-muted rounded w-full" />
+          <div className="h-3 bg-muted rounded w-4/5" />
+        </div>
       </div>
     </Card>
   );
@@ -313,114 +301,127 @@ export default function ContractorsPage() {
       ).toFixed(1)
     : "0.0";
 
+  const statCards = [
+    {
+      label: "Total",
+      value: contractors.length.toLocaleString(),
+      icon: HardHat,
+    },
+    {
+      label: "Active",
+      value: activeCount.toLocaleString(),
+      icon: Shield,
+    },
+    {
+      label: "Avg Rating",
+      value: `${avgRating}★`,
+      icon: Award,
+    },
+  ];
+
   return (
-    <>
-      <div className="min-h-full bg-background p-4 sm:p-6 space-y-6">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-xl font-medium tracking-tight text-foreground">
-              Contractors
-            </h1>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              {contractors.length} service provider
-              {contractors.length !== 1 ? "s" : ""}
-            </p>
+    <div className="min-h-full bg-background p-4 sm:p-6 space-y-4">
+      {/* Zen Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-border/50">
+        <div>
+          <h1 className="text-base font-semibold tracking-tight text-foreground">
+            Contractors
+          </h1>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            {contractors.length} service provider{contractors.length !== 1 ? "s" : ""}
+          </p>
+        </div>
+        <Button
+          size="sm"
+          onClick={() => openDrawer()}
+          className="h-8 text-xs gap-1.5"
+        >
+          <Plus className="w-3.5 h-3.5" />
+          Add Contractor
+        </Button>
+      </div>
+
+      {/* Stat Strip */}
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-2.5">
+        {statCards.map((s) => (
+          <div key={s.label} className="bg-card border border-border rounded-lg px-3.5 py-3">
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+                {s.label}
+              </span>
+              <s.icon className="w-3.5 h-3.5 text-muted-foreground/60" />
+            </div>
+            <div className="text-[15px] font-semibold tracking-tight text-foreground mt-1 truncate">
+              {s.value}
+            </div>
           </div>
-          <Button
-            onClick={() => openDrawer()}
-            className="flex items-center gap-2"
-          >
-            <Plus className="w-4 h-4" />
-            Add Contractor
-          </Button>
+        ))}
+      </div>
+
+      {/* Control Strip */}
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-2.5">
+        <div className="relative w-full sm:w-auto flex-1 max-w-sm">
+          <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            type="text"
+            placeholder="Search contractors…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="h-8 text-xs pl-8 bg-card border-border"
+          />
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-3 gap-3">
-          {[
-            {
-              icon: HardHat,
-              label: "Total",
-              value: contractors.length,
-            },
-            {
-              icon: Shield,
-              label: "Active",
-              value: activeCount,
-            },
-            {
-              icon: Award,
-              label: "Avg Rating",
-              value: `${avgRating}\u2605`,
-            },
-          ].map(({ icon: Icon, label, value }) => (
-            <Card key={label}>
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted">
-                    <Icon className="w-4 h-4 text-foreground" />
-                  </div>
-                  <div>
-                    <p className="text-lg font-medium tracking-tight text-foreground">
-                      {value}
-                    </p>
-                    <p className="text-[11px] font-medium text-muted-foreground">
-                      {label}
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+        <div className="flex items-center gap-1 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0">
+          {["", "Active", "Blacklisted"].map((s) => (
+            <button
+              key={s}
+              onClick={() => setStatusFilter(s)}
+              className={`px-2.5 py-1 text-xs rounded-md font-medium transition-colors whitespace-nowrap ${
+                statusFilter === s
+                  ? "bg-foreground text-background"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted"
+              }`}
+            >
+              {s || "All"}
+            </button>
           ))}
         </div>
+      </div>
 
-        {/* Controls */}
-        <div className="flex flex-wrap gap-3 items-center">
-          <div className="relative flex-1 min-w-[200px] max-w-sm">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <input
-              type="text"
-              placeholder="Search contractors…"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-background border border-border rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
-            />
-          </div>
-          <div className="flex gap-2">
-            {["", "Active", "Blacklisted"].map((s) => (
-              <Button
-                key={s}
-                variant={statusFilter === s ? "default" : "outline"}
-                onClick={() => setStatusFilter(s)}
-                className="text-xs"
-              >
-                {s || "All"}
-              </Button>
-            ))}
-          </div>
-        </div>
-
-        {/* Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-          {loading ? (
-            Array.from({ length: 8 }).map((_, i) => <SkeletonCard key={i} />)
-          ) : filtered.length === 0 ? (
-            <div className="col-span-full flex flex-col items-center justify-center py-16 text-muted-foreground">
-              <HardHat className="w-10 h-10 mb-3 opacity-40" />
-              <p className="text-sm font-medium">No contractors found</p>
+      {/* Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5">
+        {loading ? (
+          Array.from({ length: 8 }).map((_, i) => <SkeletonCard key={i} />)
+        ) : filtered.length === 0 ? (
+          <div className="col-span-full flex flex-col items-center justify-center py-12 bg-card border border-border rounded-lg">
+            <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center mb-2">
+              <HardHat className="w-5 h-5 text-muted-foreground" />
             </div>
-          ) : (
-            filtered.map((c) => (
-              <ContractorCard
-                key={c.id}
-                contractor={c}
-                onEdit={openDrawer}
-                onDelete={(id) => setDeleteConfirm(id)}
-              />
-            ))
-          )}
-        </div>
+            <p className="text-xs font-medium text-foreground">
+              No contractors found
+            </p>
+            <p className="text-[10px] text-muted-foreground mt-0.5 mb-2">
+              Create your first contractor to get started
+            </p>
+            <Button
+              onClick={() => openDrawer()}
+              size="sm"
+              className="flex items-center gap-1.5"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              Create Contractor
+            </Button>
+          </div>
+        ) : (
+          filtered.map((c) => (
+            <ContractorCard
+              key={c.id}
+              contractor={c}
+              onEdit={openDrawer}
+              onDelete={(id) => setDeleteConfirm(id)}
+            />
+          ))
+        )}
       </div>
 
       {/* Drawer */}
@@ -434,156 +435,163 @@ export default function ContractorsPage() {
         isSubmitting={saving}
         size="lg"
       >
-        <div className="space-y-2">
-          <Label htmlFor="name">Company Name *</Label>
-          <Input
-            id="name"
-            required
-            value={form.name}
-            onChange={(e) => setF("name", e.target.value)}
-            placeholder="e.g. ABC Construction"
-          />
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="contact_person">Contact Person</Label>
+        <div className="space-y-3">
+          <Field label="Company Name" required>
             <Input
-              id="contact_person"
-              value={form.contact_person}
-              onChange={(e) => setF("contact_person", e.target.value)}
-              placeholder="Full name"
+              required
+              value={form.name}
+              onChange={(e) => setF("name", e.target.value)}
+              placeholder="e.g. ABC Construction"
+              className="h-8 text-xs"
             />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="status">Status</Label>
-            <select
-              id="status"
-              value={form.status}
-              onChange={(e) => setF("status", e.target.value)}
-              className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-            >
-              <option value="Active">Active</option>
-              <option value="Blacklisted">Blacklisted</option>
-            </select>
-          </div>
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              value={form.email}
-              onChange={(e) => setF("email", e.target.value)}
-              placeholder="email@co.com"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="phone">Phone</Label>
-            <Input
-              id="phone"
-              value={form.phone}
-              onChange={(e) => setF("phone", e.target.value)}
-              placeholder="+94 77…"
-            />
-          </div>
-        </div>
-        <div className="rounded-lg border bg-muted p-4 space-y-3">
-          <p className="text-sm font-medium">Banking Details</p>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-2">
-              <Label htmlFor="bank_name">Bank Name</Label>
+          </Field>
+
+          <div className="grid grid-cols-2 gap-2.5">
+            <Field label="Contact Person">
               <Input
-                id="bank_name"
-                value={form.bank_name}
-                onChange={(e) => setF("bank_name", e.target.value)}
-                placeholder="e.g. BOC"
+                value={form.contact_person}
+                onChange={(e) => setF("contact_person", e.target.value)}
+                placeholder="Full name"
+                className="h-8 text-xs"
               />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="bank_account_number">Account No.</Label>
+            </Field>
+            <Field label="Status">
+              <Select value={form.status} onValueChange={(value) => setF("status", value)}>
+                <SelectTrigger className="h-8 text-xs">
+                  <SelectValue placeholder="Select status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Active">Active</SelectItem>
+                  <SelectItem value="Blacklisted">Blacklisted</SelectItem>
+                </SelectContent>
+              </Select>
+            </Field>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2.5">
+            <Field label="Email">
               <Input
-                id="bank_account_number"
-                value={form.bank_account_number}
-                onChange={(e) =>
-                  setF("bank_account_number", e.target.value)
-                }
-                placeholder="0000000000"
+                type="email"
+                value={form.email}
+                onChange={(e) => setF("email", e.target.value)}
+                placeholder="email@co.com"
+                className="h-8 text-xs"
               />
+            </Field>
+            <Field label="Phone">
+              <Input
+                value={form.phone}
+                onChange={(e) => setF("phone", e.target.value)}
+                placeholder="+94 77…"
+                className="h-8 text-xs"
+              />
+            </Field>
+          </div>
+
+          <div className="rounded-lg border bg-muted p-3 space-y-2.5">
+            <p className="text-sm font-medium">Banking Details</p>
+            <div className="grid grid-cols-2 gap-2.5">
+              <Field label="Bank Name">
+                <Input
+                  value={form.bank_name}
+                  onChange={(e) => setF("bank_name", e.target.value)}
+                  placeholder="e.g. BOC"
+                  className="h-8 text-xs"
+                />
+              </Field>
+              <Field label="Account No.">
+                <Input
+                  value={form.bank_account_number}
+                  onChange={(e) => setF("bank_account_number", e.target.value)}
+                  placeholder="0000000000"
+                  className="h-8 text-xs"
+                />
+              </Field>
             </div>
           </div>
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="tax_id">Tax ID</Label>
-          <Input
-            id="tax_id"
-            value={form.tax_id}
-            onChange={(e) => setF("tax_id", e.target.value)}
-            placeholder="VAT-…"
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="address">Address</Label>
-          <Textarea
-            id="address"
-            rows={2}
-            value={form.address}
-            onChange={(e) => setF("address", e.target.value)}
-          />
-        </div>
-        <div className="space-y-2">
-          <Label>Performance Rating</Label>
-          <StarRating
-            rating={form.rating}
-            onChange={(v) => setF("rating", v)}
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="notes">Internal Notes</Label>
-          <Textarea
-            id="notes"
-            rows={2}
-            value={form.notes}
-            onChange={(e) => setF("notes", e.target.value)}
-            placeholder="Any internal notes…"
-          />
+
+          <Field label="Tax ID">
+            <Input
+              value={form.tax_id}
+              onChange={(e) => setF("tax_id", e.target.value)}
+              placeholder="VAT-…"
+              className="h-8 text-xs"
+            />
+          </Field>
+
+          <Field label="Address">
+            <Textarea
+              rows={2}
+              value={form.address}
+              onChange={(e) => setF("address", e.target.value)}
+              placeholder="Physical address"
+              className="text-xs"
+            />
+          </Field>
+
+          <Field label="Performance Rating">
+            <div className="flex gap-1">
+              {[1, 2, 3, 4, 5].map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => setF("rating", s)}
+                  className={`p-1.5 rounded-md transition-colors ${
+                    form.rating >= s ? "text-primary" : "text-muted-foreground"
+                  }`}
+                >
+                  <Star className={`w-4 h-4 ${form.rating >= s ? "fill-current" : ""}`} />
+                </button>
+              ))}
+            </div>
+          </Field>
+
+          <Field label="Internal Notes">
+            <Textarea
+              rows={2}
+              value={form.notes}
+              onChange={(e) => setF("notes", e.target.value)}
+              placeholder="Any internal notes…"
+              className="text-xs"
+            />
+          </Field>
         </div>
       </FormModal>
 
       {/* Delete Confirm */}
       {deleteConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <Card className="w-full max-w-sm p-6 space-y-4">
-            <div className="text-center space-y-2">
-              <div className="w-14 h-14 rounded-xl bg-destructive/10 flex items-center justify-center mx-auto">
-                <Trash2 className="w-6 h-6 text-destructive" />
-              </div>
-              <h3 className="text-lg font-medium text-foreground">
-                Delete Contractor?
-              </h3>
-              <p className="text-sm text-muted-foreground">
-                This action cannot be undone.
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-[1px] p-4">
+          <div className="w-full max-w-xs bg-card border border-border rounded-lg p-4 shadow-xl space-y-3 text-center">
+            <div className="w-8 h-8 rounded-full bg-destructive/10 text-destructive flex items-center justify-center mx-auto">
+              <Trash2 className="w-4 h-4" />
+            </div>
+            <div>
+              <h3 className="text-xs font-semibold text-foreground">Delete Contractor?</h3>
+              <p className="text-[11px] text-muted-foreground mt-1">
+                This record will be permanently deleted.
               </p>
             </div>
-            <div className="flex gap-3">
+            <div className="flex gap-2 pt-2">
               <Button
                 variant="outline"
+                size="sm"
                 onClick={() => setDeleteConfirm(null)}
-                className="flex-1"
+                className="flex-1 h-8 text-xs"
               >
                 Cancel
               </Button>
               <Button
                 variant="destructive"
+                size="sm"
                 onClick={() => handleDelete(deleteConfirm)}
-                className="flex-1"
+                className="flex-1 h-8 text-xs"
               >
                 Delete
               </Button>
             </div>
-          </Card>
+          </div>
         </div>
       )}
-    </>
+    </div>
   );
 }

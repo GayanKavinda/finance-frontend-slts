@@ -2,222 +2,224 @@
 
 import { useState } from "react";
 import ProtectedRoute from "@/components/ProtectedRoute";
-import { Card } from "@/components/ui/Card";
-import { CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/Separator";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/Badge";
-import StatusBadge from "@/components/ui/StatusBadge";
+import { Mail, Phone, MessageSquare, LifeBuoy, Search, BookOpen, Download, ChevronDown, ChevronUp, AlertCircle, CheckCircle2, FileText, Shield, Users, Settings } from "lucide-react";
 
 const faqs = [
   {
-    question: "How do I reset my password?",
-    answer:
-      "Go to your Profile → Security tab. Enter your current password, then your new one. You will receive a confirmation email for security purposes.",
+    category: "Account & Access",
+    items: [
+      { q: "How do I reset my password?", a: "Go to Profile > Security tab and click 'Change Password'. You'll receive an email with reset instructions." },
+      { q: "How do I enable 2FA?", a: "Navigate to Settings > Security > Two-Factor Authentication and toggle it on. Scan the QR code with your authenticator app." },
+      { q: "I can't access certain pages", a: "Access is role-based. Contact your system administrator to request the necessary permissions." },
+      { q: "How do I update my profile information?", a: "Go to Profile > Personal tab. Edit your name, email, phone, and department details." },
+    ]
   },
   {
-    question: "How are transactions automatically categorized?",
-    answer:
-      "Our system uses intelligent classification based on merchant data and historical patterns. You can manually override any category in the Transactions view.",
+    category: "Jobs & Projects",
+    items: [
+      { q: "How do I create a new job?", a: "Go to Jobs & Projects and click 'New Job'. Fill in the job name, select customer and linked tender, set project value and dates." },
+      { q: "Can I export jobs to CSV?", a: "Yes, click the 'Export CSV' button in the Jobs page header. Filters will be applied to the export." },
+      { q: "What's the difference between Grid and List view?", a: "Grid view shows cards with more details. List view is a compact table format. Toggle using the view buttons." },
+      { q: "How do I link a tender to a job?", a: "When creating or editing a job, select the tender from the 'Linked Tender' dropdown. Only active tenders are shown." },
+      { q: "Can I delete a job with purchase orders?", a: "No, jobs with active purchase orders cannot be deleted. Archive or complete the POs first." },
+    ]
   },
   {
-    question: "Can I export financial reports?",
-    answer:
-      "Yes. Navigate to the Reports page and use the Export button. We support CSV, PDF, and Excel formats for departmental auditing.",
+    category: "Purchase Orders",
+    items: [
+      { q: "How do I issue a Purchase Order?", a: "Go to Purchase Orders > 'Issue PO'. Select job, tender, vendor, set amount and date, then submit." },
+      { q: "What are the PO statuses?", a: "Draft → Approved → Sent → Received → Cancelled. Only valid lifecycle transitions are allowed." },
+      { q: "How do I download a PO as PDF?", a: "Click the download icon on any PO row. The PDF includes all order details and terms." },
+      { q: "Can I edit an approved PO?", a: "Only Draft POs can be fully edited. Approved+ POs can only transition status (not edit amounts)." },
+    ]
   },
   {
-    question: "Who approves departmental budgets?",
-    answer:
-      "Budget requests are routed through the system to the Finance Division Manager. You can track approval status in the Budgets module.",
+    category: "Contractor Bills",
+    items: [
+      { q: "What is the bill verification workflow?", a: "Draft → Verified → Submitted → Approved → Paid. Each step requires specific permissions." },
+      { q: "What documents are needed for verification?", a: "At least one document (Contractor Bill, Completion Certificate, or Site Photo) is required before verification." },
+      { q: "How do I record a milestone payment?", a: "On an Approved bill, click 'Pay Bill'. Enter milestone name, amount, retention, reference, bank, and date." },
+      { q: "Can I reject a submitted bill?", a: "Yes, Finance users can reject Submitted or Approved bills with a mandatory reason." },
+    ]
   },
+  {
+    category: "Contractors & Vendors",
+    items: [
+      { q: "How do I add a new contractor?", a: "Go to Contractors > 'Add Contractor'. Enter company name, contact person, email, phone, banking details, and tax ID." },
+      { q: "What does Blacklisted status mean?", a: "Blacklisted contractors cannot be selected for new bills or jobs. Used for compliance issues." },
+      { q: "How is contractor rating calculated?", a: "Manual 1-5 star rating set internally. Used for vendor performance tracking." },
+    ]
+  },
+  {
+    category: "System & Settings",
+    items: [
+      { q: "How do I change notification preferences?", a: "Go to Settings > Notifications. Toggle email, browser, and critical alerts individually." },
+      { q: "What is Maintenance Mode?", a: "Settings > System > Maintenance Mode. Restricts write operations system-wide for maintenance windows." },
+      { q: "How do I report a bug?", a: "Use the 'Submit Ticket' button in Help Center or email finance-support@sltdigital.lk with details." },
+    ]
+  },
+];
+
+const contacts = [
+  { icon: Mail, label: "Email Support", detail: "finance-support@sltdigital.lk", href: "mailto:finance-support@sltdigital.lk" },
+  { icon: Phone, label: "IT Hotline", detail: "+94 11 234 5678", href: "tel:+94112345678" },
+  { icon: MessageSquare, label: "Internal Helpdesk", detail: "Ext: 4402 (Mon-Fri 8:30-17:00)", href: null },
+];
+
+const resources = [
+  { label: "User Guide (PDF)", icon: FileText, action: () => alert("Download User Guide") },
+  { label: "API Documentation", icon: BookOpen, action: () => alert("Open API Docs") },
+  { label: "Video Tutorials", icon: AlertCircle, action: () => alert("Open Tutorials") },
+  { label: "Release Notes", icon: Shield, action: () => alert("View Release Notes") },
 ];
 
 export default function HelpPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [openFaq, setOpenFaq] = useState(null);
-
-  const filteredFaqs = faqs.filter(
-    (faq) =>
-      faq.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      faq.answer.toLowerCase().includes(searchQuery.toLowerCase()),
-  );
+  const [activeCategory, setActiveCategory] = useState("all");
+  const categories = ["all", ...faqs.map((c) => c.category)];
+  const filteredFaqs = faqs
+    .flatMap((cat) => cat.items.map((item) => ({ ...item, category: cat.category })))
+    .filter((faq) =>
+      (activeCategory === "all" || faq.category === activeCategory) &&
+      faq.q.toLowerCase().includes(searchQuery.toLowerCase())
+    );
 
   return (
     <ProtectedRoute>
-      <div className="min-h-full bg-background p-4 sm:p-6 space-y-6">
-        {/* Header */}
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex flex-col items-center text-center space-y-3">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-medium uppercase tracking-widest">
-                Support Center
-              </div>
-              <h1 className="text-2xl font-medium tracking-tight text-foreground">
-                How can we help you?
-              </h1>
-              <p className="text-muted-foreground max-w-xl text-sm leading-relaxed">
-                Access internal resources, technical support, and financial
-                guidelines for the SLT Digital Procurement Division.
-              </p>
-
-              {/* Search Bar */}
-              <div className="w-full max-w-xl mt-6 relative">
-                <input
-                  type="text"
-                  placeholder="Search for guidelines, security, or technical help..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-4 pr-4 py-3 rounded-lg border border-border bg-background text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
-                />
-              </div>
+      <div className="min-h-full bg-background p-4 sm:p-6 space-y-4">
+        {/* Zen Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-border/50">
+          <div>
+            <div className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-medium uppercase tracking-widest mb-2">
+              Support Center
             </div>
-          </CardContent>
-        </Card>
+            <h1 className="text-base font-semibold tracking-tight text-foreground">
+              Help Center
+            </h1>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Find answers, contact support, and access resources
+            </p>
+          </div>
+        </div>
 
         {/* Quick Contact Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          {[
-            {
-              icon: "Mail",
-              label: "Email Support",
-              detail: "finance-support@sltdigital.lk",
-            },
-            {
-              icon: "Phone",
-              label: "Internal Hotline",
-              detail: "+94 11 234 5678",
-            },
-            {
-              icon: "MessageSquare",
-              label: "IT Helpdesk",
-              detail: "Ext: 4402 (Mon-Fri)",
-            },
-          ].map((item, i) => (
-            <Card key={i}>
-              <CardContent className="p-5 flex flex-col items-center text-center space-y-3">
-                <div className="p-2.5 rounded-lg bg-muted text-foreground">
-                  {item.icon === "Mail" && (
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
-                  )}
-                  {item.icon === "Phone" && (
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                  )}
-                  {item.icon === "MessageSquare" && (
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                  )}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+          {contacts.map((item, i) => (
+            <Card key={i} className="hover:shadow-md transition-shadow">
+              <CardContent className="p-3.5 flex items-center gap-3">
+                <div className="p-2.5 rounded-lg bg-primary/10 text-primary shrink-0">
+                  <item.icon className="w-4.5 h-4.5" />
                 </div>
-                <div>
-                  <h3 className="text-sm font-medium text-foreground">
-                    {item.label}
-                  </h3>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {item.detail}
-                  </p>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-xs font-medium text-foreground truncate">{item.label}</h3>
+                  <p className="text-[10px] text-muted-foreground truncate">{item.detail}</p>
                 </div>
+                {item.href && (
+                  <a href={item.href} className="text-primary hover:underline text-xs font-medium">Contact</a>
+                )}
               </CardContent>
             </Card>
           ))}
         </div>
 
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Left Side: FAQs */}
-          <div className="lg:col-span-8 space-y-3">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="h-5 w-5 rounded bg-primary/10 flex items-center justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
-              </div>
-              <h2 className="text-base font-medium text-foreground">Common Questions</h2>
-            </div>
-
-            <div className="space-y-2">
-              {filteredFaqs.map((faq, idx) => (
-                <Card key={idx}>
-                  <button
-                    onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
-                    className="w-full flex items-center justify-between p-4 text-left transition-colors hover:bg-muted/50"
-                  >
-                    <span className="text-sm font-medium text-foreground">
-                      {faq.question}
-                    </span>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="16"
-                      height="16"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className={`text-muted-foreground transition-transform ${
-                        openFaq === idx ? "rotate-180" : ""
-                      }`}
-                    >
-                      <path d="m6 9 6 6 6-6"/>
-                    </svg>
-                  </button>
-                  {openFaq === idx && (
-                    <div className="px-4 pb-4 text-sm text-muted-foreground leading-relaxed border-t border-border pt-3 bg-muted/30">
-                      {faq.answer}
-                    </div>
-                  )}
-                </Card>
-              ))}
-            </div>
+        {/* Search + Category Tabs */}
+        <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+          <div className="relative w-full sm:w-auto max-w-md">
+            <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder="Search help articles..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="h-8 text-xs pl-8 bg-card border-border"
+            />
           </div>
 
-          {/* Right Side: Resources & CTA */}
-          <div className="lg:col-span-4 space-y-4">
-            {/* Resources Section */}
-            <div className="space-y-2">
-              <div className="flex items-center gap-3">
-                <div className="h-5 w-5 rounded bg-primary/10 flex items-center justify-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/></svg>
-                </div>
-                <h2 className="text-base font-medium text-foreground">Resources</h2>
-              </div>
-              <div className="space-y-2">
-                {[
-                  { title: "Finance Guidelines", size: "2.4 MB" },
-                  { title: "User Manual v2.0", size: "5.1 MB" },
-                  { title: "Security Protocols", size: "1.2 MB" },
-                ].map((res, i) => (
-                  <Card key={i}>
-                    <CardContent className="p-4 flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-md bg-muted text-muted-foreground">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/></svg>
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium text-foreground">
-                            {res.title}
-                          </p>
-                          <p className="text-[10px] text-muted-foreground uppercase">
-                            {res.size} • PDF
-                          </p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </div>
+          <div className="flex items-center gap-1 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0">
+            {categories.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => { setActiveCategory(cat); setOpenFaq(null); }}
+                className={`px-2.5 py-1 text-[10px] rounded-md font-medium transition-colors whitespace-nowrap ${
+                  activeCategory === cat
+                    ? "bg-foreground text-background"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                }`}
+              >
+                {cat === "all" ? "All Topics" : cat}
+              </button>
+            ))}
+          </div>
+        </div>
 
-            {/* Support CTA Card */}
-            <Card className="bg-primary text-primary-foreground">
-              <CardContent className="p-5 space-y-4">
-                <h3 className="text-base font-medium">
-                  Need Technical Assistance?
-                </h3>
-                <p className="text-xs text-primary-foreground/80 leading-relaxed">
-                  Can not find what you are looking for? Raise a ticket
-                  and our IT team will respond within 2 hours.
-                </p>
-                <Button className="w-full bg-white text-primary hover:bg-white/90">
-                  Submit Support Ticket
-                </Button>
+        {/* FAQ Section */}
+        <div className="space-y-2">
+          {filteredFaqs.length === 0 ? (
+            <Card className="p-8 text-center">
+              <AlertCircle className="w-8 h-8 mx-auto mb-2 text-muted-foreground/50" />
+              <p className="text-sm font-medium text-foreground">No articles found</p>
+              <p className="text-xs text-muted-foreground mt-1">Try adjusting your search or filter</p>
+            </Card>
+          ) : (
+            filteredFaqs.map((faq, idx) => (
+              <Card key={idx} className="overflow-hidden">
+                <button
+                  onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
+                  className="w-full flex items-center justify-between p-3.5 text-left hover:bg-muted/50 transition-colors"
+                >
+                  <span className="text-xs font-medium text-foreground pr-4">{faq.q}</span>
+                  {openFaq === idx ? <ChevronUp className="w-4 h-4 text-muted-foreground flex-shrink-0" /> : <ChevronDown className="w-4 h-4 text-muted-foreground flex-shrink-0" />}
+                </button>
+                {openFaq === idx && (
+                  <div className="px-3.5 pb-3.5 text-xs text-muted-foreground border-t border-border pt-2">{faq.a}</div>
+                )}
+              </Card>
+            ))
+          )}
+        </div>
+
+        {/* Resources & Quick Actions */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-2.5 pt-2 border-t border-border/50">
+          <div className="lg:col-span-2 space-y-2.5">
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center gap-2 text-sm"><BookOpen className="w-3.5 h-3.5 text-primary" /> Resources</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2 pt-0">
+                {resources.map((r, i) => (
+                  <Button
+                    key={i}
+                    variant="outline"
+                    className="w-full justify-start gap-2 text-xs h-8"
+                    onClick={r.action}
+                  >
+                    <r.icon className="w-3.5 h-3.5" />
+                    {r.label}
+                  </Button>
+                ))}
+              </CardContent>
+            </Card>
+          </div>
+          <div className="lg:col-span-2 space-y-2.5">
+            <Card className="bg-gradient-to-br from-primary to-primary/80 text-primary-foreground">
+              <CardContent className="p-3.5 space-y-3">
+                <div className="flex items-center gap-2">
+                  <LifeBuoy className="w-4.5 h-4.5" />
+                  <span className="text-sm font-medium">Need Help?</span>
+                </div>
+                <p className="text-xs text-primary-foreground/80">Our IT team responds within 2 business hours during business days.</p>
+                <Button className="w-full bg-white text-primary hover:bg-white/90 h-8 text-xs" onClick={() => alert("Submit Ticket")}>Submit Support Ticket</Button>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-3.5 space-y-2">
+                <p className="text-xs font-medium flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> System Status: Operational</p>
+                <p className="text-xs font-medium flex items-center gap-1.5"><Users className="w-3.5 h-3.5 text-primary" /> Last updated: {new Date().toLocaleDateString()}</p>
+                <p className="text-xs font-medium flex items-center gap-1.5"><Settings className="w-3.5 h-3.5 text-amber-500" /> Version: 2.1.0</p>
               </CardContent>
             </Card>
           </div>

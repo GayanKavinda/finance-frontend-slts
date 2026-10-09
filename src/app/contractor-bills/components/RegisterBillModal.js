@@ -1,6 +1,24 @@
 "use client";
 
-import { X } from "lucide-react";
+import FormModal from "@/components/ui/FormModal";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
+
+const Field = ({ label, children, required }) => (
+  <div className="space-y-1.5">
+    <Label className="text-[11px] text-muted-foreground uppercase tracking-wider">
+      {label}{required && <span className="text-destructive ml-1">*</span>}
+    </Label>
+    {children}
+  </div>
+);
 
 export default function RegisterBillModal({
   isOpen,
@@ -11,115 +29,84 @@ export default function RegisterBillModal({
   jobs = [],
   contractors = [],
 }) {
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 bg-black/60  z-50 flex items-center justify-center p-4">
-      <div className="bg-white dark:bg-gray-800 w-full max-w-xl rounded-2xl shadow-sm overflow-hidden animate-in fade-in zoom-in duration-200">
-        <div className="px-6 py-5 flex justify-between items-center border-b border-gray-100 dark:border-gray-700">
-          <h2 className="text-xl font-medium text-foreground">Register Contractor Bill</h2>
-          <button
-            type="button"
-            onClick={onClose}
-            className="p-2 hover:bg-muted rounded-full transition-colors"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-        <form onSubmit={onSubmit} className="p-6 space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <label className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-                Job
-              </label>
-              <select
-                required
-                value={form.job_id}
-                onChange={(e) =>
-                  setForm({ ...form, job_id: e.target.value })
-                }
-                className="w-full px-4 py-3 bg-background border border-input rounded-xl text-sm font-medium text-foreground outline-none focus:ring-2 focus:ring-primary/20"
-              >
-                <option value="">Select Job</option>
+    <FormModal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Register Contractor Bill"
+      description="Create a new contractor bill draft for verification workflow"
+      onSubmit={onSubmit}
+      submitText="Create Bill Draft"
+      size="lg"
+    >
+      <div className="space-y-3">
+        <div className="grid grid-cols-2 gap-2.5">
+          <Field label="Job" required>
+            <Select value={form.job_id} onValueChange={(value) => setForm({...form, job_id: value})}>
+              <SelectTrigger className="h-8 text-xs">
+                <SelectValue placeholder="Select Job..." />
+              </SelectTrigger>
+              <SelectContent>
                 {jobs.map((j) => (
-                  <option key={j.id} value={j.id}>
-                    {j.name}
-                  </option>
+                  <SelectItem key={j.id} value={j.id}>{j.name}</SelectItem>
                 ))}
-              </select>
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-                Contractor
-              </label>
-              <select
-                required
-                value={form.contractor_id}
-                onChange={(e) =>
-                  setForm({ ...form, contractor_id: e.target.value })
-                }
-                className="w-full px-4 py-3 bg-background border border-input rounded-xl text-sm font-medium text-foreground outline-none focus:ring-2 focus:ring-primary/20"
-              >
-                <option value="">Select Contractor</option>
+              </SelectContent>
+            </Select>
+          </Field>
+          <Field label="Contractor" required>
+            <Select value={form.contractor_id} onValueChange={(value) => setForm({...form, contractor_id: value})}>
+              <SelectTrigger className="h-8 text-xs">
+                <SelectValue placeholder="Select Contractor..." />
+              </SelectTrigger>
+              <SelectContent>
                 {contractors.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
+                  <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
                 ))}
-              </select>
-            </div>
-          </div>
-          <div className="space-y-1.5">
-            <label className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-              Bill Number
-            </label>
-            <input
-              required
-              value={form.bill_number}
-              onChange={(e) =>
-                setForm({ ...form, bill_number: e.target.value })
-              }
-              className="w-full px-4 py-3 bg-background border border-input rounded-xl text-sm font-medium text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/20"
+              </SelectContent>
+            </Select>
+          </Field>
+        </div>
+
+        <Field label="Bill Number" required>
+          <Input
+            required
+            value={form.bill_number}
+            onChange={(e) => setForm({...form, bill_number: e.target.value})}
+            placeholder="e.g. CB-2026-001"
+            className="h-8 text-xs"
+          />
+        </Field>
+
+        <div className="grid grid-cols-2 gap-2.5">
+          <Field label="Amount (LKR)">
+            <Input
+              type="number"
+              value={form.amount}
+              onChange={(e) => setForm({...form, amount: e.target.value})}
+              placeholder="0"
+              className="h-8 text-xs"
             />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <label className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-                Amount (LKR)
-              </label>
-              <input
-                type="number"
-                required
-                value={form.amount}
-                onChange={(e) =>
-                  setForm({ ...form, amount: e.target.value })
-                }
-                className="w-full px-4 py-3 bg-background border border-input rounded-xl text-sm font-medium text-foreground placeholder:text-muted-foreground outline-none focus:ring-2 focus:ring-primary/20"
-              />
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-                Date
-              </label>
-              <input
-                type="date"
-                required
-                value={form.bill_date}
-                onChange={(e) =>
-                  setForm({ ...form, bill_date: e.target.value })
-                }
-                className="w-full px-4 py-3 bg-background border border-input rounded-xl text-sm font-medium text-foreground outline-none focus:ring-2 focus:ring-primary/20"
-              />
-            </div>
-          </div>
-          <button
-            type="submit"
-            className="w-full py-3 bg-primary text-primary-foreground rounded-xl font-medium shadow-sm hover:bg-primary/90 transition-colors"
-          >
-            Create Bill Draft
-          </button>
-        </form>
+          </Field>
+          <Field label="Bill Date" required>
+            <Input
+              type="date"
+              required
+              value={form.bill_date}
+              onChange={(e) => setForm({...form, bill_date: e.target.value})}
+              className="h-8 text-xs"
+            />
+          </Field>
+        </div>
+
+        <Field label="Notes">
+          <input
+            value={form.notes}
+            onChange={(e) => setForm({...form, notes: e.target.value})}
+            placeholder="Additional notes..."
+            className="w-full px-3 py-2 bg-background border border-border rounded-md text-sm outline-none focus:ring-2 focus:ring-primary/20"
+          />
+        </Field>
       </div>
-    </div>
+    </FormModal>
   );
 }
