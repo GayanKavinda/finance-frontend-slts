@@ -7,9 +7,16 @@ export default defineConfig({
   workers: 1,
   retries: 0,
   timeout: 45000,
+
+  // Always generate HTML report + live list output
+  reporter: [
+    ['list'],
+    ['html', { outputFolder: 'playwright-report', open: 'never' }],
+  ],
+
   use: {
     baseURL: 'http://localhost:3000',
-    trace: 'on-first-retry',
+    trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
     actionTimeout: 10000,
     navigationTimeout: 20000,
