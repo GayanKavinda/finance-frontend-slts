@@ -21,6 +21,14 @@ import {
   Use,
   XCircle,
   Eye,
+  Phone,
+  MapPin,
+  Globe,
+  Calendar,
+  UserCircle,
+  Building2,
+  Briefcase,
+  FileText,
 } from "lucide-react";
 import ImageCropModal from "@/components/ImageCropModal";
 import Image from "next/image";
@@ -28,6 +36,20 @@ import Image from "next/image";
 // Validation Schemas
 const profileSchema = yup.object({
   name: yup.string().required("Name is required").min(2, "Too short"),
+  phone: yup.string().max(30).nullable(),
+  address: yup.string().max(500).nullable(),
+  city: yup.string().max(100).nullable(),
+  country: yup.string().max(100).nullable(),
+  postal_code: yup.string().max(30).nullable(),
+  date_of_birth: yup
+    .date()
+    .max(new Date(), "Date of birth cannot be in the future")
+    .nullable()
+    .transform((value, originalValue) => (originalValue === "" ? null : value)),
+  gender: yup.string().oneOf(["Male", "Female", "Other"]).nullable(),
+  company: yup.string().max(255).nullable(),
+  job_title: yup.string().max(255).nullable(),
+  tax_id: yup.string().max(100).nullable(),
 });
 
 const emailChangeSchema = yup.object({
@@ -98,7 +120,21 @@ export default function PersonalDetails({ user, refetch }) {
   // Forms
   const profileForm = useForm({
     resolver: yupResolver(profileSchema),
-    defaultValues: { name: user?.name || "" },
+    defaultValues: {
+      name: user?.name || "",
+      phone: user?.phone || "",
+      address: user?.address || "",
+      city: user?.city || "",
+      country: user?.country || "",
+      postal_code: user?.postal_code || "",
+      date_of_birth: user?.date_of_birth
+        ? String(user.date_of_birth).slice(0, 10)
+        : "",
+      gender: user?.gender || "",
+      company: user?.company || "",
+      job_title: user?.job_title || "",
+      tax_id: user?.tax_id || "",
+    },
     mode: "onTouched",
   });
 
@@ -109,7 +145,21 @@ export default function PersonalDetails({ user, refetch }) {
 
   useEffect(() => {
     if (user) {
-      profileForm.reset({ name: user.name || "" });
+      profileForm.reset({
+        name: user.name || "",
+        phone: user.phone || "",
+        address: user.address || "",
+        city: user.city || "",
+        country: user.country || "",
+        postal_code: user.postal_code || "",
+        date_of_birth: user.date_of_birth
+          ? String(user.date_of_birth).slice(0, 10)
+          : "",
+        gender: user.gender || "",
+        company: user.company || "",
+        job_title: user.job_title || "",
+        tax_id: user.tax_id || "",
+      });
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setAvatarPreview(user?.avatar_url || null);
     }
@@ -498,6 +548,131 @@ export default function PersonalDetails({ user, refetch }) {
                 value={user?.email || ""}
                 disabled
                 className="w-full px-4 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 text-sm cursor-not-allowed"
+              />
+            </Field>
+            <Field
+              label="Phone Number"
+              icon={Phone}
+              iconColor="text-cyan-500"
+              error={profileForm.formState.errors.phone?.message}
+            >
+              <input
+                {...profileForm.register("phone")}
+                className="w-full px-4 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                placeholder="+94 77 123 4567"
+              />
+            </Field>
+            <Field
+              label="Date of Birth"
+              icon={Calendar}
+              iconColor="text-indigo-500"
+              error={profileForm.formState.errors.date_of_birth?.message}
+            >
+              <input
+                type="date"
+                {...profileForm.register("date_of_birth")}
+                className="w-full px-4 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+              />
+            </Field>
+            <Field
+              label="Gender"
+              icon={UserCircle}
+              iconColor="text-rose-500"
+              error={profileForm.formState.errors.gender?.message}
+            >
+              <select
+                {...profileForm.register("gender")}
+                defaultValue=""
+                className="w-full px-4 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+              >
+                <option value="">Select</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
+              </select>
+            </Field>
+            <Field
+              label="Address"
+              icon={MapPin}
+              iconColor="text-emerald-500"
+              error={profileForm.formState.errors.address?.message}
+            >
+              <input
+                {...profileForm.register("address")}
+                className="w-full px-4 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                placeholder="123 Main Street"
+              />
+            </Field>
+            <Field
+              label="City"
+              icon={MapPin}
+              iconColor="text-emerald-500"
+              error={profileForm.formState.errors.city?.message}
+            >
+              <input
+                {...profileForm.register("city")}
+                className="w-full px-4 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                placeholder="Colombo"
+              />
+            </Field>
+            <Field
+              label="Country"
+              icon={Globe}
+              iconColor="text-sky-500"
+              error={profileForm.formState.errors.country?.message}
+            >
+              <input
+                {...profileForm.register("country")}
+                className="w-full px-4 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                placeholder="Sri Lanka"
+              />
+            </Field>
+            <Field
+              label="Postal Code"
+              icon={Globe}
+              iconColor="text-sky-500"
+              error={profileForm.formState.errors.postal_code?.message}
+            >
+              <input
+                {...profileForm.register("postal_code")}
+                className="w-full px-4 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                placeholder="00100"
+              />
+            </Field>
+            <Field
+              label="Company / Organization"
+              icon={Building2}
+              iconColor="text-violet-500"
+              error={profileForm.formState.errors.company?.message}
+            >
+              <input
+                {...profileForm.register("company")}
+                className="w-full px-4 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                placeholder="Acme Corp"
+              />
+            </Field>
+            <Field
+              label="Job Title"
+              icon={Briefcase}
+              iconColor="text-orange-500"
+              error={profileForm.formState.errors.job_title?.message}
+            >
+              <input
+                {...profileForm.register("job_title")}
+                className="w-full px-4 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                placeholder="Manager"
+              />
+            </Field>
+            <Field
+              label="Tax ID / National ID"
+              icon={FileText}
+              iconColor="text-slate-500"
+              error={profileForm.formState.errors.tax_id?.message}
+            >
+              <input
+                {...profileForm.register("tax_id")}
+                className="w-full px-4 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/50 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                placeholder="123456789V"
               />
             </Field>
             <div className="sm:col-span-2 flex justify-end">

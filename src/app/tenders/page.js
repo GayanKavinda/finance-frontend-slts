@@ -12,6 +12,7 @@ import {
   downloadTenderAwardLetter,
 } from "@/lib/procurement";
 import { toast } from "react-hot-toast";
+import { exportToCSV } from "@/lib/exportUtils";
 import {
   Plus,
   Search,
@@ -21,6 +22,7 @@ import {
   ChevronLeft,
   ChevronRight,
   FileText,
+  Download,
 } from "lucide-react";
 import StatusBadge from "@/components/ui/StatusBadge";
 import FormModal from "@/components/ui/FormModal";
@@ -157,6 +159,26 @@ export default function TendersPage() {
     }
   };
 
+  const handleExportCSV = () => {
+    if (!tenders || tenders.length === 0) {
+      toast.error("No tender records available to export");
+      return;
+    }
+    exportToCSV(tenders, "tenders_register_export", [
+      { key: "tender_number", label: "Tender Number" },
+      { key: "name", label: "Tender Title / Scope" },
+      { key: "customer.name", label: "Customer / Client" },
+      { key: "status", label: "Status" },
+      { key: "budget", label: "Budget (LKR)" },
+      { key: "awarded_amount", label: "Awarded Amount (LKR)" },
+      { key: "start_date", label: "Start Date" },
+      { key: "end_date", label: "End Date" },
+      { key: "jobs_count", label: "Linked Jobs Count" },
+      { key: "description", label: "Description" },
+    ]);
+    toast.success("Tenders exported to Excel/CSV successfully");
+  };
+
   const total = meta.total ?? tenders.length;
   const openCount = tenders.filter((t) => t.status === "Open").length;
 
@@ -175,6 +197,15 @@ export default function TendersPage() {
             </p>
           </div>
           <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleExportCSV}
+              className="h-8 text-xs gap-1.5"
+            >
+              <Download className="w-3.5 h-3.5" />
+              Export CSV
+            </Button>
             <Button
               size="sm"
               onClick={() => openDrawer()}

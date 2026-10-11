@@ -18,16 +18,17 @@ const Tabs = ({ className, children, value, onChange, defaultValue, ...props }) 
   const [uncontrolledValue, setUncontrolledValue] = React.useState(defaultValue);
   const activeValue = isControlled ? value : uncontrolledValue;
 
-  const handleChange = (val) => {
+  const handleChange = React.useCallback((val) => {
     if (!isControlled) {
       setUncontrolledValue(val);
     }
     onChange?.(val);
-  };
+  }, [isControlled, onChange]);
 
   const contextValue = React.useMemo(
     () => ({ activeValue, onChange: handleChange }),
-    [activeValue]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [activeValue, handleChange]
   );
 
   return (
