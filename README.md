@@ -2,15 +2,24 @@
 
 <div align="center">
 
-![Next.js](https://img.shields.io/badge/Next.js-15-black?style=for-the-badge&logo=next.js&logoColor=white)
+![Next.js](https://img.shields.io/badge/Next.js-16-000000?style=for-the-badge&logo=next.js&logoColor=white)
 ![React](https://img.shields.io/badge/React-19-20232a?style=for-the-badge&logo=react&logoColor=61DAFB)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.0-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)
 
 <p align="center">
-  <strong>A modern, secure financial dashboard built for performance and usability.</strong>
+  <strong>ProcureX — a secure, production-grade finance & procurement dashboard.</strong><br/>
+  Built for the Internal Procurement Division with real-time data, RBAC, and an award-letter / PDF-ready workflow.
 </p>
 
-[Features](#-features) • [Tech Stack](#-tech-stack) • [Getting Started](#-getting-started) • [Folder Structure](#-folder-structure) • [Main Project](../README.md)
+<p>
+  <a href="#-screenshots">Screenshots</a> •
+  <a href="#-features">Features</a> •
+  <a href="#-tech-stack">Tech Stack</a> •
+  <a href="#-getting-started">Getting Started</a> •
+  <a href="#-testing">Testing</a> •
+  <a href="../finance-backend/README.md">Backend API</a>
+</p>
 
 </div>
 
@@ -18,95 +27,195 @@
 
 ## 📝 About The Project
 
-**Finance App Frontend** is the robust client-side interface for the Finance App ecosystem. It interacts seamlessly with a Laravel API to provide users with a secure, responsive, and intuitive way to manage their financial data.
+**Finance App Frontend** (a.k.a. **ProcureX**) is the client interface of the Finance App ecosystem. It is a full finance & procurement operations console — tender pipeline, job portfolio, purchase orders, contractor bills, invoicing and banking — backed by a secure [Laravel API](../finance-backend/README.md) and **Laravel Sanctum** cookie-based authentication.
 
-Built with **Next.js (App Router)** and **Tailwind CSS**, it prioritizes speed, SEO, and developer experience. Authentication is handled securely via **Laravel Sanctum** using HttpOnly cookies.
+Built with the **Next.js App Router** and **Tailwind CSS v4**, it delivers fast navigation, server-friendly rendering, light/dark theming, and a component system designed for prod use.
+
+| Design philosophy | Implementation |
+| :--- | :--- |
+| Zero-trust UI | Every route and action is permission-gated; nothing renders without entitlement |
+| Feedback first | Toasts, loading overlays, and workflow roadmaps keep users oriented at all times |
+| Keyboard & screen-reader friendly | Radix primitives, semantic landmarks, labelled controls (verified by the Playwright a11y suite) |
 
 ## ✨ Features
 
-- **🔐 Secure Authentication**: Full Login and Registration flow using HttpOnly Cookies.
-- **⚡ Modern Architecture**: Built on Next.js 15 App Router for server-side rendering and lightning-fast navigation.
-- **🎨 Beautiful UI**: Styled with Tailwind CSS for a fully responsive and clean aesthetic.
-- **✅ Form Validation**: Robust client-side validation using `react-hook-form` and `yup`.
-- **🔔 Real-time Feedback**: Interactive toast notifications via `notistack`.
-- **🛡️ Protected Routes**: Route guards to ensure sensitive pages are only accessible to authenticated users.
+- **🔐 End-to-end security** — Sanctum SPA auth over HttpOnly cookies with CSRF bootstrapping, auto-logout on idle, and forced password-reset via email OTP.
+- **🧭 Permission-aware navigation** — the sidebar, dashboards, and actions re-render per role/permission (`usePermission` + `ProtectedRoute`).
+- **📊 Executive dashboard** — KPI tiles, live trend charts (Recharts), collection-efficiency meters, and recent activity.
+- **🧾 Invoice lifecycle** — `Draft → Tax Generated → Submitted → Approved → Payment Received → Banked` with audit trail, document uploads, one-click PDF + internal receipt download, CSV export.
+- **🏗️ Procurement suite** — tenders, jobs, purchase orders with status history and audit trail, PDF download.
+- **👷 Contractor bills** — multi-stage bill workflow: attach documents → verify → submit → approve/reject → pay, with partial payments and retention.
+- **🗂️ Master data** — customers, contractors, contractor quotations & selection.
+- **🛠️ Administration** — user directory, role & permission designer, audit logs, and system telemetry (Super Admin).
+- **🔔 Notifications** — unread counters and an in-app notification center.
+- **🎨 Theming** — light/dark mode via `next-themes` with CSS-variable color tokens; motion via Framer Motion + GSAP; cinematic landing slideshow.
+
+## 📸 Screenshots
+
+| Landing & Auth | Executive Dashboard |
+| :---: | :---: |
+| <img src="docs/screenshots/landing.jpg" width="100%" alt="Landing page"/> | <img src="docs/screenshots/dashboard.png" width="100%" alt="Dashboard"/> |
+
+| Invoice Ledger | Invoice Detail & Workflow |
+| :---: | :---: |
+| <img src="docs/screenshots/invoices.png" width="100%" alt="Invoices"/> | <img src="docs/screenshots/invoice-detail.png" width="100%" alt="Invoice detail"/> |
+
+| Contractor Bills | Secure Sign-in |
+| :---: | :---: |
+| <img src="docs/screenshots/contractor-bills.png" width="100%" alt="Contractor bills"/> | <img src="docs/screenshots/signin.png" width="100%" alt="Sign in"/> |
+
+<details>
+<summary><b>More screenshots — purchase orders, access control, users, jobs & more</b></summary>
+<br/>
+
+| Purchase Orders | Roles & Permissions |
+| :---: | :---: |
+| <img src="docs/screenshots/purchase-orders.png" width="100%" alt="Purchase orders"/> | <img src="docs/screenshots/admin-roles.png" width="100%" alt="Roles & permissions"/> |
+
+| User Management | Sign-up |
+| :---: | :---: |
+| <img src="docs/screenshots/admin-users.png" width="100%" alt="User management"/> | <img src="docs/screenshots/signup.png" width="100%" alt="Sign up"/> |
+
+| Tenders | Jobs |
+| :---: | :---: |
+| <img src="docs/screenshots/tenders.png" width="100%" alt="Tenders"/> | <img src="docs/screenshots/jobs.png" width="100%" alt="Jobs"/> |
+
+</details>
+
+> Screenshots are captured at 1440×900 against the seeded demo dataset. Sample credentials after `php artisan migrate --seed`: `superadmin@finance.com` / `password`.
 
 ## 🛠 Tech Stack
 
-- **Framework**: [Next.js 15](https://nextjs.org/)
-- **Library**: [React 19](https://react.dev/)
-- **Styling**: [Tailwind CSS v4](https://tailwindcss.com/)
-- **HTTP Client**: [Axios](https://axios-http.com/)
-- **Forms**: [React Hook Form](https://react-hook-form.com/) + [Yup](https://github.com/jquense/yup)
-- **Notifications**: [Notistack](https://notistack.com/)
+| Concern | Technology |
+| :--- | :--- |
+| Framework | [Next.js 16](https://nextjs.org/) (App Router, React Compiler enabled) |
+| UI Runtime | [React 19](https://react.dev/) |
+| Styling | [Tailwind CSS v4](https://tailwindcss.com/) with CSS-variable tokens |
+| Components | [Radix UI](https://www.radix-ui.com/) primitives (`src/components/ui`) |
+| Charts | [Recharts](https://recharts.org/) |
+| Animation | [Framer Motion](https://www.framer.com/motion/) · [GSAP](https://gsap.com/) |
+| Forms | [React Hook Form](https://react-hook-form.com/) + [Yup](https://github.com/jquense/yup) |
+| HTTP | [Axios](https://axios-http.com/) with `withCredentials` Sanctum sessions |
+| Feedback | [Notistack](https://notistack.com/) · [React Hot Toast](https://react-hot-toast.com/) |
+| Icons | [Lucide](https://lucide.dev/) |
+| Testing | [Playwright](https://playwright.dev/) (QA, visual regression, responsive, a11y, RBAC) |
+
+## 🏗 Architecture
+
+The browser never talks to the API cross-domain — Next.js **rewrites proxy** `/api/*` and `/sanctum/*` to the Laravel backend, so sessions always appear same-origin (works in dev and behind Netlify/NGINX).
+
+```mermaid
+graph LR
+    A[Browser<br/>localhost:3000] -->|/api/*, /sanctum/*<br/>rewritten| B[Next.js Server]
+    B -->|proxy| C[Laravel API<br/>127.0.0.1:8000]
+    C --> D[(MySQL)]
+    C -->|HttpOnly XSRF + session cookies| A
+```
+
+## 📂 Folder Structure
+
+```text
+finance-frontend/
+├── src/
+│   ├── app/                        # App Router pages
+│   │   ├── layout.js               # Root layout + providers
+│   │   ├── page.js                 # Cinematic landing page
+│   │   ├── dashboard/              # Executive dashboard
+│   │   ├── invoices/               # Ledger + [id] detail, /create
+│   │   ├── contractor-bills/       # Bill workflow + components/
+│   │   ├── purchase-orders/        # PO register + components/
+│   │   ├── tenders/ · jobs/ · customers/ · contractors/
+│   │   ├── admin/                  # users/ · roles/ · audit-logs/
+│   │   ├── profile/ · settings/ · notifications/ · help/ · system-logs/
+│   │   └── signin/ · signup/ · forgot-password/ · reset-password/
+│   ├── components/                 # Layout, Navbar, Sidebar, ProtectedRoute …
+│   │   └── ui/                     # Radix-based design system primitives
+│   ├── contexts/                   # Auth · Theme · Scroll contexts
+│   ├── hooks/                      # usePermission · useAutoLogout · …
+│   ├── lib/                        # axios instance, API modules, utils
+│   ├── constants/                  # navigation registry, slides, config
+│   └── tests/                      # Playwright QA suite
+├── docs/screenshots/               # README imagery
+├── next.config.mjs                 # rewrites, image hosts, redirects
+├── playwright.config.js            # QA config (chromium)
+└── package.json
+```
 
 ## 🚀 Getting Started
 
-Follow these steps to get a local copy up and running.
-
 ### Prerequisites
 
-- Node.js 18+ installed on your machine.
-- A running instance of the **Finance App Backend** (Laravel) at `http://127.0.0.1:8000`.
+- Node.js **18+** (Node 20 LTS recommended)
+- A running **Finance App Backend** (see [backend README](../finance-backend/README.md)) at `http://127.0.0.1:8000`
 
 ### Installation
 
-1. **Clone the repository**
+1. **Clone & install**
 
    ```bash
-   git clone https://github.com/yourusername/finance-frontend.git
+   git clone <your-repo-url> finance-frontend
    cd finance-frontend
-   ```
-
-2. **Install dependencies**
-
-   ```bash
    npm install
    ```
 
-3. **Configure Environment**
-   Ensure your backend is running. By default, this app expects the API at `http://127.0.0.1:8000`.
+2. **Configure the API target (optional)**
 
-4. **Run the development server**
+   ```bash
+   # .env.local — defaults to http://127.0.0.1:8000 when unset
+   NEXT_PUBLIC_API_URL=http://127.0.0.1:8000
+   ```
+
+3. **Run the dev server**
 
    ```bash
    npm run dev
    ```
 
-5. **Open in Browser**
-   Navigate to [http://localhost:3000](http://localhost:3000) (or `http://127.0.0.1:3000` to avoid cookie domain issues).
+4. **Open the app** — [http://localhost:3000](http://localhost:3000)
 
-## 📂 Folder Structure
+> Use `http://localhost:3000` or `http://127.0.0.1:3000` consistently; mixing hostnames can break cookie scoping with Sanctum.
 
-A quick look at the top-level structure of the project:
+### Common Scripts
 
-```
-finance-frontend/
-├── app/                  # Next.js App Router pages
-│   ├── dashboard/        # Protected Dashboard routes
-│   ├── signin/           # Authentication pages
-│   ├── signup/
-│   ├── layout.js         # Root layout
-│   └── page.js           # Landing page
-├── public/               # Static assets
-├── src/
-│   ├── components/       # Reusable UI components
-│   ├── context/          # React Context (Auth, Global State)
-│   └── lib/              # Utilities (Axios config, Auth helpers)
-├── next.config.mjs       # Next.js configuration
-├── package.json          # Project dependencies
-└── README.md             # Project documentation
-```
+| Command | Purpose |
+| :--- | :--- |
+| `npm run dev` | Dev server on port 3000 |
+| `npm run build` | Production build |
+| `npm start` | Serve a production build |
+| `npm run lint` | ESLint (Next.js config) |
+| `npx playwright test` | Full QA suite (requires both servers running) |
+
+## 🧪 Testing
+
+The Playwright suite in `src/tests/` covers security, resilience, and visuals:
+
+| Spec | Focus |
+| :--- | :--- |
+| `rbac_security.spec.js` | Permission gating, route guards, session behavior |
+| `edge_cases.spec.js` | Validation boundaries, throttling, wrong-password flows, empty states |
+| `file_workflows.spec.js` | Document upload/download across modules |
+| `mock_api.spec.js` | Mocked API payloads, empty-state rendering, confirm dialogs |
+| `qa_full_suite.spec.js` | End-to-end module walkthrough (bills, ledger, users, notifications) |
+| `responsive_devices.spec.js` | Mobile / tablet / desktop layouts |
+| `visual_regression.spec.js` | Snapshot diffs for header, sidebar, sign-in |
+| `network_resilience.spec.js` | Offline / slow-API behavior |
+| `accessibility.spec.js` | Landmarks, labels, contrast checks |
+
+Run a single area: `npx playwright test src/tests/rbac_security.spec.js`.
+
+## 🌐 Deployment
+
+For a production stack (frontend on Netlify, API on a Docker host, managed MySQL), see the root [`deployment-guide.md`](../deployment-guide.md). Key knobs:
+
+- `NEXT_PUBLIC_API_URL` — the origin Next.js proxies to.
+- Set `SESSION_DOMAIN=null` and whitelist the site under `SANCTUM_STATEFUL_DOMAINS` on the API side.
+- Build memory headroom: `NODE_OPTIONS=--max-old-space-size=4096` on CI.
 
 ## 🤝 Contributing
 
-Contributions are what make the open-source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
-
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+1. Fork the project and create a branch (`git checkout -b feature/amazing-feature`)
+2. Follow the [frontend standards](../frontend-standards.md) — components under 400–500 lines, no inline modals, semantics-first Tailwind tokens
+3. Commit with a clear message and open a pull request
 
 ## 📄 License
 
@@ -115,5 +224,5 @@ Distributed under the MIT License. See `LICENSE` for more information.
 ---
 
 <div align="center">
-  Built with ❤️ by <strong>Gayan Kavinda</strong>
+  Built with ❤️ by <strong>Gayan Kavinda</strong> · <a href="../finance-backend/README.md">Explore the API →</a>
 </div>
