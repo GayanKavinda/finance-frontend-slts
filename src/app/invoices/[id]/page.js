@@ -24,6 +24,7 @@ import {
   canSubmitInvoice,
   canViewAuditTrail,
   canEditInvoice,
+  canCreateInvoice,
 } from "@/lib/permissions";
 import api from "@/lib/axios";
 import { useAuth } from "@/contexts/AuthContext";
@@ -94,6 +95,28 @@ export default function InvoiceDetailPage() {
       loadInvoice();
     } catch (e) {
       toast.error(e.response?.data?.message ?? "Submit failed.");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleGenerateTaxInvoice = async () => {
+    setActionLoading(true);
+    try {
+      const amount = Number(invoice.invoice_amount || 0);
+      const taxPercentage = 18;
+      const taxAmount = Math.round(amount * taxPercentage) / 100;
+      await api.post("/tax-invoices", {
+        invoice_id: invoice.id,
+        tax_invoice_number: `TAX-${invoice.invoice_number}`,
+        tax_percentage: taxPercentage,
+        tax_amount: taxAmount,
+        total_amount: amount + taxAmount,
+      });
+      toast.success("Tax invoice generated.");
+      loadInvoice();
+    } catch (e) {
+      toast.error(e.response?.data?.message ?? "Failed to generate tax invoice.");
     } finally {
       setActionLoading(false);
     }
@@ -542,20 +565,40 @@ export default function InvoiceDetailPage() {
                   Statutory tax invoice generated for Sri Lanka Inland Revenue compliance.
                 </p>
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleDownloadPdf}
-                disabled={downloadingPdf}
-                className="h-8 gap-1.5 text-xs shadow-xs"
-              >
-                {downloadingPdf ? (
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                ) : (
-                  <Download className="w-3.5 h-3.5" />
-                )}
-                Download PDF
-              </Button>
+              <div className="flex items-center gap-2">
+                {invoice.status === "Draft" &&
+                  !invoice.tax_invoice &&
+                  canCreateInvoice(permissions) && (
+                    <Button
+                      variant="default"
+                      size="sm"
+                      onClick={handleGenerateTaxInvoice}
+                      disabled={actionLoading}
+                      className="h-8 gap-1.5 text-xs shadow-xs"
+                    >
+                      {actionLoading ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <FileCheck className="w-3.5 h-3.5" />
+                      )}
+                      Generate Tax Invoice
+                    </Button>
+                  )}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleDownloadPdf}
+                  disabled={downloadingPdf}
+                  className="h-8 gap-1.5 text-xs shadow-xs"
+                >
+                  {downloadingPdf ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <Download className="w-3.5 h-3.5" />
+                  )}
+                  Download PDF
+                </Button>
+              </div>
             </div>
 
             <div className="space-y-2.5 max-w-lg">

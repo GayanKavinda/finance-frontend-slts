@@ -231,7 +231,7 @@ export default function JobDetailPage() {
                     Contractor
                   </p>
                   <p className="text-sm font-medium text-slate-700 dark:text-slate-300 truncate">
-                    {job.selectedContractor?.name || "Not Assigned"}
+                    {job.selected_contractor?.name || "Not Assigned"}
                   </p>
                 </div>
               </div>
