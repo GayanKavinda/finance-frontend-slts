@@ -35,19 +35,38 @@ async function login(page) {
     return;
   }
 
-  // Fill credentials and click submit
-  const emailInput = page.locator('#email');
-  await emailInput.waitFor({ state: 'visible', timeout: 10000 });
-  await emailInput.fill(TEST_EMAIL);
+  // Fill credentials and click submit (retried once on transient backend failure)
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    const emailInput = page.locator('#email');
+    await emailInput.waitFor({ state: 'visible', timeout: 20000 });
+    await emailInput.fill(TEST_EMAIL);
 
-  const passwordInput = page.locator('#password');
-  await passwordInput.fill(TEST_PASSWORD);
+    const passwordInput = page.locator('#password');
+    await passwordInput.fill(TEST_PASSWORD);
 
-  await page.locator('button:has-text("Sign In to Portal"), button[type="submit"]').first().click();
+    await page.locator('button:has-text("Sign In to Portal"), button[type="submit"]').first().click();
 
-  // Wait for redirect away from signin
-  await page.waitForURL(url => !url.href.includes('/signin'), { timeout: 20000 }).catch(() => {});
-  await page.waitForTimeout(1000);
+    // Wait for redirect away from signin and confirm the session was established
+    const authenticated = await page
+      .waitForURL(url => !url.href.includes('/signin'), { timeout: 12000 })
+      .then(() => true)
+      .catch(() => false);
+
+    if (authenticated) {
+      await page.waitForTimeout(1000);
+      return;
+    }
+
+    if (attempt === 1) {
+      console.log('ℹ️  Login attempt 1 did not establish a session - retrying once');
+      await page.waitForTimeout(2000);
+      continue;
+    }
+
+    throw new Error(
+      'Login failed: the app stayed on /signin after submitting valid credentials (backend not accepting login)',
+    );
+  }
 }
 
 test.describe('SLT ProcureX Comprehensive E2E System Test Suite', () => {
