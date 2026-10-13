@@ -1,6 +1,8 @@
 import React from "react";
+import { useTranslation } from "@/contexts/LanguageContext";
 
 export default function StatusBadge({ status }) {
+  const { t } = useTranslation();
   const normalized = (status || "").toLowerCase();
 
   const variant =
@@ -30,7 +32,7 @@ export default function StatusBadge({ status }) {
               : "border border-border bg-background text-muted-foreground"
       }`}
     >
-      {status}
+      {t(status)}
     </span>
   );
 }

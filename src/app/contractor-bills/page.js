@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/contexts/LanguageContext";
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
@@ -40,6 +41,7 @@ import RecordPaymentModal from "./components/RecordPaymentModal";
 import RejectBillModal from "./components/RejectBillModal";
 
 export default function ContractorBillsPage() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const permissions = user?.permissions || [];
   const router = useRouter();
@@ -283,7 +285,7 @@ export default function ContractorBillsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-border/50">
         <div>
           <h1 className="text-base font-semibold tracking-tight text-foreground">
-            Contractor Bills
+            {t("Contractor Bills")}
           </h1>
           <p className="text-xs text-muted-foreground mt-0.5">
             Progress payment ledger, contractor claims verification, and disbursement approval.

@@ -1,10 +1,12 @@
 // app/invoices/page.js
 "use client";
 
+import { useTranslation } from "@/contexts/LanguageContext";
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { fetchInvoices, downloadInvoicePdf } from "@/lib/invoice";
 import { exportToCSV } from "@/lib/exportUtils";
+import { fmt, fmtDate } from "@/lib/utils";
 import { usePermission } from "@/hooks/usePermission";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -30,6 +32,7 @@ const STATUS_FILTERS = [
 ];
 
 export default function InvoicePage() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const router = useRouter();
   const searchTimerRef = useRef(null);
@@ -122,7 +125,7 @@ export default function InvoicePage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-border/50">
         <div>
           <h1 className="text-base font-semibold tracking-tight text-foreground">
-            Invoices
+            {t("Invoices")}
           </h1>
           <p className="text-xs text-muted-foreground mt-0.5">
             Commercial invoicing ledger, billing life cycle, and clearance tracking.
@@ -240,13 +243,10 @@ export default function InvoicePage() {
                       {inv.customer?.name || "—"}
                     </td>
                     <td className="py-2.5 px-3 text-muted-foreground">
-                      {inv.invoice_date ? new Date(inv.invoice_date).toLocaleDateString() : "—"}
+                      {fmtDate(inv.invoice_date)}
                     </td>
                     <td className="py-2.5 px-3 text-right font-medium text-foreground">
-                      {Number(inv.invoice_amount || 0).toLocaleString(undefined, {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
-                      })}
+                      {fmt(inv.invoice_amount)}
                     </td>
                     <td className="py-2.5 px-3">
                       <span className="inline-block px-1.5 py-0.5 text-[10px] font-medium bg-muted text-foreground rounded border border-border/50">

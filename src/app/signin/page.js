@@ -11,6 +11,9 @@ import {
   Mail,
   Loader2,
   ShieldCheck,
+  ShieldAlert,
+  ArrowLeft,
+  RefreshCw,
 } from "lucide-react";
 import axios from "@/lib/axios";
 import { toast } from "@/lib/toast";
@@ -18,6 +21,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { fetchCsrf } from "@/lib/auth";
 import { useAuth } from "@/contexts/AuthContext";
+import { useTranslation } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
 
 const schema = yup.object({
@@ -30,6 +34,7 @@ const schema = yup.object({
 });
 
 export default function Signin() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { refetch } = useAuth();
   const [passwordStrength, setPasswordStrength] = useState({
@@ -46,6 +51,13 @@ export default function Signin() {
   } = useForm({
     resolver: yupResolver(schema),
   });
+
+  // Two-factor challenge state (login step 2)
+  const [twoFactorChallenge, setTwoFactorChallenge] = useState(null);
+  const [otp, setOtp] = useState("");
+  const [otpError, setOtpError] = useState("");
+  const [otpVerifying, setOtpVerifying] = useState(false);
+  const [otpResending, setOtpResending] = useState(false);
 
   const passwordValue = watch("password", "");
 
@@ -94,7 +106,20 @@ export default function Signin() {
   const onSubmit = async (data) => {
     try {
       await fetchCsrf();
-      await axios.post("/login", data);
+      const res = await axios.post("/login", data);
+
+      // Two-factor challenge: password was accepted, now ask for the code.
+      if (res.data?.two_factor_required) {
+        setTwoFactorChallenge({
+          token: res.data.twofa_token,
+          emailHint: res.data.email_hint || "",
+        });
+        setOtp("");
+        setOtpError("");
+        toast.info("Enter the verification code sent to your email to continue.");
+        return;
+      }
+
       await refetch();
       toast.success("Welcome back to SLT ProcureX!");
       router.push("/dashboard");
@@ -104,6 +129,49 @@ export default function Signin() {
       } else {
         toast.error("Login failed. Please try again.");
       }
+    }
+  };
+
+  const onVerifyOtp = async (e) => {
+    e?.preventDefault?.();
+    if (otp.length !== 6) {
+      setOtpError("Enter the full 6-digit code");
+      return;
+    }
+
+    setOtpVerifying(true);
+    setOtpError("");
+    try {
+      await fetchCsrf();
+      await axios.post("/verify-2fa", {
+        twofa_token: twoFactorChallenge.token,
+        otp,
+      });
+      await refetch();
+      toast.success("Two-factor verification successful. Welcome back!");
+      router.push("/dashboard");
+    } catch (error) {
+      setOtpError(
+        error.response?.data?.message || "Verification failed. Please try again."
+      );
+    } finally {
+      setOtpVerifying(false);
+    }
+  };
+
+  const onResendOtp = async () => {
+    setOtpResending(true);
+    setOtpError("");
+    try {
+      await fetchCsrf();
+      await axios.post("/resend-2fa", { twofa_token: twoFactorChallenge.token });
+      toast.success("A new verification code has been sent.");
+    } catch (error) {
+      setOtpError(
+        error.response?.data?.message || "Could not resend the code."
+      );
+    } finally {
+      setOtpResending(false);
     }
   };
 
@@ -156,20 +224,109 @@ export default function Signin() {
 
           <header className="mb-6 text-left">
             <h2 className="text-xl font-medium tracking-tight text-foreground mb-1">
-              Sign in to your account
+              {twoFactorChallenge ? "Two-factor verification" : "Sign in to your account"}
             </h2>
             <p className="text-xs text-muted-foreground">
-              Secure access for authorized personnel only.
+              {twoFactorChallenge
+                ? `Enter the 6-digit code sent to ${twoFactorChallenge.emailHint || "your email"}.`
+                : "Secure access for authorized personnel only."}
             </p>
           </header>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          {twoFactorChallenge ? (
+            /* ── 2FA verification panel ─────────────────────────── */
+            <form onSubmit={onVerifyOtp} className="space-y-4">
+              <div className="flex items-center gap-3 p-3 rounded-lg bg-primary/5 border border-primary/20">
+                <ShieldCheck className="h-5 w-5 text-primary shrink-0" />
+                <p className="text-[11px] text-muted-foreground leading-relaxed">
+                  A one-time verification code has been sent to your registered
+                  email address. The code expires in 10 minutes.
+                </p>
+              </div>
+
+              <div className="space-y-1.5 text-left">
+                <label
+                  className="text-xs font-medium text-foreground ml-1"
+                  htmlFor="otp"
+                >
+                  {t("Verification Code")}
+                </label>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-muted-foreground">
+                    <ShieldAlert className="w-4 h-4" />
+                  </div>
+                  <input
+                    className={`block w-full pl-10 pr-4 py-2.5 border rounded-lg bg-background text-foreground text-sm tracking-[0.4em] font-mono focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none ${
+                      otpError ? "border-destructive" : "border-border"
+                    }`}
+                    id="otp"
+                    type="text"
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    maxLength={6}
+                    placeholder="••••••"
+                    value={otp}
+                    onChange={(e) => {
+                      setOtp(e.target.value.replace(/\D/g, "").slice(0, 6));
+                      setOtpError("");
+                    }}
+                  />
+                </div>
+                {otpError && (
+                  <p className="text-[11px] text-destructive mt-1 ml-1 font-medium">
+                    {otpError}
+                  </p>
+                )}
+              </div>
+
+              <Button
+                className="w-full"
+                type="submit"
+                disabled={otpVerifying || otp.length !== 6}
+              >
+                {otpVerifying ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  "Verify & Sign In"
+                )}
+              </Button>
+
+              <div className="flex items-center justify-between">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setTwoFactorChallenge(null);
+                    setOtp("");
+                    setOtpError("");
+                  }}
+                  className="inline-flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                  {t("Back to sign in")}
+                </button>
+                <button
+                  type="button"
+                  onClick={onResendOtp}
+                  disabled={otpResending}
+                  className="inline-flex items-center gap-1.5 text-[11px] font-medium text-primary hover:text-primary/80 transition-colors disabled:opacity-50"
+                >
+                  {otpResending ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <RefreshCw className="w-3.5 h-3.5" />
+                  )}
+                  {t("Resend code")}
+                </button>
+              </div>
+            </form>
+          ) : (
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-1.5 text-left">
               <label
                 className="text-xs font-medium text-foreground ml-1"
                 htmlFor="email"
               >
-                Work Email
+                {t("Work Email")}
               </label>
               <div className="relative group">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-muted-foreground">
@@ -196,13 +353,13 @@ export default function Signin() {
                   className="text-xs font-medium text-foreground"
                   htmlFor="password"
                 >
-                  Password
+                  {t("Password")}
                 </label>
                 <Link
                   href="/forgot-password"
                   className="text-[11px] font-medium text-primary hover:text-primary/80 transition-colors"
                 >
-                  Forgot Password?
+                  {t("Forgot Password?")}
                 </Link>
               </div>
               <div className="relative group">
@@ -226,7 +383,7 @@ export default function Signin() {
               <div className="mt-3 p-2 rounded-lg bg-muted/30 border border-border space-y-1.5">
                 <div className="flex justify-between items-center px-1">
                   <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
-                    Security Index
+                    {t("Security Index")}
                   </span>
                   <span className="text-[10px] font-medium uppercase tracking-wider text-foreground">
                     {passwordStrength.label}
@@ -255,7 +412,7 @@ export default function Signin() {
                 htmlFor="remember-device"
                 className="text-xs text-muted-foreground cursor-pointer select-none"
               >
-                Maintain secure session on this device
+                {t("Maintain secure session on this device")}
               </label>
             </div>
 
@@ -267,14 +424,15 @@ export default function Signin() {
               {isSubmitting ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
-                "Sign In to Portal"
+                t("Sign In to Portal")
               )}
             </Button>
           </form>
+          )}
 
           <footer className="mt-6 pt-5 border-t border-border text-center">
             <p className="text-xs text-muted-foreground">
-              Don&apos;t have an account?{" "}
+              {t("Don't have an account?")}{" "}
               <Link
                 href="/signup"
                 className="font-medium text-primary hover:text-primary/80 transition-colors"

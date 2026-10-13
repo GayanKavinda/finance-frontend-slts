@@ -411,22 +411,38 @@ test.describe('SLT ProcureX Comprehensive E2E System Test Suite', () => {
   // MODULE 8: SYSTEM SETTINGS (ALL 5 FUNCTIONAL TABS)
   // ─────────────────────────────────────────────────────────────
 
-  test('TC-012: Settings - All 5 Functional Tabs Navigation', async ({ page }) => {
+  test('TC-012: Settings - Rail Navigation & Unsaved-Changes Draft Model', async ({ page }) => {
     await login(page);
     await page.goto(`${BASE_URL}/settings`);
     await page.waitForLoadState('networkidle');
 
+    // The settings rail must expose all 5 sections
+    const rail = page.locator('nav[aria-label]');
+    await expect(rail).toBeVisible();
     const tabs = ['Account', 'Notifications', 'Security', 'Appearance', 'System'];
     for (const tabName of tabs) {
       const tab = page.locator(`button:has-text("${tabName}")`).first();
       await expect(tab).toBeVisible();
       await tab.click();
-      await page.waitForTimeout(200);
+      await page.waitForTimeout(250);
+      // Active rail item is marked for assistive tech and shows the accent
+      await expect(tab).toHaveAttribute('aria-current', 'page');
+      await expect(tab.locator('span.bg-primary').first()).toBeVisible();
     }
-    console.log('✅ TC-012 PASS: All 5 Settings tabs switched without stale closures');
+
+    // Draft model: editing shows the unsaved banner, Discard clears it
+    await page.locator('button:has-text("Account")').first().click();
+    const nameInput = page.locator('input[placeholder*="name"]').first();
+    await nameInput.fill('QA Draft Test');
+    await expect(page.locator('text=unsaved changes')).toBeVisible();
+    await page.locator('button:has-text("Discard")').first().click();
+    await expect(page.locator('text=unsaved changes')).toBeHidden();
+    await expect(nameInput).not.toHaveValue('QA Draft Test');
+
+    console.log('✅ TC-012 PASS: Rail navigation + draft/discard model verified');
   });
 
-  test('TC-013: Settings - Account Profile & Name Update', async ({ page }) => {
+  test('TC-013: Settings - Account Profile Draft → Save Applies', async ({ page }) => {
     await login(page);
     await page.goto(`${BASE_URL}/settings`);
     await page.waitForLoadState('networkidle');
@@ -436,25 +452,59 @@ test.describe('SLT ProcureX Comprehensive E2E System Test Suite', () => {
     const currentName = await nameInput.inputValue();
     expect(currentName.length).toBeGreaterThan(0);
 
+    // Edit -> unsaved banner -> Save -> "Saved" state + banner cleared
+    const newName = `QA ${Date.now() % 100000}`;
+    await nameInput.fill(newName);
+    await expect(page.locator('text=unsaved changes')).toBeVisible();
     await page.locator('button:has-text("Save Changes")').click();
-    await page.waitForTimeout(1500);
-    console.log(`✅ TC-013 PASS: Account settings saved for "${currentName}"`);
+    await expect(page.locator('button:has-text("Saved")')).toBeVisible({ timeout: 8000 });
+    await expect(page.locator('text=unsaved changes')).toBeHidden();
+
+    // Persisted server-side: reload and the value survives
+    await page.reload();
+    await page.waitForLoadState('networkidle');
+    await page.locator('button:has-text("Account")').first().click();
+    await expect(page.locator('input[placeholder*="name"]').first()).toHaveValue(newName);
+
+    console.log(`✅ TC-013 PASS: Draft saved and persisted as "${newName}"`);
   });
 
-  test('TC-014: Settings - Notification Toggles & Persistence', async ({ page }) => {
+  test('TC-014: Settings - Notification Draft → Save Persists to API', async ({ page }) => {
     await login(page);
     await page.goto(`${BASE_URL}/settings`);
     await page.waitForLoadState('networkidle');
 
     await page.locator('button:has-text("Notifications")').first().click();
-    const switches = page.locator('[role="switch"]');
-    if (await switches.count() > 0) {
-      await switches.first().click();
-      await page.waitForTimeout(200);
-    }
+    await page.waitForTimeout(400);
+
+    const emailSwitch = page.locator('[role="switch"]').first();
+    const before = await emailSwitch.getAttribute('aria-checked');
+    await emailSwitch.click();
+    await page.waitForTimeout(250);
+
+    // Draft model: banner appears before saving
+    await expect(page.locator('text=unsaved changes')).toBeVisible();
+
     await page.locator('button:has-text("Save Changes")').click();
-    await page.waitForTimeout(1500);
-    console.log('✅ TC-014 PASS: Notification preferences saved to localStorage');
+    await expect(page.locator('button:has-text("Saved")')).toBeVisible({ timeout: 8000 });
+    await expect(page.locator('text=unsaved changes')).toBeHidden();
+
+    // Preference is persisted server-side (true ⇄ false flip)
+    const persisted = await page.evaluate(async () => {
+      const r = await fetch('/api/notification-preferences', {
+        headers: { Accept: 'application/json' },
+      });
+      return r.json();
+    });
+    const expected = before === 'true' ? false : true;
+    expect(persisted.email_alerts).toBe(expected);
+
+    // Restore the original value
+    await page.locator('[role="switch"]').first().click();
+    await page.locator('button:has-text("Save Changes")').click();
+    await page.waitForTimeout(1200);
+
+    console.log(`✅ TC-014 PASS: Draft→Save persisted email_alerts=${expected} via API`);
   });
 
   test('TC-015: Settings - Security Modals (Active Sessions & Login Audit Logs)', async ({ page }) => {
@@ -477,23 +527,41 @@ test.describe('SLT ProcureX Comprehensive E2E System Test Suite', () => {
     console.log('✅ TC-015 PASS: Live security audit modals retrieved and closed');
   });
 
-  test('TC-016: Settings - Appearance (Dark Theme & Regional Currency)', async ({ page }) => {
+  test('TC-016: Settings - Appearance Draft → Save Applies Theme', async ({ page }) => {
     await login(page);
     await page.goto(`${BASE_URL}/settings`);
     await page.waitForLoadState('networkidle');
 
     await page.locator('button:has-text("Appearance")').first().click();
+    await page.waitForTimeout(400);
 
-    // Toggle dark mode
-    const switches = page.locator('[role="switch"]');
-    if (await switches.count() > 0) {
-      await switches.first().click();
-      await page.waitForTimeout(400);
-      await switches.first().click();
-    }
+    const darkSwitch = page.locator('[role="switch"]').first();
+    const themeBefore = await page.evaluate(() =>
+      document.documentElement.classList.contains('dark'),
+    );
+
+    // Toggle dark mode — must NOT apply until Save
+    await darkSwitch.click();
+    await page.waitForTimeout(300);
+    expect(
+      await page.evaluate(() => document.documentElement.classList.contains('dark')),
+    ).toBe(themeBefore);
+    await expect(page.locator('text=unsaved changes')).toBeVisible();
+
+    // Save applies it
     await page.locator('button:has-text("Save Changes")').click();
-    await page.waitForTimeout(1500);
-    console.log('✅ TC-016 PASS: Appearance and theme contexts synchronized');
+    await page.waitForTimeout(900);
+    expect(
+      await page.evaluate(() => document.documentElement.classList.contains('dark')),
+    ).toBe(!themeBefore);
+    await expect(page.locator('text=unsaved changes')).toBeHidden();
+
+    // Restore original theme
+    await page.locator('[role="switch"]').first().click();
+    await page.locator('button:has-text("Save Changes")').click();
+    await page.waitForTimeout(900);
+
+    console.log('✅ TC-016 PASS: Theme applied only on Save, then restored');
   });
 
   test('TC-017: Settings - System Operational Mode Toggles', async ({ page }) => {
@@ -837,5 +905,52 @@ test.describe('SLT ProcureX Comprehensive E2E System Test Suite', () => {
       console.log('✅ TC-025 PASS: Admin audit logs endpoint accessible');
     }
   });
+  // ─────────────────────────────────────────────────────────────
+  // MODULE 12: LOCALIZATION
+  // ─────────────────────────────────────────────────────────────
+
+  test('TC-021: Settings - Language Switch Translates the App', async ({ page }) => {
+    await login(page);
+    await page.goto(`${BASE_URL}/settings`);
+    await page.waitForLoadState('networkidle');
+
+    await page.locator('button:has-text("Appearance")').first().click();
+    await page.waitForTimeout(400);
+
+    // Draft: switching the language must not apply until Save
+    await page.selectOption('select >> nth=0', 'si');
+    await page.waitForTimeout(300);
+    await expect(page.locator('nav[aria-label]')).toContainText('Account');
+
+    // Save applies the language across the shell (the Saved label is
+    // itself translated, so assert the applied language instead)
+    await page.locator('button:has-text("Save Changes")').click();
+    await expect(page.locator('nav[aria-label]')).toContainText('ගිණුම', { timeout: 8000 });
+    await expect(page.locator('h1')).toContainText('සැකසුම්');
+    await expect(page.locator('text=unsaved changes')).toBeHidden();
+
+    // Sidebar nav is translated too
+    await expect(page.locator('a[href="/dashboard"]').first()).toContainText('පාලක පුවරුව');
+
+    // Status badges translate on data pages
+    await page.goto(`${BASE_URL}/jobs`);
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(800);
+    const bodyText = await page.evaluate(() => document.body.innerText);
+    expect(bodyText).toContain('ක්‍රියාත්මකයි');
+
+    // Restore English
+    await page.goto(`${BASE_URL}/settings`);
+    await page.locator('button:has-text("පෙනුම")').first().click();
+    await page.waitForTimeout(300);
+    await page.selectOption('select >> nth=0', 'en');
+    await page.waitForTimeout(200);
+    await page.locator('button:has-text("සුරකින්න")').first().click();
+    await page.waitForTimeout(900);
+    await expect(page.locator('nav[aria-label]')).toContainText('Account');
+
+    console.log('✅ TC-021 PASS: Sinhala language applied across shell, statuses; restored to English');
+  });
+
 });
 

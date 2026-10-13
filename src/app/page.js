@@ -84,8 +84,7 @@ export default function Home() {
         {/* Global Visual Layers (Static - Higher Performance) */}
         <div className="absolute inset-0 pointer-events-none z-1">
           <div className="absolute inset-0 bg-linear-to-b from-black/60 via-transparent to-black/80" />
-          <div className="absolute inset-0 bg-black/10 -[0.5px]" />
-          <div className="absolute inset-0 opacity-[0.03] mix-blend-overlay bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
+          <div className="absolute inset-0 bg-black/10" />
         </div>
 
         {/* Content Overlay */}

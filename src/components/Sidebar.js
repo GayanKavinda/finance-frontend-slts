@@ -7,6 +7,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChevronRight, X } from "lucide-react";
 import { navLinks } from "@/constants/navigation";
+import { useTranslation } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
 
 export default function Sidebar({
@@ -14,8 +15,9 @@ export default function Sidebar({
   setIsMobileOpen,
   isCollapsed,
   setIsCollapsed,
-}) {
+  }) {
   const pathname = usePathname();
+  const { t } = useTranslation();
   const [hoveredItem, setHoveredItem] = useState(null);
   const { user } = useAuth();
 
@@ -147,7 +149,7 @@ export default function Sidebar({
                       transition={{ duration: 0.15 }}
                       className="text-sm whitespace-nowrap"
                     >
-                      {link.label}
+                      {t(link.label)}
                     </motion.span>
                   )}
 
@@ -159,7 +161,7 @@ export default function Sidebar({
                       exit={{ opacity: 0, x: -6 }}
                       className="absolute left-full ml-2 px-2.5 py-1.5 bg-popover border border-border text-foreground text-xs rounded-md whitespace-nowrap shadow-medium z-50 pointer-events-none"
                     >
-                      {link.label}
+                      {t(link.label)}
                     </motion.div>
                   )}
                 </Link>
@@ -272,7 +274,7 @@ export default function Sidebar({
                           }`}
                           strokeWidth={isActive ? 2 : 1.5}
                         />
-                        <span className="text-sm">{link.label}</span>
+                        <span className="text-sm">{t(link.label)}</span>
                       </Link>
                     );
                   })}

@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/contexts/LanguageContext";
 
 import { useState, useEffect, useCallback } from "react";
 import {
@@ -155,6 +156,7 @@ function SkeletonCard() {
 }
 
 export default function ContractorsPage() {
+  const { t } = useTranslation();
   const [contractors, setContractors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -325,7 +327,7 @@ export default function ContractorsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-border/50">
         <div>
           <h1 className="text-base font-semibold tracking-tight text-foreground">
-            Contractors
+            {t("Contractors")}
           </h1>
           <p className="text-xs text-muted-foreground mt-0.5">
             {contractors.length} service provider{contractors.length !== 1 ? "s" : ""}

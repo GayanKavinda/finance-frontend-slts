@@ -27,10 +27,12 @@ import FormModal from "@/components/ui/FormModal";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useFormat } from "@/lib/format";
 
 export default function JobDetailPage() {
   const { id } = useParams();
   const router = useRouter();
+  const { formatCurrency, formatDate } = useFormat();
   const [job, setJob] = useState(null);
   const [quotations, setQuotations] = useState([]);
   const [contractors, setContractors] = useState([]);
@@ -217,7 +219,7 @@ export default function JobDetailPage() {
                     Project Value
                   </p>
                   <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                    LKR {Number(job.project_value).toLocaleString()}
+                    {formatCurrency(job.project_value)}
                   </p>
                 </div>
               </div>
@@ -300,7 +302,7 @@ export default function JobDetailPage() {
                           <div className="flex items-center gap-3 mt-0.5">
                             <span className="inline-flex items-center gap-1 text-xs text-slate-400">
                               <Calendar className="w-3 h-3" />
-                              {new Date(quote.quotation_date).toLocaleDateString()}
+                              {formatDate(quote.quotation_date)}
                             </span>
                             <span className="inline-flex items-center gap-1 text-xs text-slate-400">
                               <Clock className="w-3 h-3" />
@@ -316,7 +318,7 @@ export default function JobDetailPage() {
                             Amount
                           </p>
                           <p className="text-base font-semibold text-slate-900 dark:text-white">
-                            LKR {Number(quote.quotation_amount).toLocaleString()}
+                            {formatCurrency(quote.quotation_amount)}
                           </p>
                         </div>
 
@@ -360,7 +362,7 @@ export default function JobDetailPage() {
             <div className="mb-4">
               <p className="text-[11px] uppercase tracking-wider opacity-70">Estimated Margin</p>
               <div className="flex items-baseline gap-2 mt-1">
-                <span className="text-2xl font-semibold">LKR {profit.toLocaleString()}</span>
+                <span className="text-2xl font-semibold">{formatCurrency(profit)}</span>
                 <span
                   className={`text-xs px-2 py-0.5 rounded-md ${
                     margin > 20 ? "bg-white/20" : "bg-red-400/30"
@@ -374,11 +376,11 @@ export default function JobDetailPage() {
             <div className="pt-4 border-t border-white/10 space-y-2">
               <div className="flex justify-between text-sm">
                 <span className="opacity-70">Revenue</span>
-                <span className="font-medium">{Number(job.project_value).toLocaleString()}</span>
+                <span className="font-medium">{formatCurrency(job.project_value)}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="opacity-70">Contractor Cost</span>
-                <span className="font-medium">-{Number(job.contractor_quote_amount || 0).toLocaleString()}</span>
+                <span className="font-medium">-{formatCurrency(job.contractor_quote_amount)}</span>
               </div>
             </div>
           </div>

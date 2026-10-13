@@ -58,6 +58,8 @@ import {
 } from "recharts";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
+import { useFormat } from "@/lib/format";
+import { useTranslation } from "@/contexts/LanguageContext";
 import {
   fetchMonthlyInvoiceTrend,
 } from "@/lib/invoice";
@@ -92,21 +94,9 @@ import Link from "next/link";
 // ═══════════════════════════════════════════════════════════════════════════════
 // UTILITIES
 // ═══════════════════════════════════════════════════════════════════════════════
-const formatCurrency = (value) => {
-  const num = Number(value) || 0;
-  return `LKR ${num.toLocaleString("en-US", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })}`;
-};
 
-const formatCompact = (value) => {
-  const num = Number(value);
-  if (num >= 1_000_000_000) return `${(num / 1_000_000_000).toFixed(1)}B`;
-  if (num >= 1_000_000) return `${(num / 1_000_000).toFixed(1)}M`;
-  if (num >= 1_000) return `${(num / 1_000).toFixed(1)}K`;
-  return num.toFixed(0);
-};
+
+
 
 const formatPercent = (value) => `${Number(value).toFixed(1)}%`;
 
@@ -200,6 +190,7 @@ function TrendIndicator({ value, label }) {
 
 // ─── Chart Tooltip ────────────────────────────────────────────────────────────
 function ChartTooltip({ active, payload, label }) {
+  const { formatCompact } = useFormat();
   if (!active || !payload?.length) return null;
   return (
     <div className="rounded-lg border border-border bg-popover px-3 py-2 shadow-soft">
@@ -226,13 +217,14 @@ function ChartTooltip({ active, payload, label }) {
 
 // ─── Welcome Popup ───────────────────────────────────────────────────────────
 function WelcomePopup({ user, onClose }) {
+  const { t } = useTranslation();
   const greetingHour = new Date().getHours();
   const greeting =
     greetingHour < 12
-      ? "Good morning"
+      ? t("Good morning")
       : greetingHour < 17
-        ? "Good afternoon"
-        : "Good evening";
+        ? t("Good afternoon")
+        : t("Good evening");
   const firstName = user?.name?.split(" ")[0] || "Admin";
 
   return (
@@ -271,7 +263,7 @@ function WelcomePopup({ user, onClose }) {
             </div>
             <div>
               <h2 className="text-base font-medium text-foreground">
-                Welcome back
+                {t("Welcome back")}
               </h2>
               <p className="text-sm text-muted-foreground">
                 {firstName}
@@ -281,11 +273,11 @@ function WelcomePopup({ user, onClose }) {
 
           <div className="rounded-lg border border-border bg-muted/30 p-4">
             <p className="text-sm text-foreground">
-              {greeting}. Heres your overview.
+              {greeting}. {t("Heres your overview.")}
             </p>
             <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
               <CheckCircle className="h-3.5 w-3.5 text-primary" />
-              <span>All systems operational</span>
+              <span>{t("All systems operational")}</span>
             </div>
             <div className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
               <RefreshCw className="h-3.5 w-3.5 text-primary" />
@@ -352,8 +344,10 @@ function EmptyState({ message, icon: Icon = AlertTriangle }) {
 // MAIN DASHBOARD
 // ═══════════════════════════════════════════════════════════════════════════════
 export default function Dashboard() {
+  const { t } = useTranslation();
   const { user, loading: authLoading } = useAuth();
   const { theme } = useTheme();
+  const { formatCurrency, formatCompact, formatDate, formatDateTime } = useFormat();
   const [showWelcome, setShowWelcome] = useState(false);
   const [dataLoading, setDataLoading] = useState(true);
 
@@ -575,11 +569,7 @@ export default function Dashboard() {
             <div className="flex items-center gap-1.5 rounded-md border border-border bg-card px-2.5 py-1">
               <Calendar className="h-3 w-3 text-muted-foreground" />
               <span className="text-[11px] font-medium text-muted-foreground">
-                {new Date().toLocaleDateString("en-US", {
-                  month: "short",
-                  day: "numeric",
-                  year: "numeric",
-                })}
+                {formatDate(new Date())}
               </span>
             </div>
           </div>
@@ -590,7 +580,7 @@ export default function Dashboard() {
           {[
             {
               icon: Briefcase,
-              label: "Total Tender Portfolio",
+              label: t("Total Tender Portfolio"),
               value: formatCurrency(tenderValue),
               trend: 12.5,
               sparkData: sparkData1,
@@ -598,7 +588,7 @@ export default function Dashboard() {
             },
             {
               icon: ShoppingBag,
-              label: "Committed PO Value",
+              label: t("Committed PO Value"),
               value: formatCurrency(poValue),
               trend: 8.3,
               sparkData: sparkData2,
@@ -606,7 +596,7 @@ export default function Dashboard() {
             },
             {
               icon: Receipt,
-              label: "Invoiced Revenue",
+              label: t("Invoiced Revenue"),
               value: formatCurrency(grossAmount),
               trend: -2.1,
               sparkData: sparkData3,
@@ -614,7 +604,7 @@ export default function Dashboard() {
             },
             {
               icon: Building2,
-              label: "Cleared (Banked)",
+              label: t("Cleared (Banked)"),
               value: formatCurrency(bankedAmount),
               trend: 15.7,
               sparkData: sparkData4,
@@ -672,7 +662,7 @@ export default function Dashboard() {
                       Collection Efficiency
                     </CardTitle>
                     <CardDescription className="text-[11px] text-muted-foreground">
-                      Banked vs outstanding
+                      {t("Banked vs outstanding")}
                     </CardDescription>
                   </div>
                 </div>
@@ -683,7 +673,7 @@ export default function Dashboard() {
                     {formatPercent(collectionRate)}
                   </p>
                   <div className="flex gap-4 text-[11px] text-muted-foreground">
-                    <span>Banked {formatCurrency(execSummary?.banked_amount || 0)}</span>
+                    <span>{t("Banked")} {formatCurrency(execSummary?.banked_amount || 0)}</span>
                     <span>Outstanding {formatCurrency(execSummary?.pending_amount || 0)}</span>
                   </div>
                 </div>

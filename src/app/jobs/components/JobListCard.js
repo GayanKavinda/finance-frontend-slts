@@ -9,6 +9,8 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { usePermission } from "@/hooks/usePermission";
+import { useFormat } from "@/lib/format";
+import { useTranslation } from "@/contexts/LanguageContext";
 import { Card, CardContent } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 
@@ -21,6 +23,8 @@ const STATUS_CONFIG = {
 
 export default function JobListCard({ job, onEdit, onDelete, onClick }) {
   const canDelete = usePermission("delete-job");
+  const { formatCurrency } = useFormat();
+  const { t } = useTranslation();
   const config = STATUS_CONFIG[job.status] || STATUS_CONFIG.Pending;
 
   return (
@@ -38,7 +42,7 @@ export default function JobListCard({ job, onEdit, onDelete, onClick }) {
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1 flex-wrap">
                 <h3 className="text-sm font-medium text-foreground">{job.name}</h3>
-                <Badge className={`${config.light} ${config.text} text-[11px] gap-1.5`}>{job.status}</Badge>
+                <Badge className={`${config.light} ${config.text} text-[11px] gap-1.5`}>{t(job.status)}</Badge>
               </div>
               <div className="flex items-center gap-4 text-xs text-muted-foreground flex-wrap">
                 <span>#{job.id}</span>
@@ -59,7 +63,7 @@ export default function JobListCard({ job, onEdit, onDelete, onClick }) {
 
             <div className="text-right hidden sm:block min-w-[120px]">
               <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Value</p>
-              <p className="text-sm font-medium text-foreground">LKR {Number(job.project_value || 0).toLocaleString()}</p>
+              <p className="text-sm font-medium text-foreground">{formatCurrency(job.project_value)}</p>
             </div>
 
             <div className="flex items-center gap-2">

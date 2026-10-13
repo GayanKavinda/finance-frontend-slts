@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import StatusBadge from "@/components/ui/StatusBadge";
 import { Button } from "@/components/ui/button";
+import { fmt as fmtMoney, fmtDate } from "@/lib/utils";
 
 export default function ContractorBillCard({
   bill,
@@ -25,16 +26,9 @@ export default function ContractorBillCard({
   onOpenReject,
   onOpenPayment,
 }) {
-  const fmtMoney = (n) =>
-    Number(n || 0).toLocaleString(undefined, {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    });
-  const fmtDate = (d) =>
-    d ? new Date(d).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" }) : "—";
+  // Preference-aware (Settings → Regional & Localization)
 
-  return (
-    <div className="bg-card border border-border rounded-lg overflow-hidden hover:shadow-sm transition-shadow">
+  return (    <div className="bg-card border border-border rounded-lg overflow-hidden hover:shadow-sm transition-shadow">
       <div className="p-3">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
           {/* Main Details */}
@@ -62,7 +56,7 @@ export default function ContractorBillCard({
               <span>
                 Amount:{" "}
                 <strong className="text-xs font-semibold text-foreground">
-                  LKR {fmtMoney(bill.amount)}
+                  {fmtMoney(bill.amount)}
                 </strong>
               </span>
             </div>

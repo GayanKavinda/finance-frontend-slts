@@ -20,6 +20,7 @@ const Switch = React.forwardRef(({ className, checked, onCheckedChange, disabled
       {...props}
     >
       <span
+        data-state={checked ? "checked" : "unchecked"}
         className={cn(
           "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-background shadow-lg ring-0 transition-transform data-[state=checked]:translate-x-5 data-[state=unchecked]:translate-x-0"
         )}

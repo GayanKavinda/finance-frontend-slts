@@ -10,6 +10,8 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { usePermission } from "@/hooks/usePermission";
+import { useFormat } from "@/lib/format";
+import { useTranslation } from "@/contexts/LanguageContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 
@@ -22,6 +24,8 @@ const STATUS_CONFIG = {
 
 export default function JobGridCard({ job, onEdit, onDelete, onClick }) {
   const canDelete = usePermission("delete-job");
+  const { formatCurrency } = useFormat();
+  const { t } = useTranslation();
   const config = STATUS_CONFIG[job.status] || STATUS_CONFIG.Pending;
 
   return (
@@ -38,7 +42,7 @@ export default function JobGridCard({ job, onEdit, onDelete, onClick }) {
               <div className="flex items-center gap-2 mb-1">
                 <Badge className={`${config.light} ${config.text} text-[11px] gap-1.5`}>
                   <span className={`w-1.5 h-1.5 rounded-full ${config.dot}`} />
-                  {job.status}
+                  {t(job.status)}
                 </Badge>
               </div>
               <CardTitle className="text-sm leading-snug line-clamp-1">{job.name}</CardTitle>
@@ -65,7 +69,7 @@ export default function JobGridCard({ job, onEdit, onDelete, onClick }) {
             </div>
             <div>
               <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">Project Value</p>
-              <p className="text-sm font-medium text-foreground">LKR {Number(job.project_value || 0).toLocaleString()}</p>
+              <p className="text-sm font-medium text-foreground">{formatCurrency(job.project_value)}</p>
             </div>
           </div>
 

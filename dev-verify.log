@@ -1,0 +1,43 @@
+
+> finance-frontend@0.1.0 dev
+> next dev -p 3000
+
+▲ Next.js 16.2.6 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://100.118.86.18:3000
+✓ Ready in 1701ms
+
+○ Compiling /signin ...
+ GET /signin 200 in 14.4s (next.js: 12.5s, application-code: 1888ms)
+ GET /signin 200 in 1468ms (next.js: 278ms, application-code: 1190ms)
+ GET /signin 200 in 364ms (next.js: 124ms, application-code: 240ms)
+ GET /dashboard 200 in 490ms (next.js: 276ms, application-code: 214ms)
+ GET /settings 200 in 199ms (next.js: 121ms, application-code: 78ms)
+ GET /signin 200 in 92ms (next.js: 20ms, application-code: 72ms)
+ GET /dashboard 200 in 523ms (next.js: 40ms, application-code: 484ms)
+ GET /dashboard 200 in 292ms (next.js: 78ms, application-code: 214ms)
+ GET /settings 200 in 236ms (next.js: 75ms, application-code: 161ms)
+✓ Finished filesystem cache database compaction in 11.1s
+ GET /notifications 200 in 341ms (next.js: 209ms, application-code: 132ms)
+ GET /settings 200 in 128ms (next.js: 19ms, application-code: 109ms)
+ GET /signin 200 in 304ms (next.js: 78ms, application-code: 226ms)
+ GET /dashboard 200 in 186ms (next.js: 34ms, application-code: 153ms)
+ GET /dashboard 200 in 85ms (next.js: 13ms, application-code: 72ms)
+ GET /settings 200 in 110ms (next.js: 22ms, application-code: 88ms)
+ GET /notifications 200 in 70ms (next.js: 11ms, application-code: 59ms)
+ GET /settings 200 in 70ms (next.js: 12ms, application-code: 58ms)
+ GET /settings 200 in 398ms (next.js: 110ms, application-code: 287ms)
+⚠ Found a change in next.config.mjs. Restarting the server to apply the changes...
+▲ Next.js 16.2.6 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://100.118.86.18:3000
+✓ Ready in 14.5s
+
+⚠ Found a change in next.config.mjs. Restarting the server to apply the changes...
+▲ Next.js 16.2.6 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://100.118.86.18:3000
+✓ Ready in 691ms
+
+✓ Finished filesystem cache database compaction in 18.8s
+[?25h

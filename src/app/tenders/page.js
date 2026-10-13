@@ -31,8 +31,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { fmt } from "@/lib/utils";
+import { useTranslation } from "@/contexts/LanguageContext";
 
 export default function TendersPage() {
+  const { t } = useTranslation();
   const router = useRouter();
   const searchTimerRef = useRef(null);
 
@@ -189,9 +192,9 @@ export default function TendersPage() {
         {/* Zen Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-border/50">
           <div>
-            <h1 className="text-base font-semibold tracking-tight text-foreground">
-              Tenders & Bids
-            </h1>
+          <h1 className="text-base font-semibold tracking-tight text-foreground">
+            {t("Tenders & Bids")}
+          </h1>
             <p className="text-xs text-muted-foreground mt-0.5">
               Public and commercial procurement bidding pipeline and contracts register.
             </p>
@@ -307,10 +310,10 @@ export default function TendersPage() {
                         {t.customer?.name || "—"}
                       </td>
                       <td className="py-2.5 px-3 text-right text-muted-foreground font-medium">
-                        {t.budget ? Number(t.budget).toLocaleString() : "—"}
+                        {t.budget ? fmt(t.budget) : "—"}
                       </td>
                       <td className="py-2.5 px-3 text-right font-medium text-foreground">
-                        {t.awarded_amount ? Number(t.awarded_amount).toLocaleString() : "—"}
+                        {t.awarded_amount ? fmt(t.awarded_amount) : "—"}
                       </td>
                       <td className="py-2.5 px-3">
                         <StatusBadge status={t.status} />

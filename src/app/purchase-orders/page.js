@@ -1,5 +1,6 @@
-// src/app/purchase-orders/page.js
 "use client";
+import { useTranslation } from "@/contexts/LanguageContext";
+// src/app/purchase-orders/page.js
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import {
@@ -39,6 +40,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { fmt as fmtMoney, fmtDate } from "@/lib/utils";
 
 const STATUS_FILTERS = [
   "",
@@ -66,16 +68,10 @@ const TRANSITIONS = {
   Cancelled: [],
 };
 
-const fmtMoney = (n) =>
-  Number(n || 0).toLocaleString(undefined, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-
-const fmtDate = (d) =>
-  d ? new Date(d).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" }) : "—";
+// Preference-aware formatters (Settings → Regional & Localization)
 
 export default function POPage() {
+  const { t } = useTranslation();
   const canManagePOs = usePermission("manage-pos");
   const canViewAudit = usePermission("view-audit-trail");
 
@@ -284,13 +280,13 @@ export default function POPage() {
     },
     {
       label: "Committed Value",
-      value: `LKR ${fmtMoney(stats.committed_value)}`,
+      value: fmtMoney(stats.committed_value),
       sub: "Across all statuses",
       icon: CircleDollarSign,
     },
     {
       label: "Approved Value",
-      value: `LKR ${fmtMoney(approvedAmt)}`,
+      value: fmtMoney(approvedAmt),
       sub: "Authorized to spend",
       icon: BadgeCheck,
     },
@@ -308,7 +304,7 @@ export default function POPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-border/50">
         <div>
           <h1 className="text-base font-semibold tracking-tight text-foreground">
-            Purchase Orders
+            {t("Purchase Orders")}
           </h1>
           <p className="text-xs text-muted-foreground mt-0.5">
             Procurement requisitions, authorizations, and committed order values.

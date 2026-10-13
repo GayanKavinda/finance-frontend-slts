@@ -82,6 +82,7 @@ export const navLinks = [
     requiredPermission: "manage-users",
   },
   { href: "/profile", label: "Profile", icon: UserCircle },
+  { label: "Notifications", href: "/notifications", icon: Bell },
   {
     href: "/system-logs",
     label: "System Logs",

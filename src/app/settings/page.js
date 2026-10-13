@@ -4,149 +4,208 @@ import { useState, useEffect, useCallback } from "react";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Switch } from "@/components/ui/switch";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/Tabs";
+import { motion } from "framer-motion";
 import {
   Bell,
   Shield,
   Monitor,
-  Users,
-  Key,
   Save,
   Loader2,
   User,
-  Mail,
   Lock,
   Globe,
   Palette,
   Laptop,
   CheckCircle,
-  XCircle,
   Trash2,
-  RefreshCw,
-  LogOut,
+  ExternalLink,
+  Wrench,
+  RotateCcw,
+  AlertCircle,
 } from "lucide-react";
 import { useSnackbar } from "notistack";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
+import { useTranslation } from "@/contexts/LanguageContext";
+import { usePreferences } from "@/contexts/PreferencesContext";
+import { useNotifications } from "@/contexts/NotificationsContext";
+import { useFormat } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import axios from "@/lib/axios";
+import Link from "next/link";
 
 const TABS = [
-  { key: "account", label: "Account", icon: User },
-  { key: "notifications", label: "Notifications", icon: Bell },
-  { key: "security", label: "Security", icon: Shield },
-  { key: "appearance", label: "Appearance", icon: Palette },
-  { key: "system", label: "System", icon: Monitor },
+  { key: "account", labelKey: "Account", hintKey: "Profile, name & password", icon: User },
+  { key: "notifications", labelKey: "Notifications", hintKey: "Email & desktop alerts", icon: Bell },
+  { key: "security", labelKey: "Security", hintKey: "2FA, sessions & logins", icon: Shield },
+  { key: "appearance", labelKey: "Appearance", hintKey: "Theme, density & region", icon: Palette },
+  { key: "system", labelKey: "System", hintKey: "Diagnostics & maintenance", icon: Monitor },
 ];
+
+const NOTIFICATION_OPTIONS = [
+  {
+    key: "email_alerts",
+    label: "Email Notifications",
+    description: "Tenders, POs, approvals, and bills",
+    locked: false,
+  },
+  {
+    key: "browser_alerts",
+    label: "Browser & Desktop Alerts",
+    description: "Desktop pop-up alerts when new workflow updates arrive",
+    locked: false,
+  },
+  {
+    key: "critical_alerts",
+    label: "Critical Alerts & Overdue Warnings",
+    description: "Always on — system and audit safety",
+    locked: true,
+  },
+];
+
+const DEFAULT_NOTIFS = {
+  email_alerts: true,
+  browser_alerts: true,
+  critical_alerts: true,
+};
+
+const sameObj = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+
+const empty2faForm = { password: "", mode: null };
 
 export default function SettingsPage() {
   const { user, refetch } = useAuth();
+  const { t } = useTranslation();
   const { enqueueSnackbar } = useSnackbar();
   const { theme, setTheme, resolvedTheme } = useTheme();
+  const { compact, setDensity, debugMode, setDebugMode, regional, setRegional } =
+    usePreferences();
+  const { requestBrowserAlerts, browserPermission } = useNotifications();
 
   const [activeTab, setActiveTab] = useState("account");
   const [saving, setSaving] = useState(false);
+  const [savedFeedback, setSavedFeedback] = useState(false);
 
-  // Profile / Account
-  const [account, setAccount] = useState({
-    name: "",
-    email: "",
-  });
+  const isDark = theme === "dark" || (theme === "system" && resolvedTheme === "dark");
+  const twoFactorEnabled = !!user?.two_factor_enabled;
+  const canManageSystem = (user?.permissions || []).includes("manage-system");
 
-  // Notifications
-  const [notifications, setNotifications] = useState({
-    email: true,
-    push: true,
-    critical: true,
-  });
+  /* ── Draft state — nothing applies until Save is pressed ────── */
+  const [accountDraft, setAccountDraft] = useState({ name: "" });
+  const [accountBase, setAccountBase] = useState({ name: "" });
 
-  // Security
-  const [security, setSecurity] = useState({
-    twoFactorEnabled: false,
+  const [notifDraft, setNotifDraft] = useState(DEFAULT_NOTIFS);
+  const [notifBase, setNotifBase] = useState(DEFAULT_NOTIFS);
+  const [notifsLoaded, setNotifsLoaded] = useState(false);
+
+  const [appearanceDraft, setAppearanceDraft] = useState(null);
+  const [regionalDraft, setRegionalDraft] = useState(null);
+  const [systemDraft, setSystemDraft] = useState(null);
+  const [systemBase, setSystemBase] = useState({
+    debugMode: false,
+    maintenanceMode: false,
   });
+  const [maintenanceLoaded, setMaintenanceLoaded] = useState(false);
+
+  /* Drafts derive from the live contexts until the user edits them, so no
+     effect is needed to keep baselines in sync. */
+  const appearanceValue = appearanceDraft ?? { darkMode: isDark, compact };
+  const regionalValue = regionalDraft ?? regional;
+  const debugValue = systemDraft?.debugMode ?? debugMode;
+  const maintenanceValue = systemDraft?.maintenanceMode ?? systemBase.maintenanceMode;
+
+  /* ── Loaded baselines ─────────────────────────────────────── */
+  // Account profile (adjust during render — no cascading effect)
+  const [syncedUserId, setSyncedUserId] = useState(null);
+  if (user && user.id !== syncedUserId) {
+    setSyncedUserId(user.id);
+    setAccountDraft({ name: user.name || "" });
+    setAccountBase({ name: user.name || "" });
+  }
+
+  // Fetch notification preferences + maintenance status from the API
+  useEffect(() => {
+    if (activeTab !== "notifications" && activeTab !== "system") return;
+
+    let cancelled = false;
+
+    if (activeTab === "notifications" && !notifsLoaded) {
+      (async () => {
+        try {
+          const res = await axios.get("/notification-preferences");
+          if (cancelled) return;
+          const loaded = {
+            email_alerts: !!res.data.email_alerts,
+            browser_alerts: !!res.data.browser_alerts,
+            critical_alerts: true,
+          };
+          setNotifDraft(loaded);
+          setNotifBase(loaded);
+          setNotifsLoaded(true);
+        } catch {
+          if (!cancelled) {
+            enqueueSnackbar(t("Failed to load notification preferences"), {
+              variant: "error",
+            });
+          }
+        }
+      })();
+    }
+
+    if (activeTab === "system" && !maintenanceLoaded) {
+      (async () => {
+        try {
+          const res = await axios.get("/system/maintenance-status");
+          if (cancelled) return;
+          setSystemBase((p) => ({ ...p, maintenanceMode: !!res.data.maintenance_mode }));
+          setMaintenanceLoaded(true);
+        } catch {
+          /* status is informational — ignore failures */
+        }
+      })();
+    }
+
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab, notifsLoaded, maintenanceLoaded]);
+
+  /* ── Dirty tracking per tab ───────────────────────────────── */
+  const dirty = {
+    account: !sameObj(accountDraft, accountBase),
+    notifications: !sameObj(notifDraft, notifBase),
+    appearance:
+      (appearanceDraft !== null &&
+        !sameObj(appearanceDraft, { darkMode: isDark, compact })) ||
+      (regionalDraft !== null && !sameObj(regionalDraft, regional)),
+    system:
+      (systemDraft?.debugMode !== undefined && systemDraft.debugMode !== debugMode) ||
+      (systemDraft?.maintenanceMode !== undefined &&
+        systemDraft.maintenanceMode !== systemBase.maintenanceMode),
+    security: false,
+  };
+  const isDirty = !!dirty[activeTab];
+
+  /* ── Security — sessions & login history ──────────────────── */
   const [activeSessions, setActiveSessions] = useState([]);
   const [loginHistory, setLoginHistory] = useState([]);
   const [loadingSecurity, setLoadingSecurity] = useState(false);
   const [showSessionsModal, setShowSessionsModal] = useState(false);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
+  const [twoFactorForm, setTwoFactorForm] = useState(empty2faForm);
+  const [twoFactorSaving, setTwoFactorSaving] = useState(false);
 
-  // Appearance
-  const [appearance, setAppearance] = useState({
-    darkMode: false,
-    compactMode: false,
-    language: "en",
-    timezone: "Asia/Colombo",
-    dateFormat: "DD/MM/YYYY",
-    currency: "LKR",
-  });
-
-  // System
-  const [system, setSystem] = useState({
-    maintenanceMode: false,
-    debugMode: false,
-  });
-
-  // Password
   const [passwordForm, setPasswordForm] = useState({
     current_password: "",
     password: "",
     password_confirmation: "",
   });
-
   const [avatarPreview, setAvatarPreview] = useState(null);
   const [avatarUploading, setAvatarUploading] = useState(false);
 
-  // Load user data
-  useEffect(() => {
-    if (user) {
-      setAccount({
-        name: user.name || "",
-        email: user.email || "",
-      });
-      setAvatarPreview(user.avatar_url || null);
-    }
-  }, [user]);
-
-  // Load local settings preferences
-  useEffect(() => {
-    const isDark =
-      theme === "dark" || (theme === "system" && resolvedTheme === "dark");
-
-    try {
-      const savedNotifs = localStorage.getItem("procurex_notifications");
-      if (savedNotifs) setNotifications((prev) => ({ ...prev, ...JSON.parse(savedNotifs) }));
-
-      const savedRegional = localStorage.getItem("procurex_regional");
-      if (savedRegional) {
-        setAppearance((prev) => ({
-          ...prev,
-          ...JSON.parse(savedRegional),
-          darkMode: isDark,
-        }));
-      } else {
-        setAppearance((prev) => ({
-          ...prev,
-          darkMode: isDark,
-        }));
-      }
-
-      const savedSecurity = localStorage.getItem("procurex_security_2fa");
-      if (savedSecurity) {
-        setSecurity({ twoFactorEnabled: savedSecurity === "true" });
-      }
-
-      const savedSystem = localStorage.getItem("procurex_system_pref");
-      if (savedSystem) {
-        setSystem(JSON.parse(savedSystem));
-      }
-    } catch (e) {
-      console.warn("Could not load stored preferences", e);
-    }
-  }, [theme, resolvedTheme]);
-
-  // Fetch security info (active sessions & login history)
   const loadSecurityData = useCallback(async () => {
     setLoadingSecurity(true);
     try {
@@ -154,10 +213,7 @@ export default function SettingsPage() {
         axios.get("/active-sessions"),
         axios.get("/login-history"),
       ]);
-
-      if (sessRes.status === "fulfilled") {
-        setActiveSessions(sessRes.value.data || []);
-      }
+      if (sessRes.status === "fulfilled") setActiveSessions(sessRes.value.data || []);
       if (histRes.status === "fulfilled") {
         const histData = histRes.value.data;
         setLoginHistory(histData?.data || histData || []);
@@ -175,23 +231,139 @@ export default function SettingsPage() {
       enqueueSnackbar("Session revoked successfully", { variant: "success" });
       loadSecurityData();
     } catch (err) {
-      enqueueSnackbar(err.response?.data?.message || "Failed to revoke session", { variant: "error" });
+      enqueueSnackbar(
+        err.response?.data?.message || "Failed to revoke session",
+        { variant: "error" }
+      );
     }
   };
 
-  const handleAccountSave = async () => {
+  /* ── Save: commits the ACTIVE tab's draft ─────────────────── */
+  const resetDrafts = () => {
+    setAccountDraft(accountBase);
+    setNotifDraft(notifBase);
+    setAppearanceDraft(null);
+    setRegionalDraft(null);
+    setSystemDraft(null);
+  };
+
+  const handleSave = async () => {
+    if (!isDirty) {
+      enqueueSnackbar(t("No changes to save"), { variant: "info" });
+      return;
+    }
     setSaving(true);
     try {
-      await axios.post("/update-profile", { name: account.name });
-      enqueueSnackbar("Profile name updated successfully", { variant: "success" });
-      await refetch();
+      if (activeTab === "account") {
+        await axios.post("/update-profile", { name: accountDraft.name });
+        setAccountBase(accountDraft);
+        await refetch();
+        enqueueSnackbar(t("Profile name updated successfully"), { variant: "success" });
+      }
+
+      if (activeTab === "notifications") {
+        const payload = { ...notifDraft, critical_alerts: true };
+
+        // Browser alerts need real browser permission at apply time.
+        if (payload.browser_alerts && !notifBase.browser_alerts) {
+          const permission = await requestBrowserAlerts();
+          if (permission !== "granted") {
+            enqueueSnackbar(
+              permission === "unsupported"
+                ? t("This browser does not support desktop notifications.")
+                : t("Browser notifications are blocked. Allow them in your browser's site settings, then save again."),
+              { variant: "warning" }
+            );
+            setSaving(false);
+            return;
+          }
+        }
+
+        await axios.put("/notification-preferences", payload);
+        setNotifBase(payload);
+        enqueueSnackbar(t("Notification preferences saved successfully"), {
+          variant: "success",
+        });
+      }
+
+      if (activeTab === "appearance") {
+        // Theme + density
+        setTheme(appearanceValue.darkMode ? "dark" : "light");
+        setDensity(appearanceValue.compact ? "compact" : "comfortable");
+        // Regional — drives formatDate/formatCurrency across the app
+        setRegional({
+          language: regionalValue.language,
+          timezone: regionalValue.timezone,
+          dateFormat: regionalValue.dateFormat,
+          currency: regionalValue.currency,
+        });
+        setAppearanceDraft(null);
+        setRegionalDraft(null);
+        enqueueSnackbar(t("Appearance and regional settings saved successfully"), {
+          variant: "success",
+        });
+      }
+
+      if (activeTab === "system") {
+        if (canManageSystem) {
+          const res = await axios.put("/system/maintenance-mode", {
+            maintenance_mode: maintenanceValue,
+          });
+          setSystemBase((p) => ({ ...p, maintenanceMode: !!res.data.maintenance_mode }));
+        }
+        setDebugMode(debugValue);
+        setSystemDraft(null);
+        enqueueSnackbar(t("System settings saved successfully"), {
+          variant: "success",
+        });
+      }
+
+      setSavedFeedback(true);
+      setTimeout(() => setSavedFeedback(false), 2200);
     } catch (err) {
       enqueueSnackbar(
-        err.response?.data?.message || "Failed to update profile",
+        err.response?.data?.message || t("Failed to save settings"),
         { variant: "error" }
       );
     } finally {
       setSaving(false);
+    }
+  };
+
+  /* ── Two-factor authentication (own password-confirmed action) ── */
+  const openTwoFactorModal = (mode) => setTwoFactorForm({ password: "", mode });
+
+  const handleTwoFactorSubmit = async (e) => {
+    e?.preventDefault?.();
+    if (!twoFactorForm.password) {
+      enqueueSnackbar(t("Enter your current password to continue"), {
+        variant: "error",
+      });
+      return;
+    }
+    setTwoFactorSaving(true);
+    const enabling = twoFactorForm.mode === "enable";
+    try {
+      await axios.post(enabling ? "/2fa/enable" : "/2fa/disable", {
+        password: twoFactorForm.password,
+      });
+      enqueueSnackbar(
+        enabling
+          ? "Two-factor authentication enabled. You will be asked for a verification code at your next login."
+          : t("Two-factor authentication disabled."),
+        { variant: "success" }
+      );
+      setTwoFactorForm(empty2faForm);
+      await refetch();
+    } catch (err) {
+      enqueueSnackbar(
+        err.response?.data?.message ||
+          err.response?.data?.errors?.password?.[0] ||
+          t("Failed to update two-factor authentication"),
+        { variant: "error" }
+      );
+    } finally {
+      setTwoFactorSaving(false);
     }
   };
 
@@ -200,18 +372,14 @@ export default function SettingsPage() {
     setSaving(true);
     try {
       await axios.post("/update-password", passwordForm);
-      enqueueSnackbar("Password changed successfully", { variant: "success" });
-      setPasswordForm({
-        current_password: "",
-        password: "",
-        password_confirmation: "",
-      });
+      enqueueSnackbar(t("Password changed successfully"), { variant: "success" });
+      setPasswordForm({ current_password: "", password: "", password_confirmation: "" });
     } catch (err) {
       enqueueSnackbar(
         err.response?.data?.message ||
           err.response?.data?.errors?.password?.[0] ||
           err.response?.data?.errors?.current_password?.[0] ||
-          "Failed to change password",
+          t("Failed to change password"),
         { variant: "error" }
       );
     } finally {
@@ -222,12 +390,10 @@ export default function SettingsPage() {
   const handleAvatarChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
     if (file.size > 2 * 1024 * 1024) {
       enqueueSnackbar("File size must be less than 2MB", { variant: "error" });
       return;
     }
-
     const validTypes = ["image/jpeg", "image/png", "image/webp"];
     if (!validTypes.includes(file.type)) {
       enqueueSnackbar("Invalid file type. Use JPG, PNG, or WebP", {
@@ -235,17 +401,15 @@ export default function SettingsPage() {
       });
       return;
     }
-
     setAvatarUploading(true);
     const formData = new FormData();
     formData.append("avatar", file);
-
     try {
       const res = await axios.post("/upload-avatar", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       setAvatarPreview(res.data.avatar_url);
-      enqueueSnackbar("Avatar updated successfully", { variant: "success" });
+      enqueueSnackbar(t("Avatar updated successfully"), { variant: "success" });
       await refetch();
     } catch (err) {
       enqueueSnackbar(err.response?.data?.message || "Upload failed", {
@@ -257,576 +421,770 @@ export default function SettingsPage() {
     }
   };
 
-  const handleNotificationSave = async () => {
-    setSaving(true);
-    try {
-      localStorage.setItem("procurex_notifications", JSON.stringify(notifications));
-      enqueueSnackbar("Notification preferences saved successfully", { variant: "success" });
-    } catch {
-      enqueueSnackbar("Could not save notification preferences", { variant: "error" });
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleSecuritySave = async () => {
-    setSaving(true);
-    try {
-      localStorage.setItem("procurex_security_2fa", String(security.twoFactorEnabled));
-      if (passwordForm.current_password && passwordForm.password) {
-        await handlePasswordChange();
-      } else {
-        enqueueSnackbar("Security preferences updated", { variant: "success" });
+  /* ── Regional live preview (from the DRAFT, so users see the
+       effect before saving) ── */
+  const { formatCurrency, formatDate, formatDateTime } = useFormat();
+  const preview = (() => {
+    const localeMap = { en: "en-LK", si: "si-LK", ta: "ta-LK" };
+    const locale = localeMap[regionalValue.language] || "en-LK";
+    const sample = new Date();
+    const p = new Intl.DateTimeFormat("en-CA", {
+      timeZone: regionalValue.timezone,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    }).formatToParts(sample);
+    const m = {};
+    for (const x of p) if (x.type !== "literal") m[x.type] = x.value;
+    const d = (() => {
+      switch (regionalValue.dateFormat) {
+        case "YYYY-MM-DD":
+          return `${m.year}-${m.month}-${m.day}`;
+        case "MM/DD/YYYY":
+          return `${m.month}/${m.day}/${m.year}`;
+        default:
+          return `${m.day}/${m.month}/${m.year}`;
       }
-    } catch {
-      enqueueSnackbar("Failed to update security settings", { variant: "error" });
-    } finally {
-      setSaving(false);
-    }
+    })();
+    const dt = `${d} ${m.hour === "24" ? "00" : m.hour}:${m.minute}`;
+    const cur = new Intl.NumberFormat(locale, {
+      style: "currency",
+      currency: regionalValue.currency,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(1234567.89);
+    return { date: d, dateTime: dt, currency: cur };
+  })();
+  const savedPreview = {
+    date: formatDate(new Date()),
+    dateTime: formatDateTime(new Date()),
+    currency: formatCurrency(1234567.89),
   };
 
-  const handleAppearanceSave = async () => {
-    setSaving(true);
-    try {
-      setTheme(appearance.darkMode ? "dark" : "light");
-      localStorage.setItem(
-        "procurex_regional",
-        JSON.stringify({
-          compactMode: appearance.compactMode,
-          language: appearance.language,
-          timezone: appearance.timezone,
-          dateFormat: appearance.dateFormat,
-          currency: appearance.currency,
-        })
-      );
-      enqueueSnackbar("Appearance and regional settings applied successfully", {
-        variant: "success",
-      });
-    } catch {
-      enqueueSnackbar("Failed to save appearance settings", { variant: "error" });
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleSystemSave = async () => {
-    setSaving(true);
-    try {
-      localStorage.setItem("procurex_system_pref", JSON.stringify(system));
-      enqueueSnackbar("System settings saved successfully", { variant: "success" });
-    } catch {
-      enqueueSnackbar("Failed to save system settings", { variant: "error" });
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const getSaveHandler = () => {
-    switch (activeTab) {
-      case "account":
-        return handleAccountSave;
-      case "notifications":
-        return handleNotificationSave;
-      case "security":
-        return handleSecuritySave;
-      case "appearance":
-        return handleAppearanceSave;
-      case "system":
-        return handleSystemSave;
-      default:
-        return () => {};
-    }
-  };
 
   return (
     <ProtectedRoute>
       <div className="min-h-full bg-background p-4 sm:p-6 space-y-4">
-        <div className="space-y-1 pb-2 border-b border-border/50">
-          <h1 className="text-base font-semibold tracking-tight text-foreground">
-            Settings & Configurations
-          </h1>
-          <p className="text-xs text-muted-foreground">
-            Manage your user profile, security controls, visual theme, and operational preferences.
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 pb-4 border-b border-border/50">
+          <div>
+            <div className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-medium uppercase tracking-widest mb-2">
+              {t("Settings")}
+            </div>
+            <h1 className="text-lg font-semibold tracking-tight text-foreground">
+              {t("Settings & Configurations")}
+            </h1>
+            <p className="text-xs text-muted-foreground mt-1 max-w-xl">
+              {t("Manage your user profile, security controls, visual theme, and operational preferences.")}
+            </p>
+          </div>
+          <p className="text-xs text-muted-foreground max-w-md">
+            {t("Changes apply only when you press Save.")}
           </p>
         </div>
 
-        <Tabs value={activeTab} onChange={setActiveTab} className="w-full">
-          <TabsList className="flex gap-1 overflow-x-auto w-full pb-1">
-            {TABS.map((t) => {
-              const Icon = t.icon;
-              return (
-                <TabsTrigger
-                  key={t.key}
-                  value={t.key}
-                  className="gap-2 px-3 py-2 whitespace-nowrap"
-                >
-                  <Icon className="w-4 h-4" />
-                  <span>{t.label}</span>
-                </TabsTrigger>
-              );
-            })}
-          </TabsList>
-
-          {/* Account Tab */}
-          <TabsContent value="account" className="pt-4 space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <User className="w-4 h-4" /> Profile Information
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center gap-4">
-                  <div className="relative">
-                    {avatarPreview ? (
-                      <img
-                        src={avatarPreview}
-                        alt="Avatar"
-                        className="w-20 h-20 rounded-full object-cover border-2 border-border"
+        <div className="grid grid-cols-1 lg:grid-cols-[240px_minmax(0,1fr)] gap-4 lg:gap-6">
+          {/* ── Premium settings rail ──────────────────────────── */}
+          <nav aria-label={t("Settings")} className="lg:sticky lg:top-4 lg:self-start">
+            {/* Desktop: vertical rail */}
+            <div className="hidden lg:flex flex-col gap-1 p-2 rounded-2xl border border-border/60 bg-muted/40 backdrop-blur-sm">
+              {TABS.map((tab) => {
+                const Icon = tab.icon;
+                const active = activeTab === tab.key;
+                return (
+                  <button
+                    key={tab.key}
+                    onClick={() => setActiveTab(tab.key)}
+                    aria-current={active ? "page" : undefined}
+                    className={`relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-colors ${
+                      active
+                        ? "text-foreground"
+                        : "text-muted-foreground hover:text-foreground hover:bg-background/60"
+                    }`}
+                  >
+                    {active && (
+                      <motion.span
+                        layoutId="settings-rail-pill"
+                        transition={{ type: "spring", stiffness: 400, damping: 32 }}
+                        className="absolute inset-0 rounded-xl bg-background shadow-soft ring-1 ring-border/60"
                       />
-                    ) : (
-                      <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center border-2 border-border">
-                        <User className="w-10 h-10 text-muted-foreground" />
-                      </div>
                     )}
-                    <label className="absolute bottom-0 right-0 cursor-pointer">
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleAvatarChange}
-                        className="sr-only"
-                        disabled={avatarUploading}
+                    {active && (
+                      <motion.span
+                        layoutId="settings-rail-accent"
+                        transition={{ type: "spring", stiffness: 400, damping: 32 }}
+                        className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-[3px] rounded-full bg-primary"
                       />
-                      <div
-                        className={`w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center border-2 border-background cursor-pointer transition-opacity ${
-                          avatarUploading ? "opacity-50" : ""
-                        }`}
-                      >
-                        <Loader2
-                          className={`w-4 h-4 ${
-                            avatarUploading ? "animate-spin" : "hidden"
-                          }`}
-                        />
-                        {!avatarUploading && <span className="text-[10px]">Edit</span>}
-                      </div>
-                    </label>
-                  </div>
-                  <div className="flex-1 space-y-3">
-                    <Field label="Full Name" required>
-                      <Input
-                        required
-                        value={account.name}
-                        onChange={(e) =>
-                          setAccount({ ...account, name: e.target.value })
-                        }
-                        placeholder="Your full name"
-                        className="h-8 text-xs"
-                      />
-                    </Field>
-                    <Field label="Email Address">
-                      <Input
-                        type="email"
-                        value={account.email}
-                        placeholder="your@email.com"
-                        className="h-8 text-xs"
-                        disabled
-                      />
-                    </Field>
-                    <p className="text-[10px] text-muted-foreground">
-                      Primary email is linked to account authentication.
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Lock className="w-4 h-4" /> Change Password
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <form onSubmit={handlePasswordChange} className="space-y-3">
-                  <Field label="Current Password" required>
-                    <Input
-                      type="password"
-                      required
-                      value={passwordForm.current_password}
-                      onChange={(e) =>
-                        setPasswordForm({
-                          ...passwordForm,
-                          current_password: e.target.value,
-                        })
-                      }
-                      placeholder="Enter current password"
-                      className="h-8 text-xs"
-                    />
-                  </Field>
-                  <Field label="New Password" required>
-                    <Input
-                      type="password"
-                      required
-                      value={passwordForm.password}
-                      onChange={(e) =>
-                        setPasswordForm({
-                          ...passwordForm,
-                          password: e.target.value,
-                        })
-                      }
-                      placeholder="Min 8 chars, uppercase, lowercase, number"
-                      className="h-8 text-xs"
-                    />
-                  </Field>
-                  <Field label="Confirm New Password" required>
-                    <Input
-                      type="password"
-                      required
-                      value={passwordForm.password_confirmation}
-                      onChange={(e) =>
-                        setPasswordForm({
-                          ...passwordForm,
-                          password_confirmation: e.target.value,
-                        })
-                      }
-                      placeholder="Repeat new password"
-                      className="h-8 text-xs"
-                    />
-                  </Field>
-                  <div className="pt-1">
-                    <Button
-                      type="submit"
-                      size="sm"
-                      disabled={saving}
-                      className="h-8 text-xs gap-1.5"
+                    )}
+                    <span
+                      className={`relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors ${
+                        active
+                          ? "bg-primary/10 text-primary"
+                          : "bg-transparent text-muted-foreground"
+                      }`}
                     >
-                      {saving && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                      Update Password
+                      <Icon className="w-4 h-4" />
+                    </span>
+                    <span className="relative z-10 flex-1 min-w-0">
+                      <span className="block text-[13px] font-medium leading-tight truncate">
+                        {t(tab.labelKey)}
+                      </span>
+                      <span className="block text-[10px] text-muted-foreground leading-tight truncate">
+                        {t(tab.hintKey)}
+                      </span>
+                    </span>
+                    {dirty[tab.key] && (
+                      <span className="relative z-10 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500" />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Mobile: horizontal scrolling pills */}
+            <div className="lg:hidden flex gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+              {TABS.map((tab) => {
+                const Icon = tab.icon;
+                const active = activeTab === tab.key;
+                return (
+                  <button
+                    key={tab.key}
+                    onClick={() => setActiveTab(tab.key)}
+                    className={`relative flex items-center gap-2 rounded-full px-3.5 py-2 text-xs font-medium whitespace-nowrap transition-colors ${
+                      active
+                        ? "text-primary-foreground"
+                        : "text-muted-foreground hover:text-foreground bg-muted/60"
+                    }`}
+                  >
+                    {active && (
+                      <motion.span
+                        layoutId="settings-rail-pill-mobile"
+                        transition={{ type: "spring", stiffness: 400, damping: 32 }}
+                        className="absolute inset-0 rounded-full bg-primary shadow-soft"
+                      />
+                    )}
+                    <Icon className="relative z-10 w-3.5 h-3.5" />
+                    <span className="relative z-10">{t(tab.labelKey)}</span>
+                    {dirty[tab.key] && (
+                      <span className="relative z-10 h-1.5 w-1.5 rounded-full bg-amber-400" />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </nav>
+
+          {/* ── Content ───────────────────────────────────────── */}
+          <div className="min-w-0 space-y-4">
+            {/* Unsaved-changes banner */}
+            {isDirty && (
+              <motion.div
+                initial={{ opacity: 0, y: -4 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex items-center justify-between gap-3 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3.5 py-2.5"
+              >
+                <p className="flex items-center gap-2 text-xs font-medium text-amber-700 dark:text-amber-400">
+                  <AlertCircle className="w-3.5 h-3.5" />
+                  {t("You have unsaved changes in this section.")}
+                </p>
+                <button
+                  onClick={resetDrafts}
+                  className="inline-flex items-center gap-1.5 text-xs font-medium text-amber-700 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300 transition-colors"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  {t("Discard")}
+                </button>
+              </motion.div>
+            )}
+
+            {/* ── Account ─────────────────────────────────────── */}
+            {activeTab === "account" && (
+              <div className="space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-sm">
+                      <User className="w-4 h-4" /> {t("Profile Information")}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-center gap-4">
+                      <div className="relative">
+                        {avatarPreview ? (
+                          <img
+                            src={avatarPreview}
+                            alt="Avatar"
+                            className="w-20 h-20 rounded-full object-cover border-2 border-border"
+                          />
+                        ) : (
+                          <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center border-2 border-border">
+                            <User className="w-10 h-10 text-muted-foreground" />
+                          </div>
+                        )}
+                        <label className="absolute bottom-0 right-0 cursor-pointer">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleAvatarChange}
+                            className="sr-only"
+                            disabled={avatarUploading}
+                          />
+                          <div
+                            className={`w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center border-2 border-background cursor-pointer transition-opacity ${
+                              avatarUploading ? "opacity-50" : ""
+                            }`}
+                          >
+                            <Loader2
+                              className={`w-4 h-4 ${
+                                avatarUploading ? "animate-spin" : "hidden"
+                              }`}
+                            />
+                            {!avatarUploading && <span className="text-[10px]">{t("Edit")}</span>}
+                          </div>
+                        </label>
+                      </div>
+                      <div className="flex-1 space-y-3">
+                        <Field label={t("Full name")} required>
+                          <Input
+                            required
+                            value={accountDraft.name}
+                            onChange={(e) =>
+                              setAccountDraft({ ...accountDraft, name: e.target.value })
+                            }
+                            placeholder={t("Full name")}
+                            className="h-8 text-xs"
+                          />
+                        </Field>
+                        <Field label={t("Email address")}>
+                          <Input
+                            type="email"
+                            value={user?.email || ""}
+                            className="h-8 text-xs"
+                            disabled
+                          />
+                        </Field>
+                        <p className="text-[10px] text-muted-foreground">
+                          {t("Primary email is linked to account authentication.")}
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-sm">
+                      <Lock className="w-4 h-4" /> {t("Change Password")}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <form onSubmit={handlePasswordChange} className="space-y-3">
+                      <Field label={t("Current Password")} required>
+                        <Input
+                          type="password"
+                          required
+                          value={passwordForm.current_password}
+                          onChange={(e) =>
+                            setPasswordForm({
+                              ...passwordForm,
+                              current_password: e.target.value,
+                            })
+                          }
+                          placeholder={t("Current Password")}
+                          className="h-8 text-xs"
+                        />
+                      </Field>
+                      <Field label={t("New password")} required>
+                        <Input
+                          type="password"
+                          required
+                          value={passwordForm.password}
+                          onChange={(e) =>
+                            setPasswordForm({ ...passwordForm, password: e.target.value })
+                          }
+                          placeholder={t("New password")}
+                          className="h-8 text-xs"
+                        />
+                      </Field>
+                      <Field label={t("Confirm New Password")} required>
+                        <Input
+                          type="password"
+                          required
+                          value={passwordForm.password_confirmation}
+                          onChange={(e) =>
+                            setPasswordForm({
+                              ...passwordForm,
+                              password_confirmation: e.target.value,
+                            })
+                          }
+                          placeholder={t("Confirm New Password")}
+                          className="h-8 text-xs"
+                        />
+                      </Field>
+                      <div className="pt-1">
+                        <Button
+                          type="submit"
+                          size="sm"
+                          disabled={saving}
+                          className="h-8 text-xs gap-1.5"
+                        >
+                          {saving && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                          {t("Update Password")}
+                        </Button>
+                      </div>
+                    </form>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+
+            {/* ── Notifications ───────────────────────────────── */}
+            {activeTab === "notifications" && (
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="flex items-center gap-2 text-sm">
+                    <Bell className="w-4 h-4" /> {t("Notification Preferences")}
+                    <Link
+                      href="/notifications"
+                      className="ml-auto inline-flex items-center gap-1 text-[11px] font-normal text-primary hover:text-primary/80 transition-colors"
+                    >
+                      {t("Open Center")}
+                      <ExternalLink className="w-3 h-3" />
+                    </Link>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-0.5">
+                    {NOTIFICATION_OPTIONS.map((opt) => (
+                      <div
+                        key={opt.key}
+                        className="flex items-center justify-between gap-3 py-1.5 border-b border-border/40 last:border-0"
+                      >
+                        <div className="min-w-0">
+                          <h4 className="text-[13px] font-medium text-foreground leading-tight">
+                            {t(opt.label)}
+                          </h4>
+                          <p className="text-[11px] text-muted-foreground leading-tight">
+                            {opt.key === "browser_alerts" && browserPermission === "denied"
+                              ? t("Blocked in browser settings — allow notifications for this site to enable")
+                              : opt.key === "browser_alerts" && browserPermission === "unsupported"
+                                ? t("Not supported by this browser")
+                                : t(opt.description)}
+                          </p>
+                        </div>
+                        <Switch
+                          checked={notifDraft[opt.key]}
+                          disabled={opt.locked}
+                          onCheckedChange={(checked) => {
+                            if (opt.locked) return;
+                            setNotifDraft((p) => ({ ...p, [opt.key]: checked }));
+                          }}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                  <p className="text-[10px] text-muted-foreground pt-2">
+                    {t("Emails go to")}{" "}
+                    <span className="font-medium text-foreground">{user?.email}</span>.{" "}
+                    {t("In-app alerts are always delivered to the navbar bell and notification center.")}
+                  </p>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* ── Security ────────────────────────────────────── */}
+            {activeTab === "security" && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-sm">
+                    <Shield className="w-4 h-4" /> {t("Security Settings")}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex items-center justify-between py-2 border-b border-border/50">
+                    <div>
+                      <h4 className="text-sm font-medium text-foreground">
+                        {t("Two-Factor Authentication (2FA)")}
+                      </h4>
+                      <p className="text-xs text-muted-foreground">
+                        {twoFactorEnabled
+                          ? t("Enabled — a 6-digit verification code is emailed to you at every login.")
+                          : t("Disabled — require a security code confirmation on logins from unknown devices")}
+                      </p>
+                    </div>
+                    <Switch
+                      checked={twoFactorEnabled}
+                      onCheckedChange={(checked) =>
+                        openTwoFactorModal(checked ? "enable" : "disable")
+                      }
+                    />
+                  </div>
+                  <div className="flex items-center justify-between py-2 border-b border-border/50">
+                    <div>
+                      <h4 className="text-sm font-medium text-foreground">
+                        {t("Active Device Sessions")}
+                      </h4>
+                      <p className="text-xs text-muted-foreground">
+                        {t("View and revoke active authorization tokens and devices")}
+                      </p>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-8 text-xs"
+                      onClick={() => {
+                        loadSecurityData();
+                        setShowSessionsModal(true);
+                      }}
+                    >
+                      {t("View Sessions")}
                     </Button>
                   </div>
-                </form>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Notifications Tab */}
-          <TabsContent value="notifications" className="pt-4 space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Bell className="w-4 h-4" /> Notification Preferences
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="space-y-1 text-xs text-muted-foreground mb-2">
-                  Configure which notifications you receive across the procurement lifecycle.
-                </div>
-                {[
-                  {
-                    key: "email",
-                    label: "Email Notifications",
-                    description:
-                      "Receive email updates about tenders, purchase orders, approvals, and bills",
-                  },
-                  {
-                    key: "push",
-                    label: "Browser & Desktop Alerts",
-                    description:
-                      "Get instant notifications for status changes and assigned workflow tasks",
-                  },
-                  {
-                    key: "critical",
-                    label: "Critical Alerts & Overdue Warnings",
-                    description:
-                      "System alerts, deadline warnings, and audit logging alerts (mandatory)",
-                  },
-                ].map((opt) => (
-                  <div
-                    key={opt.key}
-                    className="flex items-center justify-between py-2 border-b border-border/50 last:border-0"
-                  >
+                  <div className="flex items-center justify-between py-2 border-b border-border/50">
                     <div>
                       <h4 className="text-sm font-medium text-foreground">
-                        {opt.label}
+                        {t("Login History & Audits")}
                       </h4>
                       <p className="text-xs text-muted-foreground">
-                        {opt.description}
+                        {t("Inspect recent IP addresses, browser agents, and timestamps")}
                       </p>
                     </div>
-                    <Switch
-                      checked={notifications[opt.key]}
-                      onCheckedChange={(checked) =>
-                        setNotifications((p) => ({ ...p, [opt.key]: checked }))
-                      }
-                      disabled={opt.key === "critical"}
-                    />
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Security Tab */}
-          <TabsContent value="security" className="pt-4 space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Shield className="w-4 h-4" /> Security Settings
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex items-center justify-between py-2 border-b border-border/50">
-                  <div>
-                    <h4 className="text-sm font-medium text-foreground">
-                      Two-Factor Authentication (2FA)
-                    </h4>
-                    <p className="text-xs text-muted-foreground">
-                      Require security code confirmation on logins from unknown devices
-                    </p>
-                  </div>
-                  <Switch
-                    checked={security.twoFactorEnabled}
-                    onCheckedChange={(checked) =>
-                      setSecurity((p) => ({ ...p, twoFactorEnabled: checked }))
-                    }
-                  />
-                </div>
-                <div className="flex items-center justify-between py-2 border-b border-border/50">
-                  <div>
-                    <h4 className="text-sm font-medium text-foreground">
-                      Active Device Sessions
-                    </h4>
-                    <p className="text-xs text-muted-foreground">
-                      View and revoke active authorization tokens and devices
-                    </p>
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-8 text-xs"
-                    onClick={() => {
-                      loadSecurityData();
-                      setShowSessionsModal(true);
-                    }}
-                  >
-                    View Sessions
-                  </Button>
-                </div>
-                <div className="flex items-center justify-between py-2 border-b border-border/50">
-                  <div>
-                    <h4 className="text-sm font-medium text-foreground">
-                      Login History & Audits
-                    </h4>
-                    <p className="text-xs text-muted-foreground">
-                      Inspect recent IP addresses, browser agents, and timestamps
-                    </p>
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-8 text-xs"
-                    onClick={() => {
-                      loadSecurityData();
-                      setShowHistoryModal(true);
-                    }}
-                  >
-                    View Logs
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Appearance Tab */}
-          <TabsContent value="appearance" className="pt-4 space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Palette className="w-4 h-4" /> Appearance & Theme
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex items-center justify-between py-2 border-b border-border/50">
-                  <div>
-                    <h4 className="text-sm font-medium text-foreground">
-                      Dark Theme
-                    </h4>
-                    <p className="text-xs text-muted-foreground">
-                      Switch between clean high-contrast light and dark appearance
-                    </p>
-                  </div>
-                  <Switch
-                    checked={appearance.darkMode}
-                    onCheckedChange={(checked) => {
-                      setAppearance((p) => ({ ...p, darkMode: checked }));
-                      setTheme(checked ? "dark" : "light");
-                    }}
-                  />
-                </div>
-                <div className="flex items-center justify-between py-2 border-b border-border/50">
-                  <div>
-                    <h4 className="text-sm font-medium text-foreground">
-                      Compact Density Mode
-                    </h4>
-                    <p className="text-xs text-muted-foreground">
-                      Optimize padding and spacing for high-density tabular data
-                    </p>
-                  </div>
-                  <Switch
-                    checked={appearance.compactMode}
-                    onCheckedChange={(checked) =>
-                      setAppearance((p) => ({ ...p, compactMode: checked }))
-                    }
-                  />
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Globe className="w-4 h-4" /> Regional & Localization
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="space-y-1">
-                    <Label className="text-[11px] text-muted-foreground uppercase tracking-wider">
-                      Language
-                    </Label>
-                    <select
-                      value={appearance.language}
-                      onChange={(e) =>
-                        setAppearance({ ...appearance, language: e.target.value })
-                      }
-                      className="w-full h-8 px-3 text-xs bg-background border border-border rounded-md outline-none"
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-8 text-xs"
+                      onClick={() => {
+                        loadSecurityData();
+                        setShowHistoryModal(true);
+                      }}
                     >
-                      <option value="en">English (US/UK)</option>
-                      <option value="si">Sinhala (සිංහල)</option>
-                      <option value="ta">Tamil (தமிழ்)</option>
-                    </select>
+                      {t("View Logs")}
+                    </Button>
                   </div>
-                  <div className="space-y-1">
-                    <Label className="text-[11px] text-muted-foreground uppercase tracking-wider">
-                      Timezone
-                    </Label>
-                    <select
-                      value={appearance.timezone}
-                      onChange={(e) =>
-                        setAppearance({ ...appearance, timezone: e.target.value })
-                      }
-                      className="w-full h-8 px-3 text-xs bg-background border border-border rounded-md outline-none"
-                    >
-                      <option value="Asia/Colombo">Asia/Colombo (GMT+5:30)</option>
-                      <option value="UTC">UTC (GMT+0:00)</option>
-                      <option value="Asia/Singapore">Asia/Singapore (GMT+8:00)</option>
-                    </select>
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-[11px] text-muted-foreground uppercase tracking-wider">
-                      Date Format
-                    </Label>
-                    <select
-                      value={appearance.dateFormat}
-                      onChange={(e) =>
-                        setAppearance({ ...appearance, dateFormat: e.target.value })
-                      }
-                      className="w-full h-8 px-3 text-xs bg-background border border-border rounded-md outline-none"
-                    >
-                      <option value="DD/MM/YYYY">DD/MM/YYYY (e.g. 10/10/2026)</option>
-                      <option value="YYYY-MM-DD">YYYY-MM-DD (ISO standard)</option>
-                      <option value="MM/DD/YYYY">MM/DD/YYYY</option>
-                    </select>
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-[11px] text-muted-foreground uppercase tracking-wider">
-                      Primary Currency
-                    </Label>
-                    <select
-                      value={appearance.currency}
-                      onChange={(e) =>
-                        setAppearance({ ...appearance, currency: e.target.value })
-                      }
-                      className="w-full h-8 px-3 text-xs bg-background border border-border rounded-md outline-none"
-                    >
-                      <option value="LKR">LKR (Sri Lankan Rupee)</option>
-                      <option value="USD">USD (US Dollar)</option>
-                      <option value="EUR">EUR (Euro)</option>
-                    </select>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* System Tab */}
-          <TabsContent value="system" className="pt-4 space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Monitor className="w-4 h-4" /> System Preferences & Diagnostic
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="space-y-1 text-xs text-muted-foreground mb-2">
-                  System-wide runtime toggles and diagnostics controls.
-                </div>
-                {[
-                  {
-                    key: "maintenanceMode",
-                    label: "Maintenance Mode",
-                    description:
-                      "Restricts write operations across procurement and financial ledgers",
-                  },
-                  {
-                    key: "debugMode",
-                    label: "Debug Mode & Verbose Network Trace",
-                    description:
-                      "Logs API requests, response times, and stack traces to client console",
-                  },
-                ].map((opt) => (
-                  <div
-                    key={opt.key}
-                    className="flex items-center justify-between py-2 border-b border-border/50 last:border-0"
-                  >
-                    <div>
-                      <h4 className="text-sm font-medium text-foreground">
-                        {opt.label}
-                      </h4>
-                      <p className="text-xs text-muted-foreground">
-                        {opt.description}
-                      </p>
-                    </div>
-                    <Switch
-                      checked={system[opt.key]}
-                      onCheckedChange={(checked) =>
-                        setSystem((p) => ({ ...p, [opt.key]: checked }))
-                      }
-                    />
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
-
-        {/* Global Save Button */}
-        <div className="flex justify-end pt-3 border-t border-border">
-          <Button
-            onClick={getSaveHandler()}
-            disabled={saving}
-            className="h-9 px-4 text-xs gap-2"
-          >
-            {saving ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <Save className="w-4 h-4" />
+                </CardContent>
+              </Card>
             )}
-            {saving ? "Saving..." : "Save Changes"}
-          </Button>
+
+            {/* ── Appearance + Regional ───────────────────────── */}
+            {activeTab === "appearance" && (
+              <>
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-sm">
+                      <Palette className="w-4 h-4" /> {t("Appearance & Theme")}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="flex items-center justify-between py-2 border-b border-border/50">
+                      <div>
+                        <h4 className="text-sm font-medium text-foreground">
+                          {t("Dark Theme")}
+                        </h4>
+                        <p className="text-xs text-muted-foreground">
+                          {t("Switch between clean high-contrast light and dark appearance")}
+                        </p>
+                      </div>
+                      <Switch
+                        checked={appearanceValue.darkMode}
+                        onCheckedChange={(checked) =>
+                          setAppearanceDraft({ ...appearanceValue, darkMode: checked })
+                        }
+                      />
+                    </div>
+                    <div className="flex items-center justify-between py-2 border-b border-border/50">
+                      <div>
+                        <h4 className="text-sm font-medium text-foreground">
+                          {t("Compact Density Mode")}
+                        </h4>
+                        <p className="text-xs text-muted-foreground">
+                          {t("Optimize padding and spacing for high-density tabular data")}
+                        </p>
+                      </div>
+                      <Switch
+                        checked={appearanceValue.compact}
+                        onCheckedChange={(checked) =>
+                          setAppearanceDraft({ ...appearanceValue, compact: checked })
+                        }
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-sm">
+                      <Globe className="w-4 h-4" /> {t("Regional & Localization")}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div className="space-y-1">
+                        <Label className="text-[11px] text-muted-foreground uppercase tracking-wider">
+                          {t("Language (date & number format)")}
+                        </Label>
+                        <select
+                          value={regionalValue.language}
+                          onChange={(e) =>
+                            setRegionalDraft({ ...regionalValue, language: e.target.value })
+                          }
+                          className="w-full h-8 px-3 text-xs bg-background border border-border rounded-md outline-none"
+                        >
+                          <option value="en">English</option>
+                          <option value="si">සිංහල (Sinhala)</option>
+                          <option value="ta">தமிழ் (Tamil)</option>
+                        </select>
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-[11px] text-muted-foreground uppercase tracking-wider">
+                          {t("Timezone")}
+                        </Label>
+                        <select
+                          value={regionalValue.timezone}
+                          onChange={(e) =>
+                            setRegionalDraft({ ...regionalValue, timezone: e.target.value })
+                          }
+                          className="w-full h-8 px-3 text-xs bg-background border border-border rounded-md outline-none"
+                        >
+                          <option value="Asia/Colombo">Asia/Colombo (GMT+5:30)</option>
+                          <option value="UTC">UTC (GMT+0:00)</option>
+                          <option value="Asia/Singapore">Asia/Singapore (GMT+8:00)</option>
+                        </select>
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-[11px] text-muted-foreground uppercase tracking-wider">
+                          {t("Date Format")}
+                        </Label>
+                        <select
+                          value={regionalValue.dateFormat}
+                          onChange={(e) =>
+                            setRegionalDraft({ ...regionalValue, dateFormat: e.target.value })
+                          }
+                          className="w-full h-8 px-3 text-xs bg-background border border-border rounded-md outline-none"
+                        >
+                          <option value="DD/MM/YYYY">DD/MM/YYYY (e.g. 31/12/2026)</option>
+                          <option value="YYYY-MM-DD">YYYY-MM-DD (ISO standard)</option>
+                          <option value="MM/DD/YYYY">MM/DD/YYYY</option>
+                        </select>
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-[11px] text-muted-foreground uppercase tracking-wider">
+                          {t("Primary Currency")}
+                        </Label>
+                        <select
+                          value={regionalValue.currency}
+                          onChange={(e) =>
+                            setRegionalDraft({ ...regionalValue, currency: e.target.value })
+                          }
+                          className="w-full h-8 px-3 text-xs bg-background border border-border rounded-md outline-none"
+                        >
+                          <option value="LKR">LKR (Sri Lankan Rupee)</option>
+                          <option value="USD">USD (US Dollar)</option>
+                          <option value="EUR">EUR (Euro)</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* Live preview of the draft (before saving) */}
+                    <div className="rounded-lg border border-border bg-muted/40 p-3 space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+                          {t("Live Preview")}
+                        </p>
+                        <p className="text-[10px] text-muted-foreground">
+                          {t("Currently applied")}: {savedPreview.date} · {savedPreview.currency}
+                        </p>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                        <div>
+                          <p className="text-[10px] text-muted-foreground">{t("Date")}</p>
+                          <p className="text-xs font-medium text-foreground">{preview.date}</p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] text-muted-foreground">{t("Date & Time")}</p>
+                          <p className="text-xs font-medium text-foreground">{preview.dateTime}</p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] text-muted-foreground">{t("Amount")}</p>
+                          <p className="text-xs font-medium text-foreground">{preview.currency}</p>
+                        </div>
+                      </div>
+                      <p className="text-[10px] text-muted-foreground">
+                        {t("Applied to dashboards, job values, quotations, purchase orders, invoices, and tenders.")}
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </>
+            )}
+
+            {/* ── System ──────────────────────────────────────── */}
+            {activeTab === "system" && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-sm">
+                    <Monitor className="w-4 h-4" /> {t("System Preferences & Diagnostic")}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="space-y-1 text-xs text-muted-foreground mb-2">
+                    {t("System-wide runtime toggles and diagnostics controls.")}
+                  </div>
+                  <div className="flex items-center justify-between py-2 border-b border-border/50">
+                    <div>
+                      <h4 className="text-sm font-medium text-foreground">
+                        {t("Debug Mode & Verbose Network Trace")}
+                      </h4>
+                      <p className="text-xs text-muted-foreground">
+                        {debugValue
+                          ? t("Enabled — API requests, responses and timings are logged to the browser console.")
+                          : t("Logs API requests, response times, and stack traces to client console")}
+                      </p>
+                    </div>
+                    <Switch
+                      checked={debugValue}
+                      onCheckedChange={(checked) =>
+                        setSystemDraft({ debugMode: checked, maintenanceMode: maintenanceValue })
+                      }
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between py-2 border-b border-border/50">
+                    <div>
+                      <h4 className="text-sm font-medium text-foreground">
+                        {t("Maintenance Mode")}
+                      </h4>
+                      <p className="text-xs text-muted-foreground">
+                        {canManageSystem
+                          ? t("Restricts write operations across procurement and financial ledgers")
+                          : t("Only Super Admins can change maintenance mode")}
+                      </p>
+                    </div>
+                    {canManageSystem ? (
+                      <Switch
+                        checked={maintenanceValue}
+                        onCheckedChange={(checked) =>
+                          setSystemDraft({ debugMode: debugValue, maintenanceMode: checked })
+                        }
+                      />
+                    ) : (
+                      <span
+                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium ${
+                          maintenanceValue
+                            ? "bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400"
+                            : "bg-muted text-muted-foreground"
+                        }`}
+                      >
+                        <Wrench className="w-3.5 h-3.5" />
+                        {maintenanceValue
+                          ? t("Under maintenance")
+                          : t("Operational")}
+                      </span>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Sticky action bar */}
+            <div className="sticky bottom-4 z-20 flex items-center justify-end gap-2 rounded-xl border border-border/60 bg-background/90 px-3.5 py-2.5 shadow-soft backdrop-blur-md">
+              {isDirty && (
+                <button
+                  onClick={resetDrafts}
+                  className="inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  {t("Discard")}
+                </button>
+              )}
+              <Button
+                onClick={handleSave}
+                disabled={saving}
+                className="h-9 px-4 text-xs gap-2"
+              >
+                {saving ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : savedFeedback ? (
+                  <CheckCircle className="w-4 h-4" />
+                ) : (
+                  <Save className="w-4 h-4" />
+                )}
+                {saving ? t("Saving...") : savedFeedback ? t("Saved") : t("Save Changes")}
+              </Button>
+            </div>
+          </div>
         </div>
 
-        {/* Active Sessions Modal */}
+        {/* ── Modals ─────────────────────────────────────────── */}
+
+        {/* Two-Factor password confirmation */}
+        {twoFactorForm.mode && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4">
+            <div className="w-full max-w-md bg-card border border-border rounded-lg shadow-xl overflow-hidden">
+              <div className="flex items-center justify-between p-4 border-b border-border">
+                <div className="flex items-center gap-2">
+                  <Shield className="w-4 h-4 text-primary" />
+                  <h3 className="text-sm font-semibold text-foreground">
+                    {twoFactorForm.mode === "enable"
+                      ? t("Enable Two-Factor Authentication")
+                      : t("Disable Two-Factor Authentication")}
+                  </h3>
+                </div>
+                <button
+                  onClick={() => setTwoFactorForm(empty2faForm)}
+                  className="text-muted-foreground hover:text-foreground text-xs"
+                >
+                  ✕
+                </button>
+              </div>
+              <form onSubmit={handleTwoFactorSubmit} className="p-4 space-y-4">
+                <p className="text-xs text-muted-foreground">
+                  {twoFactorForm.mode === "enable"
+                    ? t("Enter your current password to enable 2FA. A 6-digit verification code will be emailed to you at every login.")
+                    : t("Enter your current password to disable 2FA. Your account will only be protected by your password.")}
+                </p>
+                <Field label={t("Current Password")} required>
+                  <Input
+                    type="password"
+                    required
+                    autoFocus
+                    value={twoFactorForm.password}
+                    onChange={(e) =>
+                      setTwoFactorForm((p) => ({ ...p, password: e.target.value }))
+                    }
+                    placeholder={t("Current Password")}
+                    className="h-9 text-xs"
+                  />
+                </Field>
+                <div className="flex justify-end gap-2 pt-1">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setTwoFactorForm(empty2faForm)}
+                    className="h-8 text-xs"
+                  >
+                    {t("Cancel")}
+                  </Button>
+                  <Button
+                    type="submit"
+                    size="sm"
+                    disabled={twoFactorSaving}
+                    className="h-8 text-xs gap-1.5"
+                  >
+                    {twoFactorSaving && (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    )}
+                    {twoFactorForm.mode === "enable" ? t("Enable 2FA") : t("Disable 2FA")}
+                  </Button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* Active Sessions */}
         {showSessionsModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4">
             <div className="w-full max-w-lg bg-card border border-border rounded-lg shadow-xl overflow-hidden flex flex-col max-h-[85vh]">
@@ -834,7 +1192,7 @@ export default function SettingsPage() {
                 <div className="flex items-center gap-2">
                   <Laptop className="w-4 h-4 text-primary" />
                   <h3 className="text-sm font-semibold text-foreground">
-                    Active Sessions
+                    {t("Active Sessions")}
                   </h3>
                 </div>
                 <button
@@ -851,7 +1209,7 @@ export default function SettingsPage() {
                   </div>
                 ) : activeSessions.length === 0 ? (
                   <div className="text-center py-6 text-muted-foreground">
-                    Only current device session is active.
+                    {t("Only current device session is active.")}
                   </div>
                 ) : (
                   activeSessions.map((s, idx) => (
@@ -864,7 +1222,7 @@ export default function SettingsPage() {
                           <span>{s.ip_address || "Localhost"}</span>
                           {s.is_current && (
                             <span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.2 rounded font-mono">
-                              Current Device
+                              {t("Current Device")}
                             </span>
                           )}
                         </div>
@@ -872,7 +1230,7 @@ export default function SettingsPage() {
                           {s.user_agent || "Web Browser"}
                         </p>
                         <p className="text-[10px] text-muted-foreground">
-                          Last activity: {s.last_activity ? new Date(s.last_activity * 1000).toLocaleString() : "Active now"}
+                          {t("Last activity")}: {s.last_activity ? new Date(s.last_activity * 1000).toLocaleString() : "Active now"}
                         </p>
                       </div>
                       {!s.is_current && (
@@ -882,7 +1240,7 @@ export default function SettingsPage() {
                           onClick={() => handleRevokeSession(s.id)}
                           className="h-7 text-xs text-destructive hover:bg-destructive/10"
                         >
-                          Revoke
+                          {t("Revoke")}
                         </Button>
                       )}
                     </div>
@@ -896,14 +1254,14 @@ export default function SettingsPage() {
                   onClick={() => setShowSessionsModal(false)}
                   className="h-8 text-xs"
                 >
-                  Close
+                  {t("Close")}
                 </Button>
               </div>
             </div>
           </div>
         )}
 
-        {/* Login History Modal */}
+        {/* Login History */}
         {showHistoryModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4">
             <div className="w-full max-w-xl bg-card border border-border rounded-lg shadow-xl overflow-hidden flex flex-col max-h-[85vh]">
@@ -911,7 +1269,7 @@ export default function SettingsPage() {
                 <div className="flex items-center gap-2">
                   <Shield className="w-4 h-4 text-primary" />
                   <h3 className="text-sm font-semibold text-foreground">
-                    Login History & Security Logs
+                    {t("Login History & Security Logs")}
                   </h3>
                 </div>
                 <button
@@ -928,7 +1286,7 @@ export default function SettingsPage() {
                   </div>
                 ) : loginHistory.length === 0 ? (
                   <div className="text-center py-6 text-muted-foreground">
-                    No recent login logs found.
+                    {t("No recent login logs found.")}
                   </div>
                 ) : (
                   loginHistory.slice(0, 15).map((log, idx) => (
@@ -949,7 +1307,7 @@ export default function SettingsPage() {
                         </p>
                       </div>
                       <span className="text-[10px] font-medium text-emerald-600 bg-emerald-500/10 px-2 py-0.5 rounded">
-                        Successful
+                        {t("Successful")}
                       </span>
                     </div>
                   ))
@@ -962,7 +1320,7 @@ export default function SettingsPage() {
                   onClick={() => setShowHistoryModal(false)}
                   className="h-8 text-xs"
                 >
-                  Close
+                  {t("Close")}
                 </Button>
               </div>
             </div>

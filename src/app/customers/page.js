@@ -1,5 +1,6 @@
-// src/app/customers/page.js
 "use client";
+import { useTranslation } from "@/contexts/LanguageContext";
+// src/app/customers/page.js
 
 import { useState, useEffect, useCallback } from "react";
 import {
@@ -28,6 +29,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 
 export default function CustomersPage() {
+  const { t } = useTranslation();
   const [customers, setCustomers] = useState([]);
   const [meta, setMeta] = useState({});
   const [loading, setLoading] = useState(true);
@@ -129,7 +131,7 @@ export default function CustomersPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-border/50">
         <div>
           <h1 className="text-base font-semibold tracking-tight text-foreground">
-            Customer Directory
+            {t("Customer Directory")}
           </h1>
           <p className="text-xs text-muted-foreground mt-0.5">
             Commercial client relationships, billing information, and tax registrations.

@@ -1,6 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactCompiler: true,
+  allowedDevOrigins: [
+    "*.trycloudflare.com",
+    "*.ngrok-free.app",
+    "*.ngrok-free.dev",
+    "*.ngrok.io",
+    "*.loca.lt",
+  ],
   async redirects() {
     return [
       {

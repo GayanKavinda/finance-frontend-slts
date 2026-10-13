@@ -1,4 +1,5 @@
 "use client";
+import { useTranslation } from "@/contexts/LanguageContext";
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
@@ -81,6 +82,7 @@ function SkeletonCard({ viewMode }) {
 }
 
 export default function JobsPage() {
+  const { t } = useTranslation();
   const router = useRouter();
   const searchTimerRef = useRef(null);
 
@@ -310,7 +312,7 @@ export default function JobsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-border/50">
         <div>
           <h1 className="text-base font-semibold tracking-tight text-foreground">
-            Jobs & Projects
+            {t("Jobs & Projects")}
           </h1>
           <p className="text-xs text-muted-foreground mt-0.5">
             Manage project execution and contractor assignments

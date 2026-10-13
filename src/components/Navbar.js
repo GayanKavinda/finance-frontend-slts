@@ -22,11 +22,13 @@ import {
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
+import { useTranslation } from "@/contexts/LanguageContext";
 import { useRouter, usePathname } from "next/navigation";
 import Image from "next/image";
 import useAutoLogout from "@/hooks/useAutoLogout";
 import { useScroll } from "@/contexts/ScrollContext";
 import ThemeToggle from "@/components/ThemeToggle";
+import NotificationDropdown from "@/components/NotificationDropdown";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/Avatar";
 
 import { navLinks, AUTH_PATHS } from "@/constants/navigation";
@@ -36,6 +38,7 @@ export default function Navbar({
   setIsMobileSidebarOpen,
 }) {
   const { user, loading, logout } = useAuth();
+  const { t } = useTranslation();
   useAutoLogout();
 
   const router = useRouter();
@@ -98,6 +101,7 @@ export default function Navbar({
     if (user) {
       return (
         <div className="flex items-center gap-3">
+          <NotificationDropdown />
           <ThemeToggle />
           <div className="relative">
             <button
@@ -165,12 +169,12 @@ export default function Navbar({
 
                   {[
                     {
-                      label: "Profile",
+                      label: t("Profile"),
                       icon: UserIcon,
                       href: "/profile",
                     },
                     {
-                      label: "Help",
+                      label: t("Help"),
                       icon: HelpCircle,
                       href: "/help",
                     },
@@ -192,7 +196,7 @@ export default function Navbar({
                       className="flex items-center gap-2.5 w-full px-3 py-2 rounded-md text-sm text-destructive hover:bg-destructive/10 transition-colors"
                     >
                       <LogOut className="w-4 h-4" />
-                      Sign Out
+                      {t("Sign Out")}
                     </button>
                   </div>
                 </motion.div>
@@ -210,7 +214,7 @@ export default function Navbar({
           href="/signin"
           className="text-sm font-medium text-foreground hover:text-primary transition-colors"
         >
-          Sign In
+          {t("Sign In")}
         </Link>
         <Link
           href="/signup"
@@ -357,7 +361,7 @@ export default function Navbar({
                           }`}
                         >
                           <Icon className="w-[18px] h-[18px] shrink-0" strokeWidth={isActive ? 2 : 1.5} />
-                          <span className="text-sm">{link.label}</span>
+                          <span className="text-sm">{t(link.label)}</span>
                         </Link>
                       );
                     })}
@@ -372,7 +376,7 @@ export default function Navbar({
                       className="flex items-center justify-center gap-2 w-full px-4 py-2.5 text-sm font-medium text-destructive border border-destructive/20 rounded-lg hover:bg-destructive/10 transition-colors"
                     >
                       <LogOut className="w-4 h-4" />
-                      Sign Out
+                      {t("Sign Out")}
                     </button>
                   </div>
                 </>
@@ -380,12 +384,12 @@ export default function Navbar({
                 <div className="p-5 space-y-3">
                   <Link href="/signup" onClick={() => setMobileMenuOpen(false)}>
                     <button className="w-full bg-foreground text-background px-5 py-3 rounded-lg font-medium text-sm hover:bg-foreground/90 transition-colors">
-                      Create Account
+                      {t("Sign Up")}
                     </button>
                   </Link>
                   <Link href="/signin" onClick={() => setMobileMenuOpen(false)}>
                     <button className="w-full border border-border px-5 py-3 rounded-lg font-medium text-sm text-foreground hover:bg-muted transition-colors">
-                      Sign In
+                      {t("Sign In")}
                     </button>
                   </Link>
                 </div>
