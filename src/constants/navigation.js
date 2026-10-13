@@ -17,8 +17,9 @@ import {
   HardHat,
   Building2,
   Banknote,
+  BookOpen,
+  Library,
 } from "lucide-react";
-
 export const navLinks = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   {
@@ -91,6 +92,8 @@ export const navLinks = [
   },
   { label: "Settings", href: "/settings", icon: Settings },
   { label: "Help Center", href: "/help", icon: HelpCircle },
+  { label: "Walkthrough Guide", href: "/help/guides", icon: BookOpen },
+  { label: "Documentation", href: "/help/docs", icon: Library },
 ];
 
 export const AUTH_PATHS = [

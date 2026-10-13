@@ -75,6 +75,10 @@ const si = {
   "Notifications": "දැනුම්දීම්",
   "Settings": "සැකසුම්",
   "Help Center": "උපදේශන මධ්‍යස්ථානය",
+
+  "Walkthrough Guide": "පියවරෙන් පියවර මාර්ගෝපදේශය",
+
+  "Documentation": "ලේඛන",
   "System Logs": "පද්ධති ලොග්",
 
   // Auth
@@ -316,6 +320,10 @@ const ta = {
   "Notifications": "அறிவிப்புகள்",
   "Settings": "அமைப்புகள்",
   "Help Center": "உதவ மையம்",
+
+  "Walkthrough Guide": "படிப்படியான வழிகாட்டி",
+
+  "Documentation": "ஆவணம்",
   "System Logs": "அமைப்பு பதிவுகள்",
 
   // Auth
