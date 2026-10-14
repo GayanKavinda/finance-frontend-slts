@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { useTranslation } from "@/contexts/LanguageContext";
 import {
   ArrowLeft,
   BookMarked,
@@ -222,9 +223,33 @@ function SectionBlock({ block }) {
 }
 
 export default function GlossaryPage() {
+  const { t } = useTranslation();
   const [activeId, setActiveId] = useState(glossarySections[0].id);
   const [query, setQuery] = useState("");
   const sectionRefs = useRef({});
+
+  // Translate the glossary at render so language switches cover every
+  // category, term and definition (and the search).
+  const sectionsT = glossarySections.map((section) => ({
+    ...section,
+    label: t(section.label),
+    title: t(section.title),
+    summary: t(section.summary),
+    blocks: section.blocks.map((block) =>
+      block.type === "terms"
+        ? {
+            ...block,
+            title: t(block.title),
+            terms: block.terms.map((term) => ({ term: t(term.term), def: t(term.def) })),
+          }
+        : {
+            ...block,
+            title: t(block.title),
+            head: block.head ? block.head.map((h) => t(h)) : block.head,
+            rows: block.rows ? block.rows.map((row) => row.map((cell) => t(cell))) : block.rows,
+          }
+    ),
+  }));
 
   useEffect(() => {
     const viewport = document.querySelector('[data-slot="scroll-area-viewport"]');
@@ -232,7 +257,7 @@ export default function GlossaryPage() {
 
     const updateActive = () => {
       let current = glossarySections[0].id;
-      for (const section of glossarySections) {
+      for (const section of sectionsT) {
         const el = sectionRefs.current[section.id];
         if (el && el.getBoundingClientRect().top <= 120) current = section.id;
       }
@@ -250,7 +275,7 @@ export default function GlossaryPage() {
 
   // Search across every term in the glossary
   const q = query.trim().toLowerCase();
-  const filteredSections = glossarySections
+  const filteredSections = sectionsT
     .map((section) => {
       if (!q) return section;
       const blocks = section.blocks
@@ -268,7 +293,7 @@ export default function GlossaryPage() {
       return blocks.length || tableMatch ? { ...section, blocks: blocks.length ? blocks : section.blocks } : null;
     })
     .filter(Boolean);
-  const totalTerms = glossarySections.reduce(
+  const totalTerms = sectionsT.reduce(
     (sum, s) => sum + s.blocks.filter((b) => b.type === "terms").reduce((n, b) => n + b.terms.length, 0),
     0
   );
@@ -280,11 +305,11 @@ export default function GlossaryPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-border/50">
           <div>
             <div className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-medium uppercase tracking-widest mb-2">
-              Documentation
+              {t("Documentation")}
             </div>
-            <h1 className="text-base font-semibold tracking-tight text-foreground">Glossary</h1>
+            <h1 className="text-base font-semibold tracking-tight text-foreground">{t("Glossary")}</h1>
             <p className="text-xs text-muted-foreground mt-0.5">
-              {totalTerms} terms — the language of the tender-to-cash system, defined in plain English
+              {t("{t(`{totalTerms} terms — the language of the tender-to-cash system, defined in plain English`)}")}
             </p>
           </div>
           <Link
@@ -292,7 +317,7 @@ export default function GlossaryPage() {
             className="inline-flex items-center gap-1.5 h-8 px-3 rounded-md border border-border text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors shrink-0"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
-            All Documents
+            {t("All Documents")}
           </Link>
         </div>
 
@@ -303,7 +328,7 @@ export default function GlossaryPage() {
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search terms, e.g. retention, tax invoice, award..."
+            placeholder={t("Search terms, e.g. retention, tax invoice, award...")}
             className="h-8 w-full text-xs pl-8 pr-3 rounded-md bg-card border border-border outline-none focus:ring-2 focus:ring-primary/20"
           />
         </div>

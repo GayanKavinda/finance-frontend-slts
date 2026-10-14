@@ -18,6 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import FormModal from "@/components/ui/FormModal";
+import { useTranslation } from "@/contexts/LanguageContext";
 import api from "@/lib/axios";
 import {
   Mail,
@@ -232,7 +233,7 @@ const contacts = [
   { icon: MessageSquare, label: "Internal Helpdesk", detail: "Ext: 4402 (Mon–Fri 08:30–17:00)", href: null },
 ];
 
-// ── Resources — every entry opens a real part of the system ──
+// ── t("Resources") — every entry opens a real part of the system ──
 const resources = [
   {
     label: "Full System Walkthrough",
@@ -346,11 +347,18 @@ const emptyTicketForm = {
 };
 
 export default function HelpPage() {
+  const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
   const [openFaq, setOpenFaq] = useState(null);
   const [activeCategory, setActiveCategory] = useState("all");
+  // Translate the article data at render so language switches apply everywhere
+  const faqsT = faqs.map((cat) => ({
+    ...cat,
+    category: t(cat.category),
+    items: cat.items.map((item) => ({ q: t(item.q), a: t(item.a) })),
+  }));
   const categories = ["all", ...faqs.map((c) => c.category)];
-  const filteredFaqs = faqs
+  const filteredFaqs = faqsT
     .flatMap((cat) => cat.items.map((item) => ({ ...item, category: cat.category })))
     .filter((faq) =>
       (activeCategory === "all" || faq.category === activeCategory) &&
@@ -374,7 +382,7 @@ export default function HelpPage() {
       const res = await api.get("/support-tickets");
       setTickets(res.data.data || []);
     } catch {
-      toast.error("Failed to load your support tickets");
+      toast.error(t("Failed to load your support tickets"));
     } finally {
       setTicketsLoading(false);
     }
@@ -388,7 +396,7 @@ export default function HelpPage() {
         const res = await api.get("/support-tickets");
         if (!cancelled) setTickets(res.data.data || []);
       } catch {
-        if (!cancelled) toast.error("Failed to load your support tickets");
+        if (!cancelled) toast.error(t("Failed to load your support tickets"));
       } finally {
         if (!cancelled) setTicketsLoading(false);
       }
@@ -411,18 +419,18 @@ export default function HelpPage() {
 
   const handleTicketSubmit = async () => {
     if (!ticketForm.subject.trim() || !ticketForm.description.trim()) {
-      toast.error("Subject and description are required");
+      toast.error(t("Subject and description are required"));
       return;
     }
     setSubmittingTicket(true);
     try {
       const res = await api.post("/support-tickets", ticketForm);
-      toast.success(`Ticket ${res.data.ticket.ticket_number} submitted — the IT team will respond shortly`);
+      toast.success(`${res.data.ticket.ticket_number} — ${t("Ticket submitted — the IT team will respond shortly")}`);
       setTicketForm(emptyTicketForm);
       setTicketModalOpen(false);
       loadTickets();
     } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to submit ticket");
+      toast.error(err.response?.data?.message || t("Failed to submit ticket"));
     } finally {
       setSubmittingTicket(false);
     }
@@ -435,13 +443,13 @@ export default function HelpPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-border/50">
           <div>
             <div className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-medium uppercase tracking-widest mb-2">
-              Support Center
+              {t("Support Center")}
             </div>
             <h1 className="text-base font-semibold tracking-tight text-foreground">
-              Help Center
+              {t("Help Center")}
             </h1>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Find answers, contact support, and raise tickets
+              {t("Find answers, contact support, and raise tickets")}
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -450,11 +458,11 @@ export default function HelpPage() {
               className="inline-flex items-center gap-1.5 h-8 px-3 rounded-md border border-border text-xs font-medium text-foreground hover:bg-muted transition-colors shadow-xs"
             >
               <Workflow className="w-3.5 h-3.5" />
-              Full Walkthrough Guide
+              {t("Full Walkthrough Guide")}
             </Link>
             <Button className="h-8 gap-1.5 text-xs shadow-xs" onClick={() => setTicketModalOpen(true)}>
               <TicketIcon className="w-3.5 h-3.5" />
-              Submit Support Ticket
+              {t("Submit Support Ticket")}
             </Button>
           </div>
         </div>
@@ -472,7 +480,7 @@ export default function HelpPage() {
                   <p className="text-[10px] text-muted-foreground truncate">{item.detail}</p>
                 </div>
                 {item.href && (
-                  <a href={item.href} className="text-primary hover:underline text-xs font-medium">Contact</a>
+                  <a href={item.href} className="text-primary hover:underline text-xs font-medium">{t("Contact")}</a>
                 )}
               </CardContent>
             </Card>
@@ -485,7 +493,7 @@ export default function HelpPage() {
             <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
             <Input
               type="text"
-              placeholder="Search help articles..."
+              placeholder={t("Search help articles...")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="h-8 text-xs pl-8 bg-card border-border"
@@ -503,7 +511,7 @@ export default function HelpPage() {
                     : "text-muted-foreground hover:text-foreground hover:bg-muted"
                 }`}
               >
-                {cat === "all" ? "All Topics" : cat}
+                {cat === "all" ? t("All Topics") : cat}
               </button>
             ))}
           </div>
@@ -514,8 +522,8 @@ export default function HelpPage() {
           {filteredFaqs.length === 0 ? (
             <Card className="p-8 text-center">
               <AlertCircle className="w-8 h-8 mx-auto mb-2 text-muted-foreground/50" />
-              <p className="text-sm font-medium text-foreground">No articles found</p>
-              <p className="text-xs text-muted-foreground mt-1">Try adjusting your search or filter</p>
+              <p className="text-sm font-medium text-foreground">{t("No articles found")}</p>
+              <p className="text-xs text-muted-foreground mt-1">{t("Try adjusting your search or filter")}</p>
             </Card>
           ) : (
             filteredFaqs.map((faq, idx) => (
@@ -535,12 +543,12 @@ export default function HelpPage() {
           )}
         </div>
 
-        {/* Resources & Quick Actions */}
+        {/* t("Resources") & Quick Actions */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-2.5 pt-2 border-t border-border/50">
           <div className="lg:col-span-2 space-y-2.5">
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="flex items-center gap-2 text-sm"><BookOpen className="w-3.5 h-3.5 text-primary" /> Resources</CardTitle>
+                <CardTitle className="flex items-center gap-2 text-sm"><BookOpen className="w-3.5 h-3.5 text-primary" /> {t("Resources")}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-1 pt-0">
                 {resources.map((r, i) => (
@@ -563,7 +571,7 @@ export default function HelpPage() {
                         <h4 className="text-xs font-medium text-foreground group-hover:text-primary transition-colors">{r.label}</h4>
                         {r.featured && (
                           <span className="px-1.5 py-0.5 rounded bg-primary text-primary-foreground text-[9px] font-semibold uppercase tracking-wide">
-                            Complete guide
+                            {t("Complete guide")}
                           </span>
                         )}
                       </div>
@@ -577,7 +585,7 @@ export default function HelpPage() {
                   onClick={() => setReleaseOpen(true)}
                 >
                   <Megaphone className="w-3.5 h-3.5" />
-                  Release Notes
+                  {t("Release Notes")}
                 </Button>
               </CardContent>
             </Card>
@@ -587,23 +595,23 @@ export default function HelpPage() {
               <CardContent className="p-3.5 space-y-3">
                 <div className="flex items-center gap-2">
                   <LifeBuoy className="w-4.5 h-4.5" />
-                  <span className="text-sm font-medium">Need Help?</span>
+                  <span className="text-sm font-medium">{t("Need Help?")}</span>
                 </div>
-                <p className="text-xs text-primary-foreground/80">Our IT team responds within 2 business hours during business days. Include the tender, job or invoice number you are working on for a faster resolution.</p>
-                <Button className="w-full bg-white text-primary hover:bg-white/90 h-8 text-xs" onClick={() => setTicketModalOpen(true)}>Submit Support Ticket</Button>
+                <p className="text-xs text-primary-foreground/80">{t("Our IT team responds within 2 business hours during business days. Include the tender, job or invoice number you are working on for a faster resolution.")}</p>
+                <Button className="w-full bg-white text-primary hover:bg-white/90 h-8 text-xs" onClick={() => setTicketModalOpen(true)}>{t("Submit Support Ticket")}</Button>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="p-3.5 space-y-2">
                 {maintenanceMode === null ? (
-                  <p className="text-xs font-medium flex items-center gap-1.5 text-muted-foreground"><Loader2 className="w-3.5 h-3.5 animate-spin" /> Checking system status...</p>
+                  <p className="text-xs font-medium flex items-center gap-1.5 text-muted-foreground"><Loader2 className="w-3.5 h-3.5 animate-spin" /> {t("Checking system status...")}</p>
                 ) : maintenanceMode ? (
-                  <p className="text-xs font-medium flex items-center gap-1.5"><Wrench className="w-3.5 h-3.5 text-amber-500" /> System Status: Maintenance Mode — write operations are temporarily disabled</p>
+                  <p className="text-xs font-medium flex items-center gap-1.5"><Wrench className="w-3.5 h-3.5 text-amber-500" /> {t("System Status: Maintenance Mode — write operations are temporarily disabled")}</p>
                 ) : (
-                  <p className="text-xs font-medium flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> System Status: Operational</p>
+                  <p className="text-xs font-medium flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> {t("System Status: Operational")}</p>
                 )}
-                <p className="text-xs font-medium flex items-center gap-1.5"><Users className="w-3.5 h-3.5 text-primary" /> Support hours: Mon–Fri 08:30–17:00</p>
-                <p className="text-xs font-medium flex items-center gap-1.5"><Settings className="w-3.5 h-3.5 text-amber-500" /> Version: 2.1.0</p>
+                <p className="text-xs font-medium flex items-center gap-1.5"><Users className="w-3.5 h-3.5 text-primary" /> {t("Support hours: Mon–Fri 08:30–17:00")}</p>
+                <p className="text-xs font-medium flex items-center gap-1.5"><Settings className="w-3.5 h-3.5 text-amber-500" /> {t("Version: 2.1.0")}</p>
               </CardContent>
             </Card>
           </div>
@@ -613,9 +621,9 @@ export default function HelpPage() {
         <div className="space-y-2 pt-2 border-t border-border/50">
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-semibold flex items-center gap-2">
-              <TicketIcon className="w-3.5 h-3.5 text-primary" /> My Support Tickets
+              <TicketIcon className="w-3.5 h-3.5 text-primary" /> {t("My Support Tickets")}
             </h2>
-            <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">{tickets.length} {tickets.length === 1 ? "ticket" : "tickets"}</span>
+            <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">{tickets.length} {t(tickets.length === 1 ? "ticket" : "tickets")}</span>
           </div>
           <Card>
             <CardContent className="p-0">
@@ -628,8 +636,8 @@ export default function HelpPage() {
                   <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center mb-2.5">
                     <TicketIcon className="text-muted-foreground" size={18} />
                   </div>
-                  <h3 className="text-xs font-medium text-foreground">No support tickets yet</h3>
-                  <p className="text-[11px] text-muted-foreground mt-0.5">Raise a ticket and the IT team will respond here and by email</p>
+                  <h3 className="text-xs font-medium text-foreground">{t("No support tickets yet")}</h3>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">{t("Raise a ticket and the IT team will respond here and by email")}</p>
                 </div>
               ) : (
                 <div className="divide-y divide-border">
@@ -667,21 +675,21 @@ export default function HelpPage() {
       <FormModal
         isOpen={ticketModalOpen}
         onClose={() => setTicketModalOpen(false)}
-        title="Submit Support Ticket"
-        description="Describe the issue and the IT team will respond within 2 business hours"
+        title={t("Submit Support Ticket")}
+        description={t("Describe the issue and the IT team will respond within 2 business hours")}
         onSubmit={handleTicketSubmit}
-        submitText="Submit Ticket"
+        submitText={t("Submit Ticket")}
         isSubmitting={submittingTicket}
       >
         <div className="space-y-3">
           <div className="space-y-1.5">
-            <Label className="text-xs">Category</Label>
+            <Label className="text-xs">{t("Category")}</Label>
             <Select
               value={ticketForm.category}
               onValueChange={(value) => setTicketForm((prev) => ({ ...prev, category: value }))}
             >
               <SelectTrigger className="h-9 text-xs">
-                <SelectValue placeholder="Select a category" />
+                <SelectValue placeholder={t("Select a category")} />
               </SelectTrigger>
               <SelectContent>
                 {ticketCategories.map((cat) => (
@@ -692,13 +700,13 @@ export default function HelpPage() {
           </div>
 
           <div className="space-y-1.5">
-            <Label className="text-xs">Priority</Label>
+            <Label className="text-xs">{t("Priority")}</Label>
             <Select
               value={ticketForm.priority}
               onValueChange={(value) => setTicketForm((prev) => ({ ...prev, priority: value }))}
             >
               <SelectTrigger className="h-9 text-xs">
-                <SelectValue placeholder="Select priority" />
+                <SelectValue placeholder={t("Select priority")} />
               </SelectTrigger>
               <SelectContent>
                 {ticketPriorities.map((p) => (
@@ -709,22 +717,22 @@ export default function HelpPage() {
           </div>
 
           <div className="space-y-1.5">
-            <Label className="text-xs">Subject</Label>
+            <Label className="text-xs">{t("Subject")}</Label>
             <Input
               value={ticketForm.subject}
               onChange={(e) => setTicketForm((prev) => ({ ...prev, subject: e.target.value }))}
-              placeholder="Short summary of the issue"
+              placeholder={t("Short summary of the issue")}
               maxLength={200}
               className="h-9 text-xs"
             />
           </div>
 
           <div className="space-y-1.5">
-            <Label className="text-xs">Description</Label>
+            <Label className="text-xs">{t("Description")}</Label>
             <Textarea
               value={ticketForm.description}
               onChange={(e) => setTicketForm((prev) => ({ ...prev, description: e.target.value }))}
-              placeholder="Include the tender, job, PO, bill or invoice number, what you expected to happen, and what actually happened"
+              placeholder={t("Include the tender, job, PO, bill or invoice number, what you expected to happen, and what actually happened")}
               rows={5}
               maxLength={5000}
               className="text-xs"
@@ -738,8 +746,8 @@ export default function HelpPage() {
       <FormModal
         isOpen={releaseOpen}
         onClose={() => setReleaseOpen(false)}
-        title="Release Notes"
-        description="What shipped in each release of ProcureX"
+        title={t("Release Notes")}
+        description={t("What shipped in each release of ProcureX")}
         submitText="Close"
         onSubmit={() => setReleaseOpen(false)}
         cancelText="Close"

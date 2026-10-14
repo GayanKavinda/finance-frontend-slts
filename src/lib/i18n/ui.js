@@ -1,14 +1,5 @@
-// src/lib/i18n.js
-// Full UI localization. Keys are the English source strings so any string
-// can be wrapped with t("...") and missing translations fall back to English.
-
-export const LANGUAGES = [
-  { code: "en", label: "English", native: "English" },
-  { code: "si", label: "Sinhala", native: "සිංහල" },
-  { code: "ta", label: "Tamil", native: "தமிழ்" },
-];
-
-const en = {};
+// src/lib/i18n/ui.js
+// Core shell UI localization. Keys are English source strings.
 
 const si = {
   // Common
@@ -501,16 +492,4 @@ const ta = {
   "Failed to save settings": "அமைப்புகளைச் சேமிக்க முடியவில்லை",
 };
 
-export const dictionaries = { en, si, ta };
-
-/**
- * Translate a UI string. Falls back to the English source when a
- * translation is missing, so untranslated strings still render correctly.
- */
-export function translate(lang, text) {
-  if (typeof text !== "string" || !text) return text ?? "";
-  if (lang === "en") return text;
-  const dict = dictionaries[lang];
-  if (!dict) return text;
-  return dict[text] ?? text;
-}
+export { si, ta };

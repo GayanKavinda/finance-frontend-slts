@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslation } from "@/contexts/LanguageContext";
 import {
   ArrowLeft,
   Database,
@@ -275,6 +276,26 @@ const demoDataSections = [
 ];
 
 export default function DemoDataPage() {
+  const { t } = useTranslation();
+  // Translate the demo-data reference at render so language switches cover
+  // every section, table and training step.
+  const sectionsT = demoDataSections.map((section) => ({
+    ...section,
+    title: t(section.title),
+    summary: t(section.summary),
+    blocks: section.blocks.map((block) => ({
+      ...block,
+      title: block.title ? t(block.title) : block.title,
+      text: block.text ? t(block.text) : block.text,
+      head: block.head ? block.head.map((h) => t(h)) : block.head,
+      rows: block.rows ? block.rows.map((row) => row.map((cell) => t(cell))) : block.rows,
+      items: block.items
+        ? block.items.map((item) =>
+            typeof item === "string" ? t(item) : { title: t(item.title), detail: t(item.detail) }
+          )
+        : block.items,
+    })),
+  }));
   return (
     <ProtectedRoute>
       <div className="min-h-full bg-background p-4 sm:p-6 space-y-4">
@@ -301,7 +322,7 @@ export default function DemoDataPage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          {demoDataSections.map((section) => {
+          {sectionsT.map((section) => {
             const Icon = section.icon;
             return (
               <Card key={section.id} id={section.id} className="scroll-mt-20">

@@ -16,10 +16,12 @@ import {
   Database,
   ListChecks,
   BookMarked,
+  Code2,
 } from "lucide-react";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { usePermission } from "@/hooks/usePermission";
+import { useTranslation } from "@/contexts/LanguageContext";
 
 const documents = [
   {
@@ -29,6 +31,13 @@ const documents = [
     href: "/help/guides",
     audience: "All users",
     featured: true,
+  },
+  {
+    title: "Developer Documentation",
+    description: "For the development team: the complete database map (ER diagram, every table, column, key and cascade rule), the use-case catalogue and workflow flowcharts.",
+    icon: Code2,
+    href: "/help/docs/dev",
+    audience: "Developers & admins",
   },
   {
     title: "API Reference",
@@ -107,9 +116,18 @@ const documents = [
 ];
 
 export default function DocsHubPage() {
+  const { t } = useTranslation();
   // Security internals inside the API and Testing docs are visible to
   // Super Admin / Admin (and development-team accounts) only.
   const isAdminTier = usePermission(["manage-users", "manage-roles", "manage-system"]);
+
+  const docsT = documents.map((doc) => ({
+    ...doc,
+    title: t(doc.title),
+    description: t(doc.description),
+    audience: t(doc.audience),
+    internalNote: doc.internalNote ? t(doc.internalNote) : doc.internalNote,
+  }));
 
   return (
     <ProtectedRoute>
@@ -118,26 +136,25 @@ export default function DocsHubPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-border/50">
           <div>
             <div className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-medium uppercase tracking-widest mb-2">
-              Documentation Library
+              {t("Documentation Library")}
             </div>
             <h1 className="text-base font-semibold tracking-tight text-foreground">
-              Documentation
+              {t("Documentation")}
             </h1>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Everything you need to use, integrate and operate the system
+              {t("Everything you need to use, integrate and operate the system")}
             </p>
           </div>
           <Link
             href="/help"
             className="inline-flex items-center gap-1.5 h-8 px-3 rounded-md border border-border text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors shrink-0"
           >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            Back to Help Center
+            {t("Back to Help Center")}
           </Link>
         </div>
 
         {/* Featured: full walkthrough */}
-        {documents
+        {docsT
           .filter((doc) => doc.featured)
           .map((doc) => (
             <Link key={doc.href} href={doc.href} className="block group">
@@ -152,7 +169,7 @@ export default function DocsHubPage() {
                         {doc.title}
                       </h2>
                       <span className="px-1.5 py-0.5 rounded bg-primary text-primary-foreground text-[9px] font-semibold uppercase tracking-wide">
-                        Start here
+                        {t("Start here")}
                       </span>
                     </div>
                     <p className="text-[11px] text-muted-foreground leading-relaxed mt-1">{doc.description}</p>
@@ -168,7 +185,7 @@ export default function DocsHubPage() {
 
         {/* All documents */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
-          {documents
+          {docsT
             .filter((doc) => !doc.featured)
             .map((doc) => (
               <Link key={doc.href} href={doc.href} className="block group">
@@ -214,8 +231,7 @@ export default function DocsHubPage() {
         <Card>
           <CardContent className="p-4 space-y-3">
             <h2 className="text-sm font-semibold flex items-center gap-2">
-              <FileText className="w-3.5 h-3.5 text-primary" />
-              Also available
+              {t("Also available")}
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               <Link
@@ -226,8 +242,8 @@ export default function DocsHubPage() {
                   <Megaphone className="w-3.5 h-3.5" />
                 </span>
                 <div>
-                  <h4 className="text-xs font-medium text-foreground group-hover:text-primary transition-colors">Release Notes</h4>
-                  <p className="text-[10px] text-muted-foreground leading-relaxed">What shipped in each version of ProcureX — opened from the Help Center.</p>
+                  <h4 className="text-xs font-medium text-foreground group-hover:text-primary transition-colors">{t("Release Notes")}</h4>
+                  <p className="text-[10px] text-muted-foreground leading-relaxed">{t("What shipped in each version of ProcureX — opened from the Help Center.")}</p>
                 </div>
               </Link>
               <Link
@@ -238,8 +254,8 @@ export default function DocsHubPage() {
                   <Workflow className="w-3.5 h-3.5" />
                 </span>
                 <div>
-                  <h4 className="text-xs font-medium text-foreground group-hover:text-primary transition-colors">Roles &amp; Permissions</h4>
-                  <p className="text-[10px] text-muted-foreground leading-relaxed">The permission matrix and what each role can do — in the Walkthrough overview.</p>
+                  <h4 className="text-xs font-medium text-foreground group-hover:text-primary transition-colors">{t("Roles & Permissions")}</h4>
+                  <p className="text-[10px] text-muted-foreground leading-relaxed">{t("The permission matrix and what each role can do — in the Walkthrough overview.")}</p>
                 </div>
               </Link>
             </div>
@@ -250,7 +266,7 @@ export default function DocsHubPage() {
         <div className="rounded-lg border border-dashed border-border p-3.5 flex gap-3">
           <Lock className="w-4 h-4 text-muted-foreground shrink-0 mt-0.5" />
           <p className="text-[11px] text-muted-foreground leading-relaxed">
-            Some documents contain internal sections — authentication and security details for the API, and security testing specifics. Those sections are visible to Super Admins, Admins and development-team accounts only; the rest of each document is available to everyone.
+            {t("Some documents contain internal sections — authentication and security details for the API, and security testing specifics. Those sections are visible to Super Admins, Admins and development-team accounts only; the rest of each document is available to everyone.")}
           </p>
         </div>
       </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useTranslation } from "@/contexts/LanguageContext";
 import Link from "next/link";
 import { usePermission } from "@/hooks/usePermission";
 import {
@@ -668,6 +669,35 @@ function SectionBlock({ block }) {
 
 export default function ApiDocsPage() {
   const [activeId, setActiveId] = useState(apiSections[0].id);
+  const { t } = useTranslation();
+
+  // Translate the page content at render so language switches apply.
+  const sectionsT = apiSections.map((section) => ({
+    ...section,
+    label: t(section.label),
+    title: t(section.title),
+    summary: t(section.summary),
+    blocks: section.blocks.map((block) => ({
+      ...block,
+      title: block.title ? t(block.title) : block.title,
+      note: block.note ? t(block.note) : block.note,
+      text: block.text ? t(block.text) : block.text,
+      items: block.items ? block.items.map((item) => (typeof item === "string" ? t(item) : { ...item, title: t(item.title), detail: t(item.detail) })) : block.items,
+      terms: block.terms ? block.terms.map((term) => ({ term: t(term.term), def: t(term.def) })) : block.terms,
+      steps: block.steps ? block.steps.map((s) => t(s)) : block.steps,
+      rows: block.rows
+        ? block.rows.map((row) =>
+            Array.isArray(row)
+              ? row.map((cell) => (typeof cell === "string" ? t(cell) : cell))
+              : typeof row === "object" && row !== null
+                ? Object.fromEntries(Object.entries(row).map(([k, v]) => [k, typeof v === "string" ? t(v) : v]))
+                : row
+          )
+        : block.rows,
+      head: block.head ? block.head.map((h) => t(h)) : block.head,
+      code: block.code ? block.code : block.code,
+    })),
+  }));
   const sectionRefs = useRef({});
   // Security internals are visible to Super Admin / Admin (and any
   // development-team account holding an admin permission) only.
@@ -678,8 +708,8 @@ export default function ApiDocsPage() {
     if (!viewport) return;
 
     const updateActive = () => {
-      let current = apiSections[0].id;
-      for (const section of apiSections) {
+      let current = sectionsT[0].id;
+      for (const section of sectionsT) {
         const el = sectionRefs.current[section.id];
         if (el && el.getBoundingClientRect().top <= 120) current = section.id;
       }
@@ -705,10 +735,10 @@ export default function ApiDocsPage() {
               Documentation
             </div>
             <h1 className="text-base font-semibold tracking-tight text-foreground">
-              API Reference
+              {t("API Reference")}
             </h1>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Every endpoint of the ProcureX backend: authentication, workflow actions, analytics and administration
+              {t("Every endpoint of the ProcureX backend: authentication, workflow actions, analytics and administration")}
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -723,7 +753,7 @@ export default function ApiDocsPage() {
               href="/help/guides"
               className="inline-flex items-center gap-1.5 h-8 px-3 rounded-md border border-border text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors shrink-0"
             >
-              Walkthrough
+              {t("Walkthrough")}
             </Link>
           </div>
         </div>
@@ -733,10 +763,10 @@ export default function ApiDocsPage() {
           <aside className="hidden lg:block">
             <div className="sticky top-6">
               <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest mb-2 px-2">
-                Endpoint Groups
+                {t("Endpoint Groups")}
               </p>
               <nav className="space-y-0.5">
-                {apiSections.map((section) => {
+                {sectionsT.map((section) => {
                   const Icon = section.icon;
                   const active = activeId === section.id;
                   const locked = section.restricted && !isAdminTier;
@@ -760,7 +790,7 @@ export default function ApiDocsPage() {
           {/* Mobile pills */}
           <div className="lg:hidden -mx-4 px-4">
             <div className="flex items-center gap-1 overflow-x-auto pb-1">
-              {apiSections.map((section) => {
+              {sectionsT.map((section) => {
                 const Icon = section.icon;
                 const active = activeId === section.id;
                 const locked = section.restricted && !isAdminTier;
@@ -782,7 +812,7 @@ export default function ApiDocsPage() {
 
           {/* Content */}
           <div className="space-y-4 min-w-0">
-              {apiSections.map((section) => {
+              {sectionsT.map((section) => {
                 const Icon = section.icon;
                 const locked = section.restricted && !isAdminTier;
                 return (
@@ -840,7 +870,7 @@ export default function ApiDocsPage() {
                     <KeyRound className="w-4.5 h-4.5 text-muted-foreground" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium">Need a working request example?</p>
+                    {t("Need a working request example?")}
                     <p className="text-[11px] text-muted-foreground leading-relaxed mt-0.5">
                       A ready-to-import Postman collection covering the full workflow ships with the repository.
                     </p>

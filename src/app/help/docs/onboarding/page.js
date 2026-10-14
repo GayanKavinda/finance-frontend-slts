@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { useTranslation } from "@/contexts/LanguageContext";
 import {
   ArrowLeft,
   ListChecks,
@@ -119,6 +120,7 @@ const onboardingSections = [
 ];
 
 export default function OnboardingPage() {
+  const { t } = useTranslation();
   // Lazy initial read: localStorage only exists in the browser, and the
   // try/catch keeps server rendering safe.
   const [checked, setChecked] = useState(() => {
@@ -131,6 +133,16 @@ export default function OnboardingPage() {
   });
   const sectionRefs = useRef({});
   const [activeId, setActiveId] = useState(onboardingSections[0].id);
+
+  // Translate the checklists at render so language switches cover every
+  // role, title, summary and task step.
+  const sectionsT = onboardingSections.map((section) => ({
+    ...section,
+    label: t(section.label),
+    title: t(section.title),
+    summary: t(section.summary),
+    steps: section.steps.map((step) => t(step)),
+  }));
 
   // Persist progress
   useEffect(() => {
@@ -147,7 +159,7 @@ export default function OnboardingPage() {
 
     const updateActive = () => {
       let current = onboardingSections[0].id;
-      for (const section of onboardingSections) {
+      for (const section of sectionsT) {
         const el = sectionRefs.current[section.id];
         if (el && el.getBoundingClientRect().top <= 120) current = section.id;
       }
@@ -171,7 +183,7 @@ export default function OnboardingPage() {
     return { done, total, pct: Math.round((done / total) * 100) };
   };
 
-  const overall = onboardingSections.map(sectionProgress).reduce(
+  const overall = sectionsT.map(sectionProgress).reduce(
     (acc, p) => ({ done: acc.done + p.done, total: acc.total + p.total }),
     { done: 0, total: 0 }
   );
@@ -234,7 +246,7 @@ export default function OnboardingPage() {
             </div>
             <div>
               <p className="text-sm font-medium text-foreground">
-                {overall.done} of {overall.total} steps complete
+                {overall.done} of {overall.total} {t("steps complete")}
               </p>
               <p className="text-[11px] text-muted-foreground leading-relaxed mt-0.5">
                 Find your role below and work top to bottom. Every step names the exact page and action — the System Walkthrough Guide covers the detail.
@@ -251,7 +263,7 @@ export default function OnboardingPage() {
                 Roles
               </p>
               <nav className="space-y-0.5">
-                {onboardingSections.map((section) => {
+                {sectionsT.map((section) => {
                   const Icon = section.icon;
                   const active = activeId === section.id;
                   const p = sectionProgress(section);
@@ -276,7 +288,7 @@ export default function OnboardingPage() {
           {/* Mobile pills */}
           <div className="lg:hidden -mx-4 px-4">
             <div className="flex items-center gap-1 overflow-x-auto pb-1">
-              {onboardingSections.map((section) => {
+              {sectionsT.map((section) => {
                 const Icon = section.icon;
                 const active = activeId === section.id;
                 return (
@@ -297,7 +309,7 @@ export default function OnboardingPage() {
 
           {/* Content */}
           <div className="space-y-4 min-w-0">
-            {onboardingSections.map((section) => {
+            {sectionsT.map((section) => {
               const Icon = section.icon;
               const p = sectionProgress(section);
               return (

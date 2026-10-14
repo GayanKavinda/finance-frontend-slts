@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { useTranslation } from "@/contexts/LanguageContext";
 import {
   ArrowLeft,
   ArrowRight,
@@ -1034,8 +1035,47 @@ function SectionBlock({ block }) {
 }
 
 export default function GuidesPage() {
+  const { t } = useTranslation();
   const [activeId, setActiveId] = useState(guideSections[0].id);
   const sectionRefs = useRef({});
+
+  // Translate the whole guide content at render so a language switch
+  // covers section titles, summaries, steps, fields and callouts.
+  const sections = guideSections.map((section) => ({
+    ...section,
+    label: t(section.label),
+    title: t(section.title),
+    summary: t(section.summary),
+    blocks: section.blocks.map((block) => ({
+      ...block,
+      title: block.title ? t(block.title) : block.title,
+      note: block.note ? t(block.note) : block.note,
+      text: block.text ? t(block.text) : block.text,
+      items: block.items
+        ? block.items.map((item) =>
+            typeof item === "string"
+              ? t(item)
+              : { ...item, title: t(item.title), detail: t(item.detail) }
+          )
+        : block.items,
+      terms: block.terms
+        ? block.terms.map((term) => ({ ...term, term: t(term.term), def: t(term.def) }))
+        : block.terms,
+      steps: block.steps ? block.steps.map((step) => t(step)) : block.steps,
+      rows: block.rows
+        ? block.rows.map((row) =>
+            Array.isArray(row)
+              ? row.map((cell) => (typeof cell === "string" ? t(cell) : cell))
+              : typeof row === "object" && row !== null
+                ? Object.fromEntries(
+                    Object.entries(row).map(([k, v]) => [k, typeof v === "string" ? t(v) : v])
+                  )
+                : row
+          )
+        : block.rows,
+      head: block.head ? block.head.map((cell) => t(cell)) : block.head,
+    })),
+  }));
 
   // The app scrolls inside a ScrollArea viewport — listen on that element so
   // the category rail always highlights the section currently in view.
@@ -1044,8 +1084,8 @@ export default function GuidesPage() {
     if (!viewport) return;
 
     const updateActive = () => {
-      let current = guideSections[0].id;
-      for (const section of guideSections) {
+      let current = sections[0].id;
+      for (const section of sections) {
         const el = sectionRefs.current[section.id];
         if (el && el.getBoundingClientRect().top <= 120) current = section.id;
       }
@@ -1071,10 +1111,10 @@ export default function GuidesPage() {
               Documentation
             </div>
             <h1 className="text-base font-semibold tracking-tight text-foreground">
-              System Walkthrough Guide
+              {t("System Walkthrough Guide")}
             </h1>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Step-by-step documentation for every module, workflow, status and download in the system
+              {t("Step-by-step documentation for every module, workflow, status and download in the system")}
             </p>
           </div>
           <Link
@@ -1082,7 +1122,7 @@ export default function GuidesPage() {
             className="inline-flex items-center gap-1.5 h-8 px-3 rounded-md border border-border text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors shrink-0"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
-            Back to Help Center
+            {t("Back to Help Center")}
           </Link>
         </div>
 
@@ -1091,10 +1131,10 @@ export default function GuidesPage() {
           <aside className="hidden lg:block">
             <div className="sticky top-6">
               <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-widest mb-2 px-2">
-                Categories
+                {t("Categories")}
               </p>
               <nav className="space-y-0.5">
-                {guideSections.map((section) => {
+                {sections.map((section) => {
                   const Icon = section.icon;
                   const active = activeId === section.id;
                   return (
@@ -1119,7 +1159,7 @@ export default function GuidesPage() {
           {/* Mobile category pills */}
           <div className="lg:hidden -mx-4 px-4">
             <div className="flex items-center gap-1 overflow-x-auto pb-1">
-              {guideSections.map((section) => {
+              {sections.map((section) => {
                 const Icon = section.icon;
                 const active = activeId === section.id;
                 return (
@@ -1142,7 +1182,7 @@ export default function GuidesPage() {
 
           {/* Guide content */}
           <div className="space-y-4 min-w-0">
-            {guideSections.map((section) => {
+            {sections.map((section) => {
               const Icon = section.icon;
               return (
                 <section
@@ -1181,7 +1221,7 @@ export default function GuidesPage() {
                   <div>
                     <p className="text-sm font-medium">Could not find what you need?</p>
                     <p className="text-[11px] text-primary-foreground/80 leading-relaxed mt-0.5">
-                      The Help Center has more FAQs and a support ticket form — our IT team responds within 2 business hours.
+                      {t("The Help Center has more FAQs and a support ticket form — our IT team responds within 2 business hours.")}
                     </p>
                   </div>
                 </div>
@@ -1189,7 +1229,7 @@ export default function GuidesPage() {
                   href="/help"
                   className="inline-flex items-center gap-1.5 h-8 px-3 rounded-md bg-white text-primary text-xs font-medium hover:bg-white/90 transition-colors shrink-0"
                 >
-                  Go to Help Center
+                  {t("Go to Help Center")}
                   <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
               </CardContent>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useTranslation } from "@/contexts/LanguageContext";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -104,6 +105,21 @@ const releases = [
 
 export default function ReleasesPage() {
   const [activeId, setActiveId] = useState(releases[0].id);
+  const { t } = useTranslation();
+
+  // Translate the changelog at render so language switches cover every
+  // version, summary and feature note.
+  const releasesT = releases.map((release) => ({
+    ...release,
+    version: t(release.version),
+    state: t(release.state),
+    summary: t(release.summary),
+    groups: release.groups.map((group) => ({
+      ...group,
+      title: t(group.title),
+      items: group.items.map((item) => t(item)),
+    })),
+  }));
   const sectionRefs = useRef({});
 
   useEffect(() => {
@@ -160,7 +176,7 @@ export default function ReleasesPage() {
                   Versions
                 </p>
                 <nav className="space-y-0.5">
-                  {releases.map((release) => {
+                  {releasesT.map((release) => {
                     const active = activeId === release.id;
                     return (
                       <button
@@ -191,7 +207,7 @@ export default function ReleasesPage() {
 
           {/* Content */}
           <div className="space-y-4 min-w-0">
-            {releases.map((release) => (
+            {releasesT.map((release) => (
               <section
                 key={release.id}
                 id={release.id}

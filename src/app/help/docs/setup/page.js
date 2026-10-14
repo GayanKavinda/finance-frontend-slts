@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useTranslation } from "@/contexts/LanguageContext";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -427,6 +428,35 @@ function SectionBlock({ block }) {
 
 export default function SetupDocsPage() {
   const [activeId, setActiveId] = useState(setupSections[0].id);
+  const { t } = useTranslation();
+
+  // Translate the page content at render so language switches apply.
+  const sectionsT = setupSections.map((section) => ({
+    ...section,
+    label: t(section.label),
+    title: t(section.title),
+    summary: t(section.summary),
+    blocks: section.blocks.map((block) => ({
+      ...block,
+      title: block.title ? t(block.title) : block.title,
+      note: block.note ? t(block.note) : block.note,
+      text: block.text ? t(block.text) : block.text,
+      items: block.items ? block.items.map((item) => (typeof item === "string" ? t(item) : { ...item, title: t(item.title), detail: t(item.detail) })) : block.items,
+      terms: block.terms ? block.terms.map((term) => ({ term: t(term.term), def: t(term.def) })) : block.terms,
+      steps: block.steps ? block.steps.map((s) => t(s)) : block.steps,
+      rows: block.rows
+        ? block.rows.map((row) =>
+            Array.isArray(row)
+              ? row.map((cell) => (typeof cell === "string" ? t(cell) : cell))
+              : typeof row === "object" && row !== null
+                ? Object.fromEntries(Object.entries(row).map(([k, v]) => [k, typeof v === "string" ? t(v) : v]))
+                : row
+          )
+        : block.rows,
+      head: block.head ? block.head.map((h) => t(h)) : block.head,
+      code: block.code ? block.code : block.code,
+    })),
+  }));
   const sectionRefs = useRef({});
 
   useEffect(() => {
@@ -434,8 +464,8 @@ export default function SetupDocsPage() {
     if (!viewport) return;
 
     const updateActive = () => {
-      let current = setupSections[0].id;
-      for (const section of setupSections) {
+      let current = sectionsT[0].id;
+      for (const section of sectionsT) {
         const el = sectionRefs.current[section.id];
         if (el && el.getBoundingClientRect().top <= 120) current = section.id;
       }
@@ -484,7 +514,7 @@ export default function SetupDocsPage() {
                 Sections
               </p>
               <nav className="space-y-0.5">
-                {setupSections.map((section) => {
+                {sectionsT.map((section) => {
                   const Icon = section.icon;
                   const active = activeId === section.id;
                   return (
@@ -507,7 +537,7 @@ export default function SetupDocsPage() {
           {/* Mobile pills */}
           <div className="lg:hidden -mx-4 px-4">
             <div className="flex items-center gap-1 overflow-x-auto pb-1">
-              {setupSections.map((section) => {
+              {sectionsT.map((section) => {
                 const Icon = section.icon;
                 const active = activeId === section.id;
                 return (
@@ -528,7 +558,7 @@ export default function SetupDocsPage() {
 
           {/* Content */}
           <div className="space-y-4 min-w-0">
-            {setupSections.map((section) => {
+            {sectionsT.map((section) => {
               const Icon = section.icon;
               return (
                 <section
