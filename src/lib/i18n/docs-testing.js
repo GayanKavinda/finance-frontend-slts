@@ -2,9 +2,7 @@
 // Testing Guide content localization.
 
 const si = {
-  "Test Strategy Overview": "පරීක්ෂණ උපාය මාර්ග දළ සීමාව",
   "Quality is verified on two layers: a PHPUnit feature suite that exercises the backend workflows end-to-end through real HTTP requests, and a Playwright suite that drives the actual browser through the UI.": "ගුණත්වය පද්ධති දෙකකින් සත්‍යාපනය වේ: සැබෑ HTTP ඉල්ලීම් හරහා පසුබිම් ක්‍රියාවාලි ආරම්භක-සිට-අවසාන අත්හදා බලන PHPUnit විශේෂාංග කට්ටලයක්, සහ UI හරහා සැබෑ බ්‍රව්සරය ධාවනය කරන Playwright කට්ටලයක්.",
-  "The two layers": "පද්ධති දෙක",
   "Run the backend suite first": "පසුබිම් කට්ටලය පළමුව ධාවනය කරන්න",
   "The feature suite proves the API contracts (statuses, permissions, PDFs). The browser suite assumes those contracts hold — backend failures usually surface as UI failures.": "විශේෂාංග කට්ටලය API ගිවිසුම් තහවුරු කරයි (තත්ත්ව, අවසර, PDF). බ්‍රව්සර කට්ටලය ඒවා පවතී යනු ඇති ලෙස උපකල්පනය කරයි — පසුබිම් අසාමාන්‍යයන් සාමාන්‍යයෙන් UI අසාමාන්‍යයන් ලෙස පෙනේ.",
   "Running Tests": "පරීක්ෂණ ධාවනය",
@@ -13,7 +11,6 @@ const si = {
   "Backend — single area": "පසුබිම — තනි ක්ෂේත්‍රය",
   "Frontend — full browser suite (both servers must be running)": "ඉදිරිපස — සම්පූර්ණ බ්‍රව්සර කට්ටලය (සේවාදායක දෙකම ධාවනය විය යුතුය)",
   "Frontend — single spec": "ඉදිරිපස — තනි විනිධිය",
-  "Before you run": "ඔබ ධාවනය කිරීමට පෙර",
   "Backend tests are self-contained": "පසුබිම් පරීක්ෂණ ස්වයංප්‍රමාණව යුක්තයි",
   "The PHPUnit suite uses an in-memory SQLite database and the RefreshDatabase trait — it never touches your local finance-app database. The browser suite does use it, so reseed afterwards if a run leaves data behind.": "PHPUnit කට්ටලය මතක-තුළ SQLite දත්ත සමුදාය සහ RefreshDatabase ලක්ෂණය භාවිත කරයි — එය ඔබේ දේශීය finance-app දත්ත සමුදායට යන කවදාවත් නැත. බ්‍රව්සර කට්ටලය එය භාවිත කරයි, එබැවින් ධාවනයකින් පසු දත්ත ඉතිරි වී ඇත්නම් බිජ නැවත දමන්න.",
   "Backend Suites": "පසුබිම් කට්ටල්",
@@ -50,9 +47,7 @@ const si = {
 };
 
 const ta = {
-  "Test Strategy Overview": "சோதனை உத்திக் கண்ணோட்டம்",
   "Quality is verified on two layers: a PHPUnit feature suite that exercises the backend workflows end-to-end through real HTTP requests, and a Playwright suite that drives the actual browser through the UI.": "தரம் இரு அடுக்குகளில் சரிபார்க்கப்படுகிறது: உண்மையான HTTP கோரிக்கைகள் வழியாக பின்னணிப் பணிப்பாய்வுகளை முழுமையாக உடற்செய்யும் PHPUnit அம்சத் தொகுப்பு, மற்றumontagu UI வழியாக உண்மையான உலாவியை ஓட்டும் Playwright தொகுப்பு.",
-  "The two layers": "இரு அடுக்குகள்",
   "Run the backend suite first": "பின்ணணிச் சோதனையை முதலில் இயக்கு",
   "The feature suite proves the API contracts (statuses, permissions, PDFs). The browser suite assumes those contracts hold — backend failures usually surface as UI failures.": "அம்சத் தொகுப்பு API ஒப்பந்தங்களை நிரூபிக்கிறது (நிலைகள், அனுமதிகள், PDFக்கள்). உலாவித் தொகுப்பு அவை நிலைக்கின்றன என்று கருதுகிறது — பின்ணணிப் பிழைகள் பொதுவாக UI பிழைகளாக தெரிகின்றன.",
   "Running Tests": "சோதனைகளை இயத்துவது",
@@ -61,7 +56,6 @@ const ta = {
   "Backend — single area": "பின்ணணி — ஒற்றைப் பகுதி",
   "Frontend — full browser suite (both servers must be running)": "முன்பேங் — முழு உலாவித் தொகுப்பு (இరண்டு சேவையகங்களும் இயங்க வேண்டும்)",
   "Frontend — single spec": "முன்பேங் — ஒற்றை விவரக்குறிப்பு",
-  "Before you run": "இயக்கும் முன்",
   "Backend tests are self-contained": "பின்ணணிச் சோதனைகள் தன்னிறைவானவை",
   "The PHPUnit suite uses an in-memory SQLite database and the RefreshDatabase trait — it never touches your local finance-app database. The browser suite does use it, so reseed afterwards if a run leaves data behind.": "PHPUnit தொகுப்பு நினைவக-த்தொகுப்பு SQLite தரவுத்தளம் மற்றும் RefreshDatabase பண்புகூறுகளைப் பயன்படுத்துகிறது — அது உங்கள் உள்ளூர் finance-app தரவுத்தளத்தை ஒருபோதும் தொடாது. உலாவித் தொகுப்பு அதைப் பயன்படுத்துகிறது, எனவே ஒரு இயக்கத்திற்குப் பின் தரவு மீதம் இருந்தால் மீண்டும் விதைக்கவும்.",
   "Backend Suites": "பின்னணித் தொகுப்புகள்",

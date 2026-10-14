@@ -1,13 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useAuth } from "@/contexts/AuthContext";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/Card";
 import { Separator } from "@/components/ui/Separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/Tabs";
-import PersonalDetails from "./PersonalDetails";
-import SecuritySettings from "./SecuritySettings";
+import ProfileDetails from "./ProfileDetails";
+import SecurityOverview from "./SecurityOverview";
 import ActivityLog from "./ActivityLog";
 
 const TABS = [
@@ -17,7 +17,7 @@ const TABS = [
 ];
 
 export default function ProfilePage() {
-  const { user, loading, refetch } = useAuth();
+  const { user, loading } = useAuth();
   const [activeTab, setActiveTab] = useState("personal");
 
   if (loading || !user) {
@@ -31,12 +31,15 @@ export default function ProfilePage() {
   return (
     <div className="min-h-full bg-background p-4 sm:p-6">
       <div className="max-w-5xl mx-auto space-y-6">
-        <div className="space-y-2">
+        <div className="space-y-1">
           <h1 className="text-xl sm:text-2xl font-medium tracking-tight text-foreground">
-            Profile Settings
+            Profile
           </h1>
           <p className="text-sm text-muted-foreground">
-            Manage your personal information, security settings, and view activity
+            Your details, security overview and recent activity — read-only.{" "}
+            <Link href="/settings?tab=account" className="text-primary hover:underline">
+              Manage in Settings
+            </Link>
           </p>
         </div>
 
@@ -50,11 +53,11 @@ export default function ProfilePage() {
           </TabsList>
 
           <TabsContent value="personal" className="pt-4">
-            <PersonalDetails key="personal" user={user} refetch={refetch} />
+            <ProfileDetails key="personal" user={user} />
           </TabsContent>
 
           <TabsContent value="security" className="pt-4">
-            <SecuritySettings key="security" />
+            <SecurityOverview key="security" user={user} />
           </TabsContent>
 
           <TabsContent value="activity" className="pt-4">

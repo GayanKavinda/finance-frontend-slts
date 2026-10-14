@@ -306,7 +306,7 @@ export default function DemoDataPage() {
               Documentation
             </div>
             <h1 className="text-base font-semibold tracking-tight text-foreground">
-              Demo Data Reference
+              {t("Demo Data Reference")}
             </h1>
             <p className="text-xs text-muted-foreground mt-0.5">
               Exactly what the seed produces — the people, companies and records behind every demo and training scenario

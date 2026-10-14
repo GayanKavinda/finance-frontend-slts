@@ -285,3 +285,46 @@
 [data-density="compact"] .space-y-4 > * + * { margin-top: 0.5rem; }
 [data-density="compact"] .gap-6 { gap: 0.75rem; }
 [data-density="compact"] .gap-4 { gap: 0.5rem; }
+
+/* ─────────────────────────────────────────────────────────────
+   Mobile data-table treatment
+   Applies to every register table on phones: momentum scrolling,
+   a visible scroll affordance, and a sticky first column so the
+   row identity stays put while the rest of the row scrolls.
+   ───────────────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  /* Momentum scrolling for horizontal table containers (iOS Safari) */
+  .overflow-x-auto {
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+  }
+
+  /* Tighter table cells so more columns fit on a phone */
+  .overflow-x-auto table th,
+  .overflow-x-auto table td {
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+  }
+
+  /* Sticky first column inside a horizontally scrollable table so the
+     row identity stays visible while the rest of the row scrolls */
+  .overflow-x-auto table thead th:first-child,
+  .overflow-x-auto table tbody td:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    background-color: hsl(var(--card));
+    box-shadow: 1px 0 0 0 hsl(var(--border));
+  }
+
+  /* Header cells sit above body cells when both are sticky */
+  .overflow-x-auto table thead th:first-child {
+    background-color: hsl(var(--muted));
+  }
+
+  /* Touch-friendly tap targets for icon-only action buttons in tables */
+  .overflow-x-auto table button:has(svg) {
+    min-height: 2rem;
+    min-width: 2rem;
+  }
+}

@@ -5,7 +5,6 @@
 const si = {
   // ── Shell ──
   "Support Center": "සහාය මධ්‍යස්ථානය",
-  "Help Center": "උපදේශන මධ්‍යස්ථානය",
   "Find answers, contact support, and raise tickets": "පිළිතුරු සොරා ගන්න, සහායට සම්බන්ධ වන්න, සහ ටිකට්පත් ඉදිරිපත් කරන්න",
   "Full Walkthrough Guide": "සම්පූර්ණ පියවරෙන් පියවර මාර්ගෝපදේශය",
   "Submit Support Ticket": "සහාය ටිකට්පතක් ඉදිරිපත් කරන්න",
@@ -14,7 +13,6 @@ const si = {
   "No articles found": "ලිපි හමු නොවීය",
   "Try adjusting your search or filter": "ඔබේ සෙවීම හෝ පෙරහන සකස් කර නැවත උත්සාහ කරන්න",
   "Resources": "සම්පත්",
-  "Release Notes": "නිකුත් සටහන්",
   "Complete guide": "සම්පූර්ණ මාර්ගෝපදේශය",
   "Need Help?": "උදව් අවැසිද?",
   "Our IT team responds within 2 business hours during business days. Include the tender, job or invoice number you are working on for a faster resolution.": "ව්‍යාපාර දිනůන්හි ව්‍යාපාර පැය 2ක් තුළ අපගේ යටත් කණ්ඩායම ප්‍රතිචාර දැක්වේ. වේගමත් විසදුමක් සඳහා ඔබ කටයුතු කරන තැටිපත්, කාර්යය හෝ ඉන්වොයිසි අංකය ඇතුළත් කරන්න.",
@@ -56,8 +54,6 @@ const si = {
   "Medium": "මධ්‍යම",
   "High": "ඉහළ",
   "Critical": "අති වැදගත්",
-  "Open": "විවෘත",
-  "In Progress": "ප්‍රගතිපත්",
   "Resolved": "විසඳා ඇත",
   "Closed": "වසා ඇත",
 
@@ -75,7 +71,6 @@ const si = {
   // ── Resource labels ──
   "Full System Walkthrough": "සම්පූර්ණ පද්ධති මාර්ගෝපදේශය",
   "Complete step-by-step documentation: every module, workflow, field, status and download": "පියවරෙන් පියවර සම්පූර්ණ ලේඛනගත කිරීම: සෑම මොඩියුලය, ක්‍රියාවාලිය, ක්ෂේත්‍රය, තත්ත්වය සහ බාගැනීම",
-  "Documentation Library": "ලේඛන පුස්තකාලය",
   "API reference, testing guide, setup & deployment guide and everything else": "API යොමුව, පරීක්ෂණ මාර්ගෝපදේශය, ස්ථාපන සහ යෙදවුම් මාර්ගෝපදේශය සහ තවත් බොහෝ විස්තර",
   "Getting Started Walkthrough": "පටන්ගැනීමේ මාර්ගෝපදේශය",
   "Executive dashboard: KPIs, collection efficiency and recent activity": "කාර්යාධිකාරී පුවරුව: KPI, එකතු කිරීමේ කාර්යක්ෂමතාව සහ මෑත ක්‍රියාකාරකම්",
@@ -94,7 +89,6 @@ const si = {
 
   // ── Release notes modal ──
   "What shipped in each release of ProcureX": "සෑම නිකුතුවක්ම ProcureX හි ඇතුළත් කළේ කුමක්ද",
-  "Current release": "වත්මන් නිකුතුව",
   "The complete end-to-end system guide (workflows, statuses, roles and demo data) is available from the administration team.": "සම්පූර්ණ ආරම්භක-සිට-අවසාන පද්ධති මාර්ගෝපදේශය (ක්‍රියාවාලි, තත්ත්ව, භූමිකා සහදර්ශ දත්ත) පරිපාලන කණ්ඩායම වෙතින් ලැබේ.",
   "Tender-to-cash lifecycle: tenders, jobs, contractor quotations with bid comparison and job award": "තැටිපතේ සිට මුදල් තුළ ක්‍රියාවාලිය: තැටිපත්, කාර්යයන්, ලංසු සංසන්දනය සහිත කොන්ත්‍රාත් මිල දැක්ම් සහ කාර්ය පිරිනමණය",
   "Statutory tax invoice generation with locked VAT schedule": "බදු ලදුටක් සහිත නීතිමය බදු ඉන්වොයිසි සාදන්න",
@@ -114,7 +108,6 @@ const si = {
 const ta = {
   // ── Shell ──
   "Support Center": "ஆதரவு மையம்",
-  "Help Center": "உதவ மையம்",
   "Find answers, contact support, and raise tickets": "பதில்களைத் தேடுங்கள், ஆதரவைத் தொடர்பு கொள்ளுங்கள், டிக்கெட்டுகளை உயர்த்துங்கள்",
   "Full Walkthrough Guide": "முழு வழிகாட்டி",
   "Submit Support Ticket": "ஆதரவு டிக்கெட்டை சமர்ப்பு",
@@ -123,7 +116,6 @@ const ta = {
   "No articles found": "கட்டுரைகள் இல்லை",
   "Try adjusting your search or filter": "உங்கள் தேடல் அல்லது வடிகட்டியை சரிசெய்து முயற்சிக்கவும்",
   "Resources": "வளங்கள்",
-  "Release Notes": "வெளியீட்டு குறிப்புகள்",
   "Complete guide": "முழுமையான வழிகாட்டி",
   "Need Help?": "உதவி தேவையா?",
   "Our IT team responds within 2 business hours during business days. Include the tender, job or invoice number you are working on for a faster resolution.": "வணிக நாட்களில் 2 வணிக மணி நேரத்தில் எங்கள் ஐடி குழு பதிலளிக்கும். வேகமான தீர்வுக்கு நீங்கள் பணிபுரியும் டெண்டர், வேலை அல்லது இன்வாய்ஸ் எண்ணைச் சேர்க்கவும்.",
@@ -165,8 +157,6 @@ const ta = {
   "Medium": "நடுத்தரம்",
   "High": "அதிகம்",
   "Critical": "மிக முக்கியம்",
-  "Open": "திறந்த",
-  "In Progress": "செயலில்",
   "Resolved": "தீர்வு",
   "Closed": "மூடப்பட்டது",
 
@@ -184,7 +174,6 @@ const ta = {
   // ── Resource labels ──
   "Full System Walkthrough": "முழு அமைப்பு வழிகாட்டி",
   "Complete step-by-step documentation: every module, workflow, field, status and download": "படிப்படியான முழு ஆவணம்: ஒவ்வொரு தொகுதி, பணிப்பாய்வு, புலம், நிலை மற்றும் பதிவிறக்கம்",
-  "Documentation Library": "ஆவண நூலகம்",
   "API reference, testing guide, setup & deployment guide and everything else": "API குறிப்பு, சோதனை வழிகாட்டி, நிறுவல் & வரிசைப்படுத்தல் வழிகாட்டி மற்றும் மற்றவை",
   "Getting Started Walkthrough": "தொடக்க வழிகாட்டி",
   "Executive dashboard: KPIs, collection efficiency and recent activity": "நிர்வாக டாஷ்போர்டு: KPI, சேகரிப்பு திறமை மற்றும் சமீபத்திய செயல்பாடு",
@@ -203,7 +192,6 @@ const ta = {
 
   // ── Release notes modal ──
   "What shipped in each release of ProcureX": "ஒவ்வொரு வெளியீட்டிலும் ProcureX இல் சேர்ந்தவை",
-  "Current release": "தற்போதைய வெளியீடு",
   "The complete end-to-end system guide (workflows, statuses, roles and demo data) is available from the administration team.": "முழுமையான கடைக்கணக்கு அமைப்பு வழிகாட்டி (பணிப்பாய்வுகள், நிலைகள், பங்குகள் மற்றும் மாதிரி தரவு) நிர்வாக குழுவிடம் இருந்து கிடைக்கும்.",
   "Tender-to-cash lifecycle: tenders, jobs, contractor quotations with bid comparison and job award": "டெண்டர் முதல் பணம் வரை வாழ்க்கைச்சுற்று: டெண்டர்கள், பணிகள், ஆஃப் ஒப்பீட்டுடன் ஒப்பந்தக்காரர் மேலோட்டங்கள் மற்றும் வேலை வழங்கல்",
   "Statutory tax invoice generation with locked VAT schedule": "பூட்டப்பட்ட VAT அட்டவணையுடன் சட்டபூர்வ வரி விலைப்பட்டியல் உருவாக்கம்",

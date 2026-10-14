@@ -57,7 +57,7 @@ function ScrollableContent({ children }) {
             setIsMobileSidebarOpen={setIsMobileSidebarOpen}
           />
           {showSidebar ? (
-            <div className="flex flex-1">
+            <div className="flex flex-1 min-w-0">
               <Sidebar
                 isMobileOpen={isMobileSidebarOpen}
                 setIsMobileOpen={setIsMobileSidebarOpen}
@@ -65,11 +65,11 @@ function ScrollableContent({ children }) {
                 setIsCollapsed={setIsSidebarCollapsed}
               />
               <main
-                className={`flex-1 pt-16 transition-all duration-300 ${
+                className={`flex-1 min-w-0 pt-16 transition-all duration-300 ${
                   isSidebarCollapsed ? "lg:ml-[72px]" : "lg:ml-[260px]"
                 }`}
               >
-                <div className="p-4 sm:p-6 lg:p-8">
+                <div className="p-4 sm:p-6 lg:p-8 min-w-0">
                   {!isDashboard && <Breadcrumb path={pathname} />}
                   {renderContent()}
                 </div>

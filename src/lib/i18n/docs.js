@@ -4,7 +4,6 @@
 
 const si = {
   // ── Shared shell ──
-  "Documentation": "ලේඛන",
   "Developer Documentation": "සංවර්ධක ලේඛන",
   "For the development team: the complete database map (ER diagram, every table, column, key and cascade rule), the use-case catalogue and workflow flowcharts.": "සංවර්ධන කණ්ඩායම සඳහා: සම්පූර්ණ දත්ත සමුදාය සිතියම (ER රූපීය, සෑම වගුවක්, තීරුවක්, යතුරුවක් සහ ජලබද්ධ නීතිය), භාවිතා පරිඝෝෂණා සහ ක්‍රියාවාලි ප්‍රවාහ සටහන්.",
   "For the development team": "සංවර්ධන කණ්ඩායම සඳහා",
@@ -71,7 +70,6 @@ const si = {
 
 const ta = {
   // ── Shared shell ──
-  "Documentation": "ஆவணம்",
   "Developer Documentation": "உருவாக்கும் ஆவணம்",
   "For the development team: the complete database map (ER diagram, every table, column, key and cascade rule), the use-case catalogue and workflow flowcharts.": "உருவாக்கக் குழுவுக்கு: முழுமையான தரவுத்தள வரைபடம் (ER வரைபடம், ஒவ்வொரு அட்டவணை, நிரல், விசை மற்றும் cascade விதி), பயன்பாட்டு நோக்கம் பட்டியல் மற்றும் பணிப்பாய்வு ஓட்ட வரைபடங்கள்.",
   "For the development team": "உருவாக்கக் குழுவுக்கு",

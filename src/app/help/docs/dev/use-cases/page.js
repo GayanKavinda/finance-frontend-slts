@@ -196,7 +196,7 @@ export default function UseCasesPage() {
             <div className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-medium uppercase tracking-widest mb-2">
               Developer Documentation
             </div>
-            <h1 className="text-base font-semibold tracking-tight text-foreground">Use Cases</h1>
+            <h1 className="text-base font-semibold tracking-tight text-foreground">{t("Use Cases")}</h1>
             <p className="text-xs text-muted-foreground mt-0.5">
               Every actor, every use case — trigger, main flow and outcome, including the automated system reactions
             </p>

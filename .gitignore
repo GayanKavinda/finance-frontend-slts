@@ -10,32 +10,60 @@
 !.yarn/releases
 !.yarn/versions
 
+# next.js build output
+/.next/
+/out
+/build
+/.next/cache
+
 # testing
 /coverage
-
-# next.js
-/.next/
-/out/
+/test-results
+/playwright-report
+/blob-report
+/.playwright
 
 # production
-/build
+/vercel
 
 # misc
 .DS_Store
+Thumbs.db
 *.pem
 
-# debug
+# debug logs & script output
+*.log
+*.log.*
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
+lint_output.txt
+lint-output.txt
+dev-verify.log
 
-# env files (can opt-in for committing if needed)
+# scratch / temp verification scripts (never commit)
+debug.js
+debug2.js
+debug*.js
+verify-*.js
+audit-*.js
+/scratch
+/tmp
+*.tmp
+*.bak
+*.orig
+*.rej
+
+# local env & caches
 .env*
-
-# vercel
 .vercel
-
-# typescript
+.eslintcache
 *.tsbuildinfo
 next-env.d.ts
+node_modules/.cache
+
+# NOTE: public/slides/*.mp4 and public/images/*.png are functional landing
+# assets and stay tracked. They are large (~55 MB total) — move them to Git
+# LFS or a CDN before they bloat history further:
+#   git lfs track "public/slides/*.mp4"

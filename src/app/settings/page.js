@@ -22,8 +22,11 @@ import {
   Wrench,
   RotateCcw,
   AlertCircle,
+  AlertTriangle,
+  UserX,
 } from "lucide-react";
 import { useSnackbar } from "notistack";
+import { toast } from "react-hot-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useTranslation } from "@/contexts/LanguageContext";
@@ -35,14 +38,61 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import axios from "@/lib/axios";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import ProfilePanel from "./components/ProfilePanel";
 
 const TABS = [
-  { key: "account", labelKey: "Account", hintKey: "Profile, name & password", icon: User },
+  { key: "account", labelKey: "Account", hintKey: "Profile, photo, email & password", icon: User },
   { key: "notifications", labelKey: "Notifications", hintKey: "Email & desktop alerts", icon: Bell },
   { key: "security", labelKey: "Security", hintKey: "2FA, sessions & logins", icon: Shield },
   { key: "appearance", labelKey: "Appearance", hintKey: "Theme, density & region", icon: Palette },
   { key: "system", labelKey: "System", hintKey: "Diagnostics & maintenance", icon: Monitor },
 ];
+
+const PROFILE_FIELDS = [
+  "name",
+  "phone",
+  "address",
+  "city",
+  "country",
+  "postal_code",
+  "date_of_birth",
+  "gender",
+  "company",
+  "job_title",
+  "tax_id",
+];
+
+const emptyProfile = () => ({
+  name: "",
+  phone: "",
+  address: "",
+  city: "",
+  country: "",
+  postal_code: "",
+  date_of_birth: "",
+  gender: "",
+  company: "",
+  job_title: "",
+  tax_id: "",
+});
+
+const profileFromUser = (user) => {
+  const base = emptyProfile();
+  if (!user) return base;
+  base.name = user.name || "";
+  base.phone = user.phone || "";
+  base.address = user.address || "";
+  base.city = user.city || "";
+  base.country = user.country || "";
+  base.postal_code = user.postal_code || "";
+  base.date_of_birth = user.date_of_birth ? String(user.date_of_birth).slice(0, 10) : "";
+  base.gender = user.gender || "";
+  base.company = user.company || "";
+  base.job_title = user.job_title || "";
+  base.tax_id = user.tax_id || "";
+  return base;
+};
 
 const NOTIFICATION_OPTIONS = [
   {
@@ -87,14 +137,25 @@ export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState("account");
   const [saving, setSaving] = useState(false);
   const [savedFeedback, setSavedFeedback] = useState(false);
+  const searchParams = useSearchParams();
+
+  // Deep links: /settings?tab=security opens that tab (used by the profile page).
+  // Applied during render — no effect needed.
+  const [tabParamSynced, setTabParamSynced] = useState(null);
+  const tabParam = searchParams?.get("tab") || null;
+  const validTabParam = tabParam && TABS.some((t) => t.key === tabParam) ? tabParam : null;
+  if (validTabParam && tabParamSynced !== validTabParam) {
+    setTabParamSynced(validTabParam);
+    setActiveTab(validTabParam);
+  }
 
   const isDark = theme === "dark" || (theme === "system" && resolvedTheme === "dark");
   const twoFactorEnabled = !!user?.two_factor_enabled;
   const canManageSystem = (user?.permissions || []).includes("manage-system");
 
   /* ── Draft state — nothing applies until Save is pressed ────── */
-  const [accountDraft, setAccountDraft] = useState({ name: "" });
-  const [accountBase, setAccountBase] = useState({ name: "" });
+  const [accountDraft, setAccountDraft] = useState(emptyProfile);
+  const [accountBase, setAccountBase] = useState(emptyProfile);
 
   const [notifDraft, setNotifDraft] = useState(DEFAULT_NOTIFS);
   const [notifBase, setNotifBase] = useState(DEFAULT_NOTIFS);
@@ -121,8 +182,8 @@ export default function SettingsPage() {
   const [syncedUserId, setSyncedUserId] = useState(null);
   if (user && user.id !== syncedUserId) {
     setSyncedUserId(user.id);
-    setAccountDraft({ name: user.name || "" });
-    setAccountBase({ name: user.name || "" });
+    setAccountDraft(profileFromUser(user));
+    setAccountBase(profileFromUser(user));
   }
 
   // Fetch notification preferences + maintenance status from the API
@@ -203,8 +264,39 @@ export default function SettingsPage() {
     password: "",
     password_confirmation: "",
   });
-  const [avatarPreview, setAvatarPreview] = useState(null);
-  const [avatarUploading, setAvatarUploading] = useState(false);
+
+  /* ── Danger zone: account deactivation / permanent deletion ── */
+  const [dangerModal, setDangerModal] = useState(null); // "deactivate" | "delete"
+  const [dangerBusy, setDangerBusy] = useState(null);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
+
+  const handleAccountDeactivate = async () => {
+    setDangerBusy("deactivate");
+    try {
+      await axios.post("/deactivate-account");
+      toast.success("Account deactivated — signing you out");
+      await new Promise((r) => setTimeout(r, 900));
+      window.location.href = "/signin";
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to deactivate account");
+      setDangerBusy(null);
+      setDangerModal(null);
+    }
+  };
+
+  const handleAccountDelete = async () => {
+    setDangerBusy("delete");
+    try {
+      await axios.delete("/permanent-delete-account");
+      toast.success("Account permanently removed — signing you out");
+      await new Promise((r) => setTimeout(r, 900));
+      window.location.href = "/signin";
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to delete account");
+      setDangerBusy(null);
+      setDangerModal(null);
+    }
+  };
 
   const loadSecurityData = useCallback(async () => {
     setLoadingSecurity(true);
@@ -255,10 +347,16 @@ export default function SettingsPage() {
     setSaving(true);
     try {
       if (activeTab === "account") {
-        await axios.post("/update-profile", { name: accountDraft.name });
+        const payload = {};
+        PROFILE_FIELDS.forEach((k) => {
+          payload[k] = accountDraft[k] ?? "";
+        });
+        const res = await axios.post("/update-profile", payload);
         setAccountBase(accountDraft);
         await refetch();
-        enqueueSnackbar(t("Profile name updated successfully"), { variant: "success" });
+        enqueueSnackbar(res.data.message || t("Profile updated successfully"), {
+          variant: "success",
+        });
       }
 
       if (activeTab === "notifications") {
@@ -384,40 +482,6 @@ export default function SettingsPage() {
       );
     } finally {
       setSaving(false);
-    }
-  };
-
-  const handleAvatarChange = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    if (file.size > 2 * 1024 * 1024) {
-      enqueueSnackbar("File size must be less than 2MB", { variant: "error" });
-      return;
-    }
-    const validTypes = ["image/jpeg", "image/png", "image/webp"];
-    if (!validTypes.includes(file.type)) {
-      enqueueSnackbar("Invalid file type. Use JPG, PNG, or WebP", {
-        variant: "error",
-      });
-      return;
-    }
-    setAvatarUploading(true);
-    const formData = new FormData();
-    formData.append("avatar", file);
-    try {
-      const res = await axios.post("/upload-avatar", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-      setAvatarPreview(res.data.avatar_url);
-      enqueueSnackbar(t("Avatar updated successfully"), { variant: "success" });
-      await refetch();
-    } catch (err) {
-      enqueueSnackbar(err.response?.data?.message || "Upload failed", {
-        variant: "error",
-      });
-    } finally {
-      setAvatarUploading(false);
-      e.target.value = "";
     }
   };
 
@@ -600,78 +664,15 @@ export default function SettingsPage() {
               </motion.div>
             )}
 
-            {/* ── Account ─────────────────────────────────────── */}
+            {/* ── Account (profile) ────────────────────────────── */}
             {activeTab === "account" && (
               <div className="space-y-4">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2 text-sm">
-                      <User className="w-4 h-4" /> {t("Profile Information")}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="flex items-center gap-4">
-                      <div className="relative">
-                        {avatarPreview ? (
-                          <img
-                            src={avatarPreview}
-                            alt="Avatar"
-                            className="w-20 h-20 rounded-full object-cover border-2 border-border"
-                          />
-                        ) : (
-                          <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center border-2 border-border">
-                            <User className="w-10 h-10 text-muted-foreground" />
-                          </div>
-                        )}
-                        <label className="absolute bottom-0 right-0 cursor-pointer">
-                          <input
-                            type="file"
-                            accept="image/*"
-                            onChange={handleAvatarChange}
-                            className="sr-only"
-                            disabled={avatarUploading}
-                          />
-                          <div
-                            className={`w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center border-2 border-background cursor-pointer transition-opacity ${
-                              avatarUploading ? "opacity-50" : ""
-                            }`}
-                          >
-                            <Loader2
-                              className={`w-4 h-4 ${
-                                avatarUploading ? "animate-spin" : "hidden"
-                              }`}
-                            />
-                            {!avatarUploading && <span className="text-[10px]">{t("Edit")}</span>}
-                          </div>
-                        </label>
-                      </div>
-                      <div className="flex-1 space-y-3">
-                        <Field label={t("Full name")} required>
-                          <Input
-                            required
-                            value={accountDraft.name}
-                            onChange={(e) =>
-                              setAccountDraft({ ...accountDraft, name: e.target.value })
-                            }
-                            placeholder={t("Full name")}
-                            className="h-8 text-xs"
-                          />
-                        </Field>
-                        <Field label={t("Email address")}>
-                          <Input
-                            type="email"
-                            value={user?.email || ""}
-                            className="h-8 text-xs"
-                            disabled
-                          />
-                        </Field>
-                        <p className="text-[10px] text-muted-foreground">
-                          {t("Primary email is linked to account authentication.")}
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                <ProfilePanel
+                  user={user}
+                  refetch={refetch}
+                  draft={accountDraft}
+                  setDraft={setAccountDraft}
+                />
 
                 <Card>
                   <CardHeader>
@@ -702,7 +703,10 @@ export default function SettingsPage() {
                           required
                           value={passwordForm.password}
                           onChange={(e) =>
-                            setPasswordForm({ ...passwordForm, password: e.target.value })
+                            setPasswordForm({
+                              ...passwordForm,
+                              password: e.target.value,
+                            })
                           }
                           placeholder={t("New password")}
                           className="h-8 text-xs"
@@ -861,6 +865,67 @@ export default function SettingsPage() {
                       }}
                     >
                       {t("View Logs")}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Danger Zone: account deactivation & permanent deletion */}
+            {activeTab === "security" && (
+              <Card className="border-destructive/40">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-sm text-destructive">
+                    <AlertTriangle className="w-4 h-4" /> {t("Danger Zone")}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-border/50">
+                    <div>
+                      <h4 className="text-sm font-medium text-foreground">
+                        {t("Deactivate Account")}
+                      </h4>
+                      <p className="text-xs text-muted-foreground">
+                        {t("Temporarily disable your access. You can request restore within 30 days.")}
+                      </p>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-8 text-xs gap-1.5 border-destructive/40 text-destructive hover:bg-destructive/10 shrink-0"
+                      disabled={dangerBusy}
+                      onClick={() => setDangerModal("deactivate")}
+                    >
+                      {dangerBusy === "deactivate" ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <UserX className="w-3.5 h-3.5" />
+                      )}
+                      {t("Deactivate")}
+                    </Button>
+                  </div>
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                      <h4 className="text-sm font-medium text-foreground">
+                        {t("Delete Account Permanently")}
+                      </h4>
+                      <p className="text-xs text-muted-foreground">
+                        {t("Irreversible. All your data is deleted and access ends immediately.")}
+                      </p>
+                    </div>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      className="h-8 text-xs gap-1.5 shrink-0"
+                      disabled={dangerBusy}
+                      onClick={() => setDangerModal("delete")}
+                    >
+                      {dangerBusy === "delete" ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <Trash2 className="w-3.5 h-3.5" />
+                      )}
+                      {t("Delete forever")}
                     </Button>
                   </div>
                 </CardContent>
@@ -1326,6 +1391,83 @@ export default function SettingsPage() {
             </div>
           </div>
         )}
+        {/* Danger zone confirmation */}
+        {dangerModal && (
+          <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-xs p-4">
+            <div className="w-full max-w-md bg-card border border-border rounded-lg shadow-xl overflow-hidden">
+              <div className="flex items-center gap-2 p-4 border-b border-border">
+                <AlertTriangle className="w-4 h-4 text-destructive" />
+                <h3 className="text-sm font-semibold text-foreground">
+                  {t(dangerModal === "delete" ? "Delete Account Permanently?" : "Deactivate Account?")}
+                </h3>
+              </div>
+              <div className="p-4 space-y-3">
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  {t(
+                    dangerModal === "delete"
+                      ? "All your data will be permanently deleted and you will lose access immediately. This action cannot be undone."
+                      : "Your access will be temporarily disabled. You can request a restore within 30 days."
+                  )}
+                </p>
+                {dangerModal === "delete" && (
+                  <p className="text-xs font-medium text-destructive">
+                    {t("This cannot be undone.")}
+                  </p>
+                )}
+              </div>
+
+              {/* Step 2 of 2 — type to confirm. Irreversible actions should
+                  never be one click away. */}
+              {dangerModal === "delete" && (
+                <div className="px-4 pb-3 space-y-2">
+                  <Label className="text-[11px] text-muted-foreground uppercase tracking-wider">
+                    {t('Type')} <span className="font-mono font-semibold text-destructive">DELETE</span> {t('to confirm')}
+                  </Label>
+                  <Input
+                    value={deleteConfirmText}
+                    onChange={(e) => setDeleteConfirmText(e.target.value)}
+                    placeholder="DELETE"
+                    autoComplete="off"
+                    spellCheck={false}
+                    className="h-9 text-xs font-mono tracking-widest"
+                  />
+                  {deleteConfirmText.length > 0 && deleteConfirmText !== "DELETE" && (
+                    <p className="text-[10px] text-destructive">
+                      {t('Text must exactly match "DELETE"')}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              <div className="p-3 border-t border-border flex justify-end gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 text-xs"
+                  onClick={() => {
+                    setDangerModal(null);
+                    setDangerBusy(null);
+                    setDeleteConfirmText("");
+                  }}
+                  disabled={!!dangerBusy}
+                >
+                  {t("Cancel")}
+                </Button>
+                <Button
+                  variant={dangerModal === "delete" ? "destructive" : "outline"}
+                  size="sm"
+                  className={`h-8 text-xs gap-1.5 ${dangerModal === "delete" ? "" : "border-destructive/40 text-destructive hover:bg-destructive/10"}`}
+                  onClick={dangerModal === "delete" ? handleAccountDelete : handleAccountDeactivate}
+                  disabled={!!dangerBusy || (dangerModal === "delete" && deleteConfirmText !== "DELETE")}
+                >
+                  {dangerBusy && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                  {t(dangerModal === "delete" ? "Delete forever" : "Deactivate")}
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
       </div>
     </ProtectedRoute>
   );

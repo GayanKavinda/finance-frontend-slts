@@ -424,7 +424,7 @@ export default function RunbookPage() {
               Documentation
             </div>
             <h1 className="text-base font-semibold tracking-tight text-foreground">
-              Operations Runbook
+              {t("Operations Runbook")}
             </h1>
             <p className="text-xs text-muted-foreground mt-0.5">
               Backups, resets, maintenance windows, incident response and routine governance — for the platform team

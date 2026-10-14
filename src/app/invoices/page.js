@@ -190,7 +190,7 @@ export default function InvoicePage() {
                   : "text-muted-foreground hover:text-foreground hover:bg-muted"
               }`}
             >
-              {s || "All"}
+              {s ? t(s) : t("All")}
             </button>
           ))}
         </div>
@@ -250,7 +250,7 @@ export default function InvoicePage() {
                     </td>
                     <td className="py-2.5 px-3">
                       <span className="inline-block px-1.5 py-0.5 text-[10px] font-medium bg-muted text-foreground rounded border border-border/50">
-                        {inv.status}
+                        {t(inv.status)}
                       </span>
                     </td>
                     <td className="py-2.5 px-3.5 text-right">

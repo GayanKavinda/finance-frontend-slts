@@ -198,7 +198,7 @@ export default function OnboardingPage() {
               Documentation
             </div>
             <h1 className="text-base font-semibold tracking-tight text-foreground">
-              Role Onboarding Checklists
+              {t("Role Onboarding Checklists")}
             </h1>
             <p className="text-xs text-muted-foreground mt-0.5">
               Your first week in the system, step by step — tick items off and progress is saved in this browser

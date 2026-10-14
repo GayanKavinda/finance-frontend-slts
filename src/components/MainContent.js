@@ -10,7 +10,7 @@ export default function MainContent({ children }) {
   const isAuthPage = AUTH_PATHS.includes(pathname);
   const isHomePage = pathname === "/";
   const shouldAddTopPadding = !isAuthPage && !isHomePage;
-  const mainClassName = `flex-1 ${shouldAddTopPadding ? "pt-16" : ""}`;
+  const mainClassName = `flex-1 min-w-0 ${shouldAddTopPadding ? "pt-16" : ""}`;
 
   return <main className={mainClassName}>{children}</main>;
 }

@@ -153,7 +153,7 @@ export default function ReleasesPage() {
             <div className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-medium uppercase tracking-widest mb-2">
               Documentation
             </div>
-            <h1 className="text-base font-semibold tracking-tight text-foreground">Release Notes</h1>
+            <h1 className="text-base font-semibold tracking-tight text-foreground">{t("Release Notes")}</h1>
             <p className="text-xs text-muted-foreground mt-0.5">
               What shipped in each version of ProcureX, and how updates are rolled out
             </p>

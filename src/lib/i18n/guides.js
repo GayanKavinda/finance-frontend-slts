@@ -6,7 +6,6 @@
 
 const si = {
   // ── Page shell ──
-  "Documentation": "ලේඛන",
   "System Walkthrough Guide": "පද්ධති මාර්ගෝපදේශය",
   "Step-by-step documentation for every module, workflow, status and download in the system": "පද්ධතියේ සෑම මොඩියුලය, ක්‍රියාවාලිය, තත්ත්වය සහ බාගැනීමකටම පියවරෙන් පියවර ලේඛන",
   "Back to Help Center": "උපදේශන මධ්‍යස්ථානයට ආපසු",
@@ -25,10 +24,8 @@ const si = {
   "Contractor Bids": "කොන්ත්‍රාත් ලංසු",
   "Job Awarded": "කාර්යය පිරිනම ඇත",
   "Purchase Order": "මිලදී ගැනුම් ඇණවුම",
-  "Contractor Bills": "කොන්ත්‍රාත් බිල්පත්",
   "Customer Invoice": "පාරිභෝගික ඉන්වොයිසිය",
   "Payment Received": "ගෙවීම ලැබීය",
-  "Banked": "බැංකු කර ඇත",
   "The journey, stage by stage": "අදියරෙන් අදියර ගමන",
   "Set up master data": "ප්‍රධාන දත්ත ස්ථාපනය කරන්න",
   "Create the Customers and Contractors you work with. Contractors need bank details because payments are made to them.": "ඔබ වැඩ කරන පාරිභෝගිකයින් සහ කොන්ත්‍රාත්කරුවන් සාදන්න. ගෙවීම් කොන්ත්‍රාත්කරුවන්ට කරන නිසා බැංකු විස්තර අවැසි වේ.",
@@ -80,7 +77,6 @@ const si = {
   "Action buttons only appear when your role holds the permission, and every write endpoint is validated on the server as well. If a button is missing or an action is refused, your role does not cover that step — ask an administrator.": "ඔබේ භූමිකාවට අවසර ඇති විට පමණක් ක්‍රියා බොත්තම් පෙන්වයි, සහ සෑම ලිඛි අන්ත ලක්ෂ්‍යයක්ම සේවාදායකයෙහිද වලංගු කරයි. බොත්තමක් නැති වීමට හෝ ක්‍රියාවක් ප්‍රතික්ෂේප වීමට ඔබේ භූමිකාව එම පියවරය ආවරණය නොකරයි — පරිපාලකයෙකුගෙන් විමසන්න.",
 
   // ── Dashboard ──
-  "Dashboard": "පුවරුව",
   "The landing page after sign-in. It is the executive summary of the whole operation — money in, money out and how fast things move.": "පුරනය වීමෙන් පසු භූමි පිටුව. මුළු මෙහෙයුමේ කාර්යාධිකාරී සාරාංශයකි — පැමිණ මුදල්, පිටත් මුදල් සහ දේ වේගවත් ගමන් කරන්නේ කෙසේද යන්න.",
   "What each panel shows": "සෑම පැනලයක් පෙන්වන දේ",
   "KPI cards": "KPI කාඩ්පත්",
@@ -111,7 +107,6 @@ const si = {
   "The creation form opens.": "සාදන පෝරමය විවෘත වේ.",
   "Fill in the details": "විස්තර පුරවන්න",
   "Name is the only mandatory field — add as much as you have (see the field reference below).": "නම එකම අත්‍යවශ්‍ය ක්ෂේත්‍රයයි — ඔබ සතුව ඇති තරම් (පහත ක්ෂේත්‍ර යොමුව බලන්න) එකතු කරන්න.",
-  "Save": "සුරකින්න",
   "The customer is immediately selectable in tenders, jobs and invoices.": "පාරිභෝගිකයා වහාම තැටිපත්, කාර්යයන් සහ ඉන්වොයිසි තුළ තෝරා ගත හැක.",
   "Customer fields": "පාරිභෝගික ක්ෂේත්‍ර",
   "Customer / client company name": "පාරිභෝගික / සේවාදායක සමාගම් නාමය",
@@ -120,7 +115,6 @@ const si = {
   "Address used on invoices and tax invoices": "ඉන්වොයිසි සහ බදු ඉන්වොයිසි මත භාවිතා වන ලිපිනය",
   "Customer tax identification number": "පාරිභෝගික බදු හඳුනාගැනීමේ අංකය",
   "Managing existing customers": "පවතින පාරිභෝගිකයින් කළමනාකරණය",
-  "Edit": "සංස්කරණය",
   "Open a customer row and update any field — changes flow through to new tenders, jobs and invoices.": "පාරිභෝගික පේලිය විවෘත කර ඕනෑම ක්ෂේත්‍රයක් යාවත්කාලීන කරන්න — වෙනස්කම් නව තැටිපත්, කාර්යයන් සහ ඉන්වොයිසි තුළ පවතී.",
   "Use the search box to filter by name or contact details.": "නම හෝ සම්බන්ධතා විස්තරයෙන් පෙරීමට සෙවුම් පෙට්ටිය භාවිතා කරන්න.",
   "Where customers appear": "පාරිභෝගිකයින් පෙන්වන තැන්",
@@ -155,7 +149,6 @@ const si = {
   "Blacklisting hides the contractor from new selections but keeps history intact. Existing bills and quotations remain visible for audit.": "කළ යුතු නැති ලෙස සලකුණු කිරීම නව තේරීම් වලින් කොන්ත්‍රාත්කරු සඟවයි නමුත් ඉතිහාසය තොරව තබයි. පවතින බිල්පත් සහ මිල දැක්ම් විගණනය සඳහා පෙනේ.",
 
   // ── Tenders ──
-  "Tenders": "තැටිපත්",
   "The tender pipeline. Register every bid opportunity, mark it awarded when you win, and issue the customer award letter.": "තැටිපත් පෝලිමාව. සෑම ලංසු අවස්ථාවක්ම ලියාපදිංචි කරන්න, ඔබ ජයග්‍රහණය කළ විට ලැබී ලෙස සලකුණු කරන්න, සහ පාරිභෝගික තැටි ලිපිය නිකුත් කරන්න.",
   "Creating a tender": "තැටිපතක් සෑදීම",
   "Open Tenders from the sidebar": "පැති තීරයින් තැටිපත් විවෘත කරන්න",
@@ -189,7 +182,6 @@ const si = {
   "As soon as the awarded amount is greater than zero, the row shows a Download action — click it to generate the tender award letter PDF addressed to the customer.": "ලැබී ඇති මුදල ශුන්‍යයට වැඩි වූ විට පමණක් පේලිය බාගැනීම් ක්‍රියාවක් පෙන්වයි — පාරිභෝගිකයාට යොමු කරන තැටි ලිපියේ PDF සාදා ගැනීමට එය ක්ලික් කරන්න.",
   "Download only appears when it should": "බාගැනීම පෙන්වනු ලබන්නේ සාධාරණයට පමණි",
   "No awarded amount, no letter — the Download action is shown only for tenders with an awarded amount greater than zero, so you can never issue an empty letter.": "ලැබී ඇති මුදලක් නැතිනම් ලිපියක් නැත — ශුන්‍යයට වැඩි ලැබී ඇති මුදලක් සහිත තැටිපත් සඳහා පමණක් බාගැනීම් ක්‍රියාව පෙන්වයි, එබැවින් හිස් ලිපියක් නිකුත් කළ නොහැක.",  // ── Jobs ──
-  "Jobs & Projects": "කාර්යයන් සහ ව්‍යාපෘති",
   "Jobs are where delivery happens. A job links a tender to the contractors who bid on it, the purchase order, the bills and finally the invoice.": "කාර්යයන් යනු සැපයුම් සිදුවන තැනයි. කාර්්යයක් තැටිපතක් එහි ලංසු තබන කොන්ත්‍රාත්කරුවන්, මිලදී ගැනුම් ඇණවුම, බිල්පත් සහ අවසානයේ ඉන්වොයිසිය වෙත සම්බන්ධ කරයි.",
   "Creating a job": "කාර්යයක් සෑදීම",
   "Open Jobs from the sidebar": "පැති තීරයින් කාර්යයන් විවෘත කරන්න",
@@ -411,7 +403,6 @@ const si = {
   "Recording a cheque payment registers it in the cheque transaction register with the cheque number, date, amount and payer details — so clearing and bounce follow-up has a single home.": "චෙක් ගෙවීමක් පටිගත කිරීම චෙක් අංකය, දිනය, මුදල සහ ගෙවන්නාගේ විස්තර සමඟ හුවමාරු ගනුදෙනු ලියාපදිංචිය තුළ ලියාපදිංචි කරයි — එබැවින් පැහැදිලි කිරීම් සහ ප්‍රතිපාර්ශව පිළිබඳ අනුගමනයට එක් ගෙදරයක් ඇත.",
 
   // ── Notifications ──
-  "Notifications": "දැනුම්දීම්",
   "Every workflow transition notifies the next actor's role group in-app, so work never stalls waiting for someone to check.": "සෑම ක්‍රියාවාලි පරිවර්තනයක්ම ඊළඟ ක්‍රියාකරුගේ භූමිකා කාණ්ඩයට in-app දැනුම් දෙයි, එබැවින් යම් අයෙකු පරීක්ෂා කිරීමට රැඳී සිටින විට කාර්යය නවතන්නේ නැත.",
   "Using the bell": "බෙලය භාවිත කිරීම",
   "The bell in the navbar shows your unread count and refreshes automatically every 30 seconds.": "නාවික තීරයේ බෙලය ඔබේ නොකියවූ ගණන පෙන්වන අතර ස්වයංක්‍රීයව තත්පර 30කට වරක් නවීකරණය වේ.",
@@ -442,7 +433,6 @@ const si = {
   "Settings → Notifications lets each user choose how alerts reach them. Critical workflow alerts are always delivered because they drive the approval chain.": "සැකසුම් → දැනුම්දීම් හරහා සෑම පරිශීලකයෙකුටම ඇනවුම් ඔවුන් වෙත ළං වන ආකාරය තෝරා ගත හැක. අනුමැති දාමය ධාවනය කරන නිසා තීරණාත්මක ක්‍රියාවාලි ඇනවුම් සැමවිටම භාර දෙනු ලැබේ.",
 
   // ── Settings ──
-  "Settings": "සැකසුම්",
   "Personal and system configuration. Settings use a draft model — nothing is applied until you save.": "පුද්ගලික සහ පද්ධති වින්‍යාසය. සැකසුම් කෙටිමොළ මාදිලිය භාවිත කරයි — ඔබ සුරකින තුරු කිසිවක් යොදනු නොලැබේ.",
   "The draft model": "කෙටිමොළ මාදිලිය",
   "Edit any field on any tab.": "ඕනෑම ටැබයක ඕනෑම ක්ෂේත්‍රයක් සංස්කරණය කරන්න.",
@@ -452,10 +442,8 @@ const si = {
   "Tabs and what they control": "ටැබ් සහ ඒවා පාලන දේ",
   "Tab": "ටැබය",
   "What it does": "එය කරන දේ",
-  "Account": "ගිණුම",
   "Your profile information — name, contact details, company and job title": "ඔබේ පැතිකඩ තොරතුරු — නම, සම්බන්ධතා විස්තර, සමාගම සහ රැකියා මාතෘකාව",
   "How workflow alerts reach you (email / browser, with critical alerts always on)": "ක්‍රියාවාලි ඇනවුම් ඔබ වෙත ළං වන ආකාරය (ඊමේල් / බ්‍රව්සර, තීරණාත්මක ඇනවුම් සැමවිටම ක්‍රියාත්මක)",
-  "Appearance": "පෙනුම",
   "Theme (light / dark) and compact density mode, which tightens spacing app-wide": "තේමාව (ආලෝක / අඳුරු) සහ සංයුක්ත ඝනත්ව ප්‍රකාරය, එය යෙදුම් පුරා ඉඩ කුඩා කරයි",
   "Regional": "කලාපීය",
   "Language, timezone, date format and currency — with a live preview; amounts and dates update across the dashboard, jobs, tenders, POs, invoices and bills": "භාෂාව, වේලාවේ කලාපය, දින ආකෘතිය සහ මුදල් — සජීව පෙරදසුනක් සමඟ; මුදල් සහ දින පුවරුව, කාර්්යයන්, තැටිපත්, PO, ඉන්වොයිසි සහ බිල්පත් මුළුලෙහි යාවත්කාලී වේ",
@@ -506,7 +494,6 @@ const si = {
   "Invoice PDF": "ඉන්වොයිසි PDF",
   "Invoice detail → PDF action": "ඉන්වොයිසි විස්තරය → PDF ක්‍රියාව",
   "Any invoice": "ඕනෑම ඉන්වොයිසියක්",
-  "Internal receipt": "අභ්‍යන්තර රිසිට්පත",
   "Invoice detail → receipt action": "ඉන්වොයිසි විස්තරය → රිසිට්පත් ක්‍රියාව",
   "A payment has been recorded (receipt number required)": "ගෙවීමක් පටිගත කර ඇත (රිසිට්පත් අංකය අවැසිය)",
   "CSV / Excel exports": "CSV / Excel අපනයන",
@@ -550,7 +537,6 @@ const si = {
 
 const ta = {
   // ── Page shell ──
-  "Documentation": "ஆவணம்",
   "System Walkthrough Guide": "அமைப்பு வழிகாட்டி",
   "Step-by-step documentation for every module, workflow, status and download in the system": "அமைப்பின் ஒவ்வொரு தொகுதி, பணிப்பாய்வு, நிலை மற்றும் பதிவிறக்கத்திற்கும் படிப்படியான ஆவணம்",
   "Back to Help Center": "உதவ மையத்திற்குச் செல்",
@@ -569,10 +555,8 @@ const ta = {
   "Contractor Bids": "ஒப்பந்தக்காரர் ஆஃப்கள்",
   "Job Awarded": "பணி வழங்கப்பட்டது",
   "Purchase Order": "கொள்முதல் ஆணை",
-  "Contractor Bills": "ஒப்பந்தக்காரர் பில்கள்",
   "Customer Invoice": "வாடிக்கையாளர் விலைப்பட்டியல்",
   "Payment Received": "பணம் பெறப்பட்டது",
-  "Banked": "வங்கியிடப்பட்டது",
   "The journey, stage by stage": "கட்டம் கட்டமான பயணம்",
   "Set up master data": "தனித்த தரவை அமைக்கவும்",
   "Create the Customers and Contractors you work with. Contractors need bank details because payments are made to them.": "நீங்கள் பணிபுரியும் வாடிக்கையாளர்கள் மற்றும் ஒப்பந்தக்காரர்களை உருவாக்கவும். பணம் அவர்களுக்கே செல்கிறது என்பதால் ஒப்பந்தக்காரர்களுக்கு வங்கி விவரங்கள் தேவை.",
@@ -624,7 +608,6 @@ const ta = {
   "Action buttons only appear when your role holds the permission, and every write endpoint is validated on the server as well. If a button is missing or an action is refused, your role does not cover that step — ask an administrator.": "உங்கள் பங்குக்கு அனுமதி உள்ளபோது மட்டுமே செயற் பொத்தான்கள் தெரியும், மேலmontagu ஒவ்வொரு எழுதும் இறுதிப்புள்ளியும் சேவையகத்தில் சரிபார்க்கப்படும். ஒரு பொத்தான் இல்லை அல்லது ஒரு செயல் மறுக்கப்பட்டால், உங்கள் பங்கு அந்தப் படியை உள்ளடக்காது — நிர்வாகியிடம் கேளுங்கள்.",
 
   // ── Dashboard ──
-  "Dashboard": "டாஷ்போர்டு",
   "The landing page after sign-in. It is the executive summary of the whole operation — money in, money out and how fast things move.": "உள்நுழைவுக்குப் பின் இருக்கும் முகப்புப் பக்கம். இது முழு நடவடிக்கையின் நிர்வாகச் சுருக்கம் — உள்ளே வரும் பணம், வெளியே செல்லும் பணம் மற்றும் விஷயங்கள் எவ்வளவு விரைவாக நகருகின்றன.",
   "What each panel shows": "ஒவ்வொரு பேனலும் என்ன காட்டுகிறது",
   "KPI cards": "KPI அட்டைகள்",
@@ -697,7 +680,6 @@ const ta = {
   "Blacklisting hides the contractor from new selections but keeps history intact. Existing bills and quotations remain visible for audit.": "தடுப்புப்பட்டியல் புதிய தேர்வுகளிலிருந்து ஒப்பந்தக்காரரை மறைக்கும் ஆனால் வரலாற்றை உயிருடன் வைக்கிறது. தற்போதைய பில்கள் மற்றும் மேலோட்டங்கள் தணிக்கைக்குத் தெரியும்.",
 
   // ── Tenders ──
-  "Tenders": "டெண்டர்கள்",
   "The tender pipeline. Register every bid opportunity, mark it awarded when you win, and issue the customer award letter.": "டெண்டர் குழாய். ஒவ்வொரு ஆஃப் வாய்ப்பையும் பதிவுசெய்யுங்கள், நீங்கள் வெற்றி பெறும்போது வழங்கப்பட்டதாகக் குறியுங்கள், மற்றும் வாடிக்கையாளர் வழங்கல் கடிதத்தை அனுப்புங்கள்.",
   "Creating a tender": "டெண்டரை உருவாக்குதல்",
   "Open Tenders from the sidebar": "பக்கப்பட்டியிலிருந்து டெண்டர்களைத் திறக்கவும்",
@@ -733,7 +715,6 @@ const ta = {
   "No awarded amount, no letter — the Download action is shown only for tenders with an awarded amount greater than zero, so you can never issue an empty letter.": "வழங்கப்பட்டத் தொகை இல்லை எனில் கடிதமும் இல்லை — பூச்சியத்திற்கு மேல் வழங்கப்பட்டத் தொகை உள்ள டெண்டர்களுக்கு மட்டுமே பதிவிறக்கச் செயல் காட்டப்படும், எனவே காலிக் கடிதத்தை நீங்கள் ஒருபோதும் அனுப்ப முடியாது.",
 
   // ── Jobs ──
-  "Jobs & Projects": "பணிகள் & திட்டங்கள்",
   "Jobs are where delivery happens. A job links a tender to the contractors who bid on it, the purchase order, the bills and finally the invoice.": "பணிகள் என்பது விநியோகம் நடக்கும் இடம். ஒரு பணி ஒரு டெண்டரை அதற்கு ஆஃப் போட்ட ஒப்பந்தக்காரர்கள், கொள்முதல் ஆணை, பில்கள் மற்றும் இறுதியாக விலைப்படுத்தலுடன் இணைக்கிறது.",
   "Creating a job": "பணியை உருவாக்குதல்",
   "Open Jobs from the sidebar": "பக்கப்பட்டியிலிருந்து பணிகளைத் திறக்கவும்",
@@ -966,7 +947,6 @@ const ta = {
   "The bell in the navbar shows your unread count and refreshes automatically every 30 seconds.": "நவ்பாரில் உள்ள மணி உங்கள் படிக்காத எண்ணிக்கையைக் காட்டுகிறது மற்றும் 30 வினாடிகளுக்கு ஒருமுறை தானாகவே புத்துணர்ச்சியடைகிறது.",
   "Open the dropdown": "இறங்குப் பட்டியலைத் திற",
   "The newest alerts are listed with their source module.": "அண்மையக் கால எச்சரிக்கைகள் அவற்றள Mali சூழல் தொகுதியுடன் பட்டியலிடப்படுகின்றன.",
-  "Mark as read": "படித்ததாகக் குறி",
   "Hover an item and click the check button — the badge decrements immediately and the item moves to the Earlier section.": "ஒரு உறுப்பின் மீது சரியுடன் சரிபார் பொத்தானைக் கிளிக் செய்யுங்கள் — பேட்ஜ் உடனடியாக குறைந்து உறு முந்தைய பகுதிக்கு நகரும்.",
   "Jump to the record": "பதிவிற்குத் தாவு",
   "Each notification links to the entity it came from — a job, a bill or an invoice.": "ஒவ்வொரு அறிவிப்பும் அது வெளிய arrived धरtted आयतमானது — ஒரு பணி, ஒரு பில் அல்லது ஒரு விலைப்படுத்தல்.",
@@ -975,7 +955,6 @@ const ta = {
   "The full history of your alerts.": "உங்கள் எச்சரிக்கைகளின் முழு வரலாறு.",
   "Filter unread": "படிக்காததை வடிகட்டு",
   "Use the Unread filter to focus on what still needs attention.": "இன்னும் கவனம் தேவைப்படுவதை மையமாகக் கொள்ள படிக்காத வடிகட்டியைப் பயன்படுத்துங்கள்.",
-  "Mark all read": "அனைத்தையும் படித்ததாகக் குறி",
   "One click clears the unread state everywhere — the badge, dropdown and page stay in sync instantly.": "ஒரே கிளிக் எங்கும் படிக்காத நிலையை அழிக்கிறது — பேட்ஜ், இறங்குப் பட்டியல் மற்றும் பக்கம் உடனடியாக ஒத்திசைக்கின்றன.",
   "Remove notifications you no longer need.": "உங்களுக்கு இனி தேவையில்ல大幅 அறிவிப்புகளை அகற்றுங்கள்.",
   "What triggers a notification": "எது ஒரு அறிவிப்பைத் தூண்டுகிறது",
@@ -1052,7 +1031,6 @@ const ta = {
   "Invoice PDF": "விலைப்படுத்தல் PDF",
   "Invoice detail → PDF action": "விலைப்படுத்தல் விவரம் → PDF செயல்",
   "Any invoice": "எந்த விலைப்படுத்தல்",
-  "Internal receipt": "உள் ரசீது",
   "Invoice detail → receipt action": "விலைப்படுத்தல் விவரம் → ரசீदச் செயல்",
   "A payment has been recorded (receipt number required)": "ஒரு பணப்பரிவர்த்தனை பதிவுசெய்யப்பட்டது (ரசீத்க் எண் தேவை)",
   "CSV / Excel exports": "CSV / Excel ஏற்றுமதிகள்",

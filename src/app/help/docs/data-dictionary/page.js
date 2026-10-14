@@ -490,7 +490,7 @@ export default function DataDictionaryPage() {
             <div className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-medium uppercase tracking-widest mb-2">
               Documentation
             </div>
-            <h1 className="text-base font-semibold tracking-tight text-foreground">Data Dictionary</h1>
+            <h1 className="text-base font-semibold tracking-tight text-foreground">{t("Data Dictionary")}</h1>
             <p className="text-xs text-muted-foreground mt-0.5">
               Every entity, field and status value in the system, and how the records relate
             </p>

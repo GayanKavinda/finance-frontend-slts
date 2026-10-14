@@ -470,7 +470,7 @@ export default function TestingDocsPage() {
               Documentation
             </div>
             <h1 className="text-base font-semibold tracking-tight text-foreground">
-              Testing Guide
+              {t("Testing Guide")}
             </h1>
             <p className="text-xs text-muted-foreground mt-0.5">
               How the system is verified: backend feature suites, browser QA suites, coverage and conventions

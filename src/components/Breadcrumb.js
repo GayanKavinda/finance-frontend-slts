@@ -32,28 +32,28 @@ export default function Breadcrumb({ items, path }) {
   if (!breadcrumbItems || breadcrumbItems.length === 0) return null;
 
   return (
-    <nav className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-gray-400 mb-6 group/breadcrumb">
+    <nav className="flex items-center gap-2 min-w-0 text-[10px] font-black uppercase tracking-widest text-gray-400 mb-6 group/breadcrumb">
       <Link
         href="/dashboard"
-        className="hover:text-primary transition-colors flex items-center gap-1"
+        className="hover:text-primary transition-colors flex items-center gap-1 shrink-0"
       >
         <Home size={12} />
-        <span>Home</span>
+        <span className="hidden sm:inline">Home</span>
       </Link>
 
       {breadcrumbItems.map((item, index) => {
         const isLast = index === breadcrumbItems.length - 1;
         return (
-          <div key={index} className="flex items-center gap-2">
-            <ChevronRight size={10} className="text-gray-300" />
+          <div key={index} className="flex items-center gap-2 min-w-0">
+            <ChevronRight size={10} className="text-gray-300 shrink-0" />
             {isLast ? (
-              <span className="text-gray-600 dark:text-gray-300 font-black">
+              <span className="text-gray-600 dark:text-gray-300 font-black truncate">
                 {item.label || item}
               </span>
             ) : (
               <Link
                 href={item.href || "#"}
-                className="hover:text-primary transition-colors"
+                className="hover:text-primary transition-colors truncate hidden sm:inline"
               >
                 {item.label || item}
               </Link>
