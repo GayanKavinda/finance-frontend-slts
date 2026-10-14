@@ -4,48 +4,50 @@ export const slides = [
   {
     title: "SLT Procurement Division",
     subtitle:
-      "Empowering employees with comprehensive salary and payment management",
+      "The tender-to-cash platform that runs the full commercial lifecycle — from winning a customer tender to collecting and banking the final payment",
     image: "/slides/2.santa-claus-chariot-3840x2160-24949.avif",
-    cta: "View Dashboard",
+    cta: "Get Started",
   },
   {
-    title: "Maritime Finance Solutions",
+    title: "One Pipeline, End to End",
     subtitle:
-      "Managing port fees and shipping allowances with nautical precision",
+      "Tenders, project jobs, contractor bids, purchase orders and invoices — every stage linked, from the first bid opportunity to money in the bank",
     video: "/slides/motorboat-in-harbor-with-sailboats-bequia.mp4",
-    cta: "Explore Portals",
+    cta: "Explore the Platform",
   },
   {
-    title: "Instant Salary Insights",
+    title: "Transparent Competitive Bidding",
     subtitle:
-      "View your monthly earnings, deductions, and net pay in real-time",
+      "Collect three contractor quotations and compare price, duration and work scope side by side before selecting the winning bid",
     image: "/slides/6.wp9223826-finance-4k-wallpapers.avif",
-    cta: "Check Salary",
+    cta: "See How Bidding Works",
   },
   {
-    title: "Global Reach, Local Impact",
-    subtitle: "Supporting digital infrastructure across the island regions",
+    title: "Tender & Job Award Letters",
+    subtitle:
+      "Issue award letters to customers and contractors as PDFs the moment a bid is selected — no manual documents",
     video: "/slides/raja-ampat-islands-17.mp4",
-    cta: "See Networks",
+    cta: "View Award Documents",
   },
   {
-    title: "Digital Pay Sheets",
+    title: "Purchase Orders, Controlled",
     subtitle:
-      "Download and export your monthly payment slips as secure PDFs instantly",
+      "Issue purchase orders and walk them through Draft, Approved, Sent and Received with a complete status history and audit trail",
     image: "/slides/5.uwp4831664.avif",
-    cta: "Download PDF",
+    cta: "Review the Workflow",
   },
   {
-    title: "Digital Transformation",
-    subtitle: "Navigating the future of telecommunications and finance",
-    video: "/slides/rocky-shore-coast.mp4",
-    cta: "Learn More",
-  },
-  {
-    title: "Streamlined Allowances",
+    title: "Contractor Bills & Retention",
     subtitle:
-      "Your financial data, protected by enterprise-grade security protocols",
+      "Verify, approve and pay contractor bills with supporting documents, milestone payments and retention tracking",
+    video: "/slides/rocky-shore-coast.mp4",
+    cta: "Discover Payables",
+  },
+  {
+    title: "Tax Invoices, Payments & Banking",
+    subtitle:
+      "Generate statutory tax invoices, record payments and mark them banked — with receipts, audit trails and collection efficiency in one place",
     image: "/slides/9.wp15425485-nasa-earth-wallpapers.avif",
-    cta: "Login Now",
+    cta: "Start Now",
   },
 ];
